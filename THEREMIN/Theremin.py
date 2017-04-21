@@ -33,9 +33,6 @@ GPIO.setup(26,GPIO.OUT)
 
 gauge = GPIO.PWM(gaugePin,100) 
 
-GPIO.setwarnings(False)
-
-
 # Import SPI library (for hardware SPI) and MCP3008 library.
 
 
