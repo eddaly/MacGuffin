@@ -1,0 +1,13 @@
+LCD multi-touch library Model number?
+State machine enumeration
+
+The following https://github.com/pimoroni/python-multitouch driver is beta but allows the following example code
+[code]
+import ft5406
+ts = ft5406.Touchscreen()
+
+while True:
+    for touch in ts.poll():
+        print(touch.slot, touch.id, touch.valid, touch.x, touch.y)
+
+[/code]
