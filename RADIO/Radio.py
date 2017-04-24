@@ -17,12 +17,69 @@ import threading
 
 import ft5406
 ts = ft5406.Touchscreen()
+# 7 by 4 icon division
+
+the_key = [ 0, 1, 8, 9 ] # a list of the active combination
+
+def poll_touch():
+    global ts
+    global the_key
+    xoffset = 0
+    yoffset = 0
+    xsize = 65536
+    ysize = 65536
+    xper = (xsize - 2 * xoffset) / 7
+    yper = (ysize - 2 * yoffset) / 4
+    hits = [ 0, 0, 0, 0 ]
+    visible_select = [ False, False, False, False, False, False, False,
+                       False, False, False, False, False, False, False,
+                       False, False, False, False, False, False, False,
+                       False, False, False, False, False, False, False ]
+    for touch in ts.poll():
+        if touch.valid == True:
+            index = (touch.x - xoffset) / xper + (touch.y - yoffset) / yper * 7 #create a touch index
+            visible_select[index] = True
+            for idx in the_key:
+                if index == idx:
+                    addto = the_key.index(idx)
+                    hits[addto] += 1
+    for i in range(28):
+        if visible_select[i] == True:
+            # show selected image
+        else
+            # show non selected image
+    locked = false
+    for symbol in hits:
+        if symbol < 1:
+            locked = true
+    # all symbols in the_key have been touched at the same time?
+    return locked
 
 import sys
 if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
     from Tkinter import *
 else:
     from tkinter import *
+
+class FullscreenWindow:
+
+    def __init__(self):
+        self.tk = Tk()
+        self.tk.attributes('-zoomed', True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
+        self.frame = Frame(self.tk)
+        self.frame.pack()
+        self.state = True # full screen state
+        self.tk.attributes("-fullscreen", self.state)
+
+    def background(self):
+        img = Image.open('SYMBOLS/TouchSCreenBackground.jpg')
+        # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
+        img = ImageTk.PhotoImage(img)
+        panel = Label(root, image=img)
+        panel.image = img
+        panel.pack()
+
+w = FullscreenWindow() # a window
 
 ser = serial.Serial(
 port='/dev/ttyUSB0',
@@ -100,7 +157,7 @@ def start_game():
 def reset_loop():
     while True:
         result = receive_packet()
-        print 'waiting for interupt'
+        print 'waiting for interrupt'
         
         if result == "101":
             reset_all()
@@ -118,6 +175,10 @@ def heartbeat_loop():
         print 'isAlive'
         l.release
         time.sleep(10)
+
+def gui_loop():
+    global w
+    w.tk.mainloop()
     
 #====================================
 # BACKGROUND RESET AND ALIVE DEAMONS
@@ -130,6 +191,9 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
+    t3 = threading.Thread(target=gui_loop)
+    t3.daemon = False
+    t3.start()
 
 #===================================
 # EVERTHING BELOW SPECIFIC TO RADIO

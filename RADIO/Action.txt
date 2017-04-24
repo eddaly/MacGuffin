@@ -1,5 +1,8 @@
-LCD multi-touch library Model number?
 State machine enumeration
+The calibration of the LCD is missing the top of the screen. I think it's capacitive to the brass fittings.
+SSH is set up, a new password needs issuing for security reasons.
+
+
 
 The following https://github.com/pimoroni/python-multitouch driver is beta but allows the following example code
 [code]
