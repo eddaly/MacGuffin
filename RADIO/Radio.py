@@ -18,6 +18,7 @@ import PIL.Image
 import ft5406
 import sys
 import os
+import atexit
 
 ts = ft5406.Touchscreen()
 # 7 by 4 icon division
@@ -165,6 +166,10 @@ RECV_UDP_PORT = 6000
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
+def clean_up():
+    recv_sock.close() # just in case there is a hanging socket reaalocation problem (but it's not C)
+
+atexit.register(clean_up)
 
 def send_packet(body):
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
