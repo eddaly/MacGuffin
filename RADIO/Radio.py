@@ -88,7 +88,7 @@ class FullscreenWindow:
         img = ImageTk.PhotoImage(img)
         panel = Label(root, image=img)
         panel.image = img
-        panel.pack()
+        panel.place(x=0, y=0, relwidth=1, relheight=1)
 
     def image_pair(self, num):  # the number of the image pair
         digits = "00" + str(num + 1)
@@ -107,10 +107,11 @@ class FullscreenWindow:
             if visible_select[i] == True:
                 selected = 0  # on
             self.panels[i].image = self.cache[i * 2 + selected]
-            self.panels[i].pack()  # redraw!!
+            self.panels[i].grid(row=i / 7, column=i % 7)
         self.frame.pack() # redraw again? should nest!!
 
     def fill_grid(self):
+        self.background()
         for i in range(28):
             self.image_pair(i)  # create loaded images
             panel = Label(root)  # is it root NOOOOOOO!! --toplevel
