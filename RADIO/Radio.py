@@ -16,6 +16,8 @@ import threading
 import PIL
 
 import ft5406
+import sys
+import os
 
 ts = ft5406.Touchscreen()
 # 7 by 4 icon division
@@ -59,9 +61,6 @@ def poll_touch():
     # all symbols in the_key have been touched at the same time?
     w.set_panel_image()
     return locked
-
-
-import sys
 
 if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
     from Tkinter import *
