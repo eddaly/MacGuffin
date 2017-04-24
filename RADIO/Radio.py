@@ -246,16 +246,22 @@ def tuning_lock():
     if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
         state = 2 # better luck next time
         near = 0
+        send_packet('300')
         gauge.start(0)
         l.release
     else:
         near = min(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0) # divide by 4 for 20% tune => 0
         gauge.start(near) # tuning indication, maybe sensitivity needs changing
         state = 3 # whey hey, tuned in!!
+        if near > 99: # arbitary? and fine tunning issues
+            send_packet('302')
+        elif near > 90:
+            send_packet('301')
+        send_packet()
         l.release
 
 
-tunning_sounds = [ '/play1', 'play2' ]
+tunning_sounds = [ '/play1', '/play2' ]
 #===================================
 # SPECIFICS OF RADIO PLAY
 #===================================
@@ -272,42 +278,15 @@ def radio(): # use near global as the closeness of the station.
     # alternates
 
     crakle = 100 - near # maybe a volume specification of the secondary sound
+    # hetrodyne
 
-    ser.flushInput()
-    msg = OSC.OSCMessage()
-    msg.setAddress("/play_this")
-    play = OSC.OSCMessage()
-    play.setAddress("/play")
+#    ser.flushInput()
+#    msg = OSC.OSCMessage()
+#    msg.setAddress("/play_this")
+#    play = OSC.OSCMessage()
+#    play.setAddress("/play")
     
-    s = int(ser.readline())
-    pitch = s
-    #gauge.ChangeDutyCycle(t)
-    l.acquire       
-    if s == 100:
-        f = f + 1
-        print("OOR")
-    
-    elif s > 109 and s < 881:
-        f = 0
-        if pitch != old_pitch:
-            msg.insert(0,pitch)
-            client.send(msg)
-     
-    if f == 0 :
-        play.insert(0,1)
-        client.send(play)
-    if f > 30 :
-        t = 0
-        play.insert(0,0)
-        client.send(play)
-        
-
-    if t >= 90:
-        play.insert(0,0)
-        client.send(play)
-        state = 6
-    
-    l.release
+#    s = int(ser.readline())
     time.sleep(0.01)
 
 #COMPLETE
@@ -340,8 +319,10 @@ def main():
                 l.release
         if state == 2:
             tuning_lock() # touched success turn on radio
+            radio() # needed??
         if state == 3:
             tuning_lock() # tuning locked in maybe different state, but tuning lock should do both
+            radio() # needed??
         if state == 4:
             # message done -- is this a needed state?
 
