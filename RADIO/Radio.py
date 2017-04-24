@@ -21,8 +21,15 @@ ts = ft5406.Touchscreen()
 
 the_key = [ 0, 1, 8, 9 ] # a list of the active combination
 
+visible_select = [False, False, False, False, False, False, False,
+                  False, False, False, False, False, False, False,
+                  False, False, False, False, False, False, False,
+                  False, False, False, False, False, False, False]
+
 def poll_touch():
     global ts
+    global w
+    global visible_select
     global the_key
     xoffset = 0
     yoffset = 0
@@ -43,16 +50,12 @@ def poll_touch():
                 if index == idx:
                     addto = the_key.index(idx)
                     hits[addto] += 1
-    for i in range(28):
-        if visible_select[i] == True:
-            # show selected image
-        else
-            # show non selected image
     locked = false
     for symbol in hits:
         if symbol < 1:
             locked = true
     # all symbols in the_key have been touched at the same time?
+    w.fill_grid
     return locked
 
 import sys
@@ -62,6 +65,7 @@ else:
     from tkinter import *
 
 class FullscreenWindow:
+    
 
     def __init__(self):
         self.tk = Tk()
@@ -78,6 +82,14 @@ class FullscreenWindow:
         panel = Label(root, image=img)
         panel.image = img
         panel.pack()
+
+    def fill_grid(self):
+
+        for i in range(28):
+            if visible_select[i] == True:
+            # show selected image
+            else
+        # show non selected image
 
 w = FullscreenWindow() # a window
 
@@ -211,6 +223,7 @@ def tuning_lock():
     l.acquire
     if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
         state = 2 # better luck next time
+        gauge.start(0)
         l.release
     else:
         near = min(100 - (pot - tune_centre) * (pot - tune_centre), 0)
