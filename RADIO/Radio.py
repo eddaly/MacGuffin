@@ -80,8 +80,8 @@ class FullscreenWindow:
         self.frame.pack()
         self.state = True  # full screen state
         self.tk.attributes("-fullscreen", self.state)
-        fill_grid()
-        set_panel_image()
+        self.fill_grid()
+        self.set_panel_image()
 
     def background(self):  # not yet called!!!
         img = Image.open('SYMBOLS/TouchSCreenBackground.jpg')
@@ -96,8 +96,8 @@ class FullscreenWindow:
         digits2 = digits[len(digits) - 2:len(digits) - 1]  # a pair of digits
         imgon = Image.open('SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
         imgoff = Image.open('SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
-        cache.append(ImageTk.PhotoImage(imgon))
-        cache.append(ImageTk.PhotoImage(imgoff))
+        self.cache.append(ImageTk.PhotoImage(imgon))
+        self.cache.append(ImageTk.PhotoImage(imgoff))
         # 56 images in cache
 
     def set_panel_image(self):
@@ -106,14 +106,14 @@ class FullscreenWindow:
             selected = 1  # off
             if visible_select[i] == True:
                 selected = 0  # on
-            panels[i].image = cache[i * 2 + selected]
-            panels[i].pack()  # redraw!!
+            self.panels[i].image = self.cache[i * 2 + selected]
+            self.panels[i].pack()  # redraw!!
 
     def fill_grid(self):
         for i in range(28):
-            image_pair(i)  # create loaded images
+            self.image_pair(i)  # create loaded images
             panel = Label(root)  # is it root NOOOOOOO!!
-            panels.append(panel)
+            self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
 
