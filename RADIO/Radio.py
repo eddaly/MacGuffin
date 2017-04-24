@@ -5,7 +5,6 @@
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
 import OSC
-from random import randint
 import time
 
 import serial
@@ -56,7 +55,7 @@ def poll_touch():
         if symbol < 1:
             locked = true
     # all symbols in the_key have been touched at the same time?
-    w.fill_grid
+    w.set_panel_image()
     return locked
 
 import sys
@@ -112,6 +111,7 @@ class FullscreenWindow:
             panel = Label(root) #is it root NOOOOOOO!!
             panels.append(panel)
             #then place in grid
+            panel.grid(row = i / 7, column = i % 7)
 
 w = FullscreenWindow() # a window
 
@@ -245,15 +245,17 @@ def tuning_lock():
     l.acquire
     if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
         state = 2 # better luck next time
+        near = 0
         gauge.start(0)
         l.release
     else:
-        near = min(100 - (pot - tune_centre) * (pot - tune_centre), 0)
+        near = min(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0) # divide by 4 for 20% tune => 0
         gauge.start(near) # tuning indication, maybe sensitivity needs changing
         state = 3 # whey hey, tuned in!!
         l.release
 
 
+tunning_sounds = [ '/play1', 'play2' ]
 #===================================
 # SPECIFICS OF RADIO PLAY
 #===================================
@@ -261,6 +263,16 @@ def radio(): # use near global as the closeness of the station.
     global state
     global l
     global near
+
+    number_sounds = len(tunning_sounds)
+    per_sound = 100.0 / float(number_sounds)
+    toplay = max(number_sounds, near / per_sound)
+
+    # exact scheduling??? is there a sync lock between the sounds and a mechanism of offset?
+    # alternates
+
+    crakle = 100 - near # maybe a volume specification of the secondary sound
+
     ser.flushInput()
     msg = OSC.OSCMessage()
     msg.setAddress("/play_this")
@@ -311,7 +323,7 @@ def idle():
 
 
 def main():
-
+    global l
     initialise()
 
     while True:
@@ -321,11 +333,15 @@ def main():
         if state == 0:
             idle() # in reset so idle and initialize display
         if state == 1:
-            # main gaming entry state check for touch events
+            if poll_touch() == False: # main gaming entry state check for touch events
+                #unlocked
+                l.acquire
+                state = 2
+                l.release
         if state == 2:
-            # touched success turn on radio
+            tuning_lock() # touched success turn on radio
         if state == 3:
-            # tuning locked in
+            tuning_lock() # tuning locked in maybe different state, but tuning lock should do both
         if state == 4:
             # message done -- is this a needed state?
 
