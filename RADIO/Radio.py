@@ -13,7 +13,7 @@ import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import socket
 import threading
-import PIL
+import PIL.Image
 
 import ft5406
 import sys
