@@ -78,8 +78,7 @@ class FullscreenWindow:
                            True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
         self.frame = Frame(self.tk)
         self.frame.pack()
-        self.state = True  # full screen state
-        self.tk.attributes("-fullscreen", self.state)
+        self.tk.attributes("-fullscreen", True)
         self.fill_grid()
         self.set_panel_image()
 
@@ -93,9 +92,10 @@ class FullscreenWindow:
 
     def image_pair(self, num):  # the number of the image pair
         digits = "00" + str(num + 1)
-        digits2 = digits[len(digits) - 3:len(digits) - 1]  # a pair of digits
-        imgon = PIL.Image.open('SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
-        imgoff = PIL.Image.open('SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
+        digits2 = digits[len(digits) - 2:len(digits)]  # a pair of digits
+        dir, file = os.path.split(os.path.abspath(__file__)) # current path
+        imgon = PIL.Image.open(dir + '/SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
+        imgoff = PIL.Image.open(dir + '/SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
         self.cache.append(ImageTk.PhotoImage(imgon))
         self.cache.append(ImageTk.PhotoImage(imgoff))
         # 56 images in cache
@@ -108,11 +108,12 @@ class FullscreenWindow:
                 selected = 0  # on
             self.panels[i].image = self.cache[i * 2 + selected]
             self.panels[i].pack()  # redraw!!
+        self.frame.pack() # redraw again? should nest!!
 
     def fill_grid(self):
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(root)  # is it root NOOOOOOO!!
+            panel = Label(root)  # is it root NOOOOOOO!! --toplevel
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
@@ -122,8 +123,8 @@ new_env = dict(os.environ)
 new_env['DISPLAY'] = '0.0'
 w = FullscreenWindow()  # a window
 
-client = OSC.OSCClient()
-client.connect(('127.0.0.1', 4559))
+#client = OSC.OSCClient()
+#client.connect(('127.0.0.1', 4559))
 
 GPIO.setmode(GPIO.BCM)
 
@@ -145,7 +146,7 @@ tune_centre = 50  # MUST CHANGE
 pot = 0  # A default, must set before check to aquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
 
-state = 4  # set initial state, should be 0 at showtime
+state = 0  # set initial state
 print 'state:', state
 
 l = threading.Lock()  # A master lock as some code had no lock on atomic state change
@@ -262,7 +263,7 @@ def tuning_lock():
         near = min(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
         gauge.start(near)  # tuning indication, maybe sensitivity needs changing
         state = 3  # whey hey, tuned in!!
-        if near > 99:  # arbitary? and fine tunning issues
+        if near > 97:  # arbitary? and fine tunning issues 33 buckets
             send_packet('302')
         elif near > 90:
             send_packet('301')
@@ -274,7 +275,7 @@ tunning_sounds = ['/play1', '/play2']
 
 
 # ===================================
-# SPECIFICS OF RADIO PLAY
+# SPECIFICS OF RADIO PLAY (NOT USED?)
 # ===================================
 def radio():  # use near global as the closeness of the station.
     global state
