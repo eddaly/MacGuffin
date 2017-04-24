@@ -15,6 +15,15 @@ import RPi.GPIO as GPIO
 import socket
 import threading
 
+import ft5406
+ts = ft5406.Touchscreen()
+
+import sys
+if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
+    from Tkinter import *
+else:
+    from tkinter import *
+
 ser = serial.Serial(
 port='/dev/ttyUSB0',
 baudrate= 9600,)
@@ -24,18 +33,17 @@ client = OSC.OSCClient()
 client.connect(('127.0.0.1', 4559))
 
 GPIO.setmode(GPIO.BCM)
-gaugePin = 19 #set pin for pressure gauge
+
+gaugePin = 19 #set pin for tunning gauge
 ledPin = 26 
 
 GPIO.setup(gaugePin,GPIO.OUT)
-GPIO.setup(26,GPIO.OUT)
-
+GPIO.setup(ledPin,GPIO.OUT)
 
 
 gauge = GPIO.PWM(gaugePin,100) 
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
-
 
 CLK  = 12
 MISO = 24
@@ -43,24 +51,14 @@ MOSI = 23
 CS   = 18
 mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
-low_t = 50
-high_t = 70
-pot = 50
-old_pot = 50
-delay = 1 #set turn speed delay here
-
-wheel_pack = 0
+percent_tune = 20
+tune_centre = 50 #MUST CHANGE
+pot = 0 #A default, must set before check to aquire position
 
 state = 4 #set initial state, should be 0 at showtime
 print 'state:', state
 
-
-turn_speed = 0
-
-pitch=840
-old_pitch=840
-f=0
-t=10
+l = threading.Lock() # A master lock as some code had no lock on atomic state change
 
 SEND_UDP_IP = "10.100.1.100"
 SEND_UDP_PORT = 5001
@@ -84,13 +82,12 @@ def receive_packet():
 def reset_all():
     print 'reset all - wawiting to acquire lock'
     global state
-    l = threading.Lock()
+    global l
     l.acquire
     print 'reset all - got the lock... continue processing'
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
     state = 0
-    wheel_pack = 0
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     
     l.release
@@ -98,10 +95,9 @@ def reset_all():
     
 def start_game():
     global state
-    l = threading.Lock()
+    global l
     l.acquire
     state = 1
-    wheel_pack = 0
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     l.release
 
@@ -119,8 +115,8 @@ def reset_loop():
     
 
 def heartbeat_loop():
+    global l
     while True:
-        l = threading.Lock()
         l.acquire
         send_packet("I am alive!")
         print 'isAlive'
@@ -136,21 +132,26 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    
 
-def lock(low_t, high_t):
-    global wheel_pack
+    #=========================
+    # EVERTHING BELOW SPECIFIC
+    #=========================
+
+def tuning_lock():
     global state
-    l = threading.Lock()
+    global tune_centre
+    global percent_tune
+    global pot
+    global l
     time.sleep(0.5)
     pot = mcp.read_adc(0)
     l.acquire
-    if pot >= low_t and pot <= high_t:
-        wheel_pack += 1
+    if pot >= tune_centre - percent_tune and pot <= tune_centre + percent_tune:
+
         state = 1
         l.release
     else:
-        wheel_pack = 0
+
         state = 4
         l.release
         
@@ -158,16 +159,12 @@ def lock(low_t, high_t):
 
 def turn():
     global pot
-    global turn_speed
-    old_pot = pot
-    time.sleep(delay)
+    time.sleep(1) #ADC aquire interval
     pot = mcp.read_adc(0)
-    turn_speed = abs(pot - old_pot)
-
 
 def waiting():
     global state
-    l = threading.Lock()
+    global l
     turn()
     if turn_speed > 5:
         l.acquire
@@ -176,7 +173,7 @@ def waiting():
 
 def stop_wait():
     global state
-    l = threading.Lock()
+    global l
     turn()
     
     if turn_speed < 5:
@@ -184,26 +181,9 @@ def stop_wait():
         state = 3
         l.release
 
-def Wheel_pack():
-    global state
-    l = threading.Lock()
-    if wheel_pack == 0:
-        lock(1000, 1023)
-    elif wheel_pack == 1:
-        lock(240,300)
-    elif wheel_pack == 2:
-        lock(705, 770)
-    elif wheel_pack == 3:
-        lock(113, 163)
-    else:
-        l.acquire
-        #GPIO.output(ledPin,GPIO.HIGH)
-        state = 5
-        l.release    
-
 def clear():
     global state
-    l = threading.Lock()
+    global l
     time.sleep(0.5)
     l.acquire
     pot = mcp.read_adc(0)
@@ -212,14 +192,10 @@ def clear():
       
     l.release
 
-def theremin():
+def radio():
     GPIO.output(ledPin,GPIO.HIGH)
-    global t
-    global f
-    global pitch
-    global old_pitch
     global state
-    l = threading.Lock()
+    global l
     ser.flushInput()
     msg = OSC.OSCMessage()
     msg.setAddress("/play_this")
@@ -228,7 +204,6 @@ def theremin():
     
     s = int(ser.readline())
     pitch = s
-    print 't:',t
     #gauge.ChangeDutyCycle(t)
     l.acquire       
     if s == 100:
@@ -273,9 +248,9 @@ def theremin():
     l.release
     time.sleep(0.01)
 
-
+#COMPLETE
 def idle():
-    
+    global pot
     pot = mcp.read_adc(0)
     print 'pot:',pot
     time.sleep(0.5)    
@@ -288,6 +263,10 @@ def pressure(t):
     gauge.ChangeDutyCycle(p)
     time.sleep(0.01)
     
+#=========================
+#  STATE MACHINE MAIN LOOP
+#=========================
+
 
 def main():
 
@@ -295,10 +274,7 @@ def main():
 
     while True:
         global state
-        global old_pot
-        global wheel_pack
         print 'state:',state
-        print 'wheel_pack:', wheel_pack
         time.sleep(0.001)
         if state == 0:
             idle()
@@ -306,7 +282,9 @@ def main():
             pot = mcp.read_adc(0)
             old_pot = pot
             if wheel_pack == 4:
+                l.acquire
                 state = 5
+                l.release
             else:
                 waiting()
         if state == 2:
@@ -320,10 +298,6 @@ def main():
             theremin()
         if state == 6:
             pressure(t)
-        
-
 
 if __name__ == "__main__":
     main()
-    
-    
