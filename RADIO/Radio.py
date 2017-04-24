@@ -119,6 +119,8 @@ class FullscreenWindow:
             panel.grid(row=i / 7, column=i % 7)
 
 
+new_env = dict(os.environ)
+new_env['DISPLAY'] = '0.0'
 w = FullscreenWindow()  # a window
 
 client = OSC.OSCClient()
