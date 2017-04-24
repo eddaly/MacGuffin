@@ -82,7 +82,7 @@ class FullscreenWindow:
         self.fill_grid()
         self.set_panel_image()
 
-    def dir:
+    def dir(self):
         dir, file = os.path.split(os.path.abspath(__file__))  # current path
         return dir
 
@@ -180,23 +180,23 @@ def reset_all():
     print 'reset all - wawiting to acquire lock'
     global state
     global l
-    l.acquire
+    l.acquire()
     print 'reset all - got the lock... continue processing'
     gauge.start(0)  # start PWM
     state = 0  # indicate reset
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
-    l.release
+    l.release()
     print 'all reset - releasing the lock'
 
 
 def start_game():
     global state
     global l
-    l.acquire
+    l.acquire()
     state = 1  # indicate enable and play on
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    l.release
+    l.release()
 
 
 def reset_loop():
@@ -215,10 +215,10 @@ def reset_loop():
 def heartbeat_loop():
     global l
     while True:
-        l.acquire
+        l.acquire()
         send_packet("I am alive!")
         print 'isAlive'
-        l.release
+        l.release()
         time.sleep(10)
 
 
@@ -256,13 +256,13 @@ def tuning_lock():
     global l
     time.sleep(0.5)
     pot = mcp.read_adc(0)
-    l.acquire
+    l.acquire()
     if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
         state = 2  # better luck next time
         near = 0
         send_packet('300')
         gauge.start(0)
-        l.release
+        l.release()
     else:
         near = min(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
         gauge.start(near)  # tuning indication, maybe sensitivity needs changing
@@ -272,7 +272,7 @@ def tuning_lock():
         elif near > 90:
             send_packet('301')
         send_packet()
-        l.release
+        l.release()
 
 
 tunning_sounds = ['/play1', '/play2']
@@ -308,6 +308,7 @@ def radio():  # use near global as the closeness of the station.
 
 # COMPLETE
 def idle():
+    # is this needed as it is never used. I guess it initializes the first value on state 1
     global pot
     pot = mcp.read_adc(0)
     print 'pot:', pot
@@ -332,9 +333,9 @@ def main():
         if state == 1:
             if poll_touch() == False:  # main gaming entry state check for touch events
                 # unlocked
-                l.acquire
+                l.acquire()
                 state = 2
-                l.release
+                l.release()
         if state == 2:
             tuning_lock()  # touched success turn on radio
             radio()  # needed??
