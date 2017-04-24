@@ -35,12 +35,8 @@ client.connect(('127.0.0.1', 4559))
 GPIO.setmode(GPIO.BCM)
 
 gaugePin = 19 #set pin for tunning gauge
-ledPin = 26 
 
 GPIO.setup(gaugePin,GPIO.OUT)
-GPIO.setup(ledPin,GPIO.OUT)
-
-
 gauge = GPIO.PWM(gaugePin,100) 
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
@@ -54,6 +50,7 @@ mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 percent_tune = 20
 tune_centre = 50 #MUST CHANGE
 pot = 0 #A default, must set before check to aquire position
+near = 0 #A default for the near tuning 100 is spot on 0 is far away
 
 state = 4 #set initial state, should be 0 at showtime
 print 'state:', state
@@ -85,9 +82,8 @@ def reset_all():
     global l
     l.acquire
     print 'reset all - got the lock... continue processing'
-    gauge.start(0)
-    GPIO.output(ledPin,GPIO.LOW)
-    state = 0
+    gauge.start(0) # start PWM
+    state = 0 #indicate reset
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     
     l.release
@@ -97,7 +93,7 @@ def start_game():
     global state
     global l
     l.acquire
-    state = 1
+    state = 1 #indicate enable and play on
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     l.release
 
@@ -123,7 +119,9 @@ def heartbeat_loop():
         l.release
         time.sleep(10)
     
-
+#====================================
+# BACKGROUND RESET AND ALIVE DEAMONS
+#====================================
 def initialise():
     reset_all()
     t1 = threading.Thread(target=reset_loop)
@@ -133,69 +131,37 @@ def initialise():
     t2.daemon = False
     t2.start()
 
-    #=========================
-    # EVERTHING BELOW SPECIFIC
-    #=========================
+#===================================
+# EVERTHING BELOW SPECIFIC TO RADIO
+#===================================
 
 def tuning_lock():
     global state
     global tune_centre
     global percent_tune
     global pot
+    global near
     global l
     time.sleep(0.5)
     pot = mcp.read_adc(0)
     l.acquire
-    if pot >= tune_centre - percent_tune and pot <= tune_centre + percent_tune:
-
-        state = 1
+    if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
+        state = 2 # better luck next time
         l.release
     else:
-
-        state = 4
-        l.release
-        
-        
-
-def turn():
-    global pot
-    time.sleep(1) #ADC aquire interval
-    pot = mcp.read_adc(0)
-
-def waiting():
-    global state
-    global l
-    turn()
-    if turn_speed > 5:
-        l.acquire
-        state = 2
+        near = min(100 - (pot - tune_centre) * (pot - tune_centre), 0)
+        gauge.start(near) # tuning indication, maybe sensitivity needs changing
+        state = 3 # whey hey, tuned in!!
         l.release
 
-def stop_wait():
-    global state
-    global l
-    turn()
-    
-    if turn_speed < 5:
-        l.acquire
-        state = 3
-        l.release
 
-def clear():
+#===================================
+# SPECIFICS OF RADIO PLAY
+#===================================
+def radio(): # use near global as the closeness of the station.
     global state
     global l
-    time.sleep(0.5)
-    l.acquire
-    pot = mcp.read_adc(0)
-    if pot < 11:
-        state = 1
-      
-    l.release
-
-def radio():
-    GPIO.output(ledPin,GPIO.HIGH)
-    global state
-    global l
+    global near
     ser.flushInput()
     msg = OSC.OSCMessage()
     msg.setAddress("/play_this")
@@ -224,22 +190,7 @@ def radio():
         play.insert(0,0)
         client.send(play)
         
-    if pitch > 420 and pitch < 460:
-        t = t + 1
-    elif pitch == 100:
-        pass
-    else:
-        t = t - 1
-    
-    if t > 90:
-        t = 90
-    elif t < 0:
-        t = 0
-    else:
-        pass
-    
-    old_pitch = pitch
-    
+
     if t >= 90:
         play.insert(0,0)
         client.send(play)
@@ -253,15 +204,7 @@ def idle():
     global pot
     pot = mcp.read_adc(0)
     print 'pot:',pot
-    time.sleep(0.5)    
-
-
-def pressure(t):
-    r = randint(1,10)
-    p = t + (r-5)
-    p = abs(p)
-    gauge.ChangeDutyCycle(p)
-    time.sleep(0.01)
+    time.sleep(0.5)
     
 #=========================
 #  STATE MACHINE MAIN LOOP
@@ -277,27 +220,16 @@ def main():
         print 'state:',state
         time.sleep(0.001)
         if state == 0:
-            idle()
+            idle() # in reset so idle and initialize display
         if state == 1:
-            pot = mcp.read_adc(0)
-            old_pot = pot
-            if wheel_pack == 4:
-                l.acquire
-                state = 5
-                l.release
-            else:
-                waiting()
+            # main gaming entry state check for touch events
         if state == 2:
-            stop_wait()
+            # touched success turn on radio
         if state == 3:
-            Wheel_pack()
+            # tuning locked in
         if state == 4:
-            clear()
-        if state == 5:
-            pressure(t)
-            theremin()
-        if state == 6:
-            pressure(t)
+            # message done -- is this a needed state?
+
 
 if __name__ == "__main__":
     main()
