@@ -1,6 +1,17 @@
+SSH is set up, a new password needs issuing for security reasons.
+The general outline is done. The specifics of the radio sound and how many if any?
+TEST PLAN:
+==========
+All modules which pip-ed are pip-ed
+There are likely some syntax issues
+The placing of a background alpha blend is an issue with .jpg files. (.png?)
+There is likely a switch needing for removing the fullscreen border (if any)
+There is some issue in touch to screen coordination. The offsets will have to be tested and back filled.
+
+
+
 State machine enumeration
 The calibration of the LCD is missing the top of the screen. I think it's capacitive to the brass fittings.
-SSH is set up, a new password needs issuing for security reasons.
 
 
 
