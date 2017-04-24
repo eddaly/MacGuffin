@@ -1,3 +1,8 @@
+The ft5406 module needed an edit to import and use Queue instead of queue. It is installed on the Pi in the RADIO ONLY!
+DIRECTORY: ~/multitouch/library       # this likely needs cloning and so I'll copy it ... with the edits for python 2
+
+
+
 SSH is set up, a new password needs issuing for security reasons.
 The general outline is done. The specifics of the radio sound and how many if any?
 TEST PLAN:
