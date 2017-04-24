@@ -4,10 +4,10 @@
 # Cloned: 24/4/2017 S. Jackson
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
-import OSC
-import time
+#import OSC
+#import time
 
-import serial
+#import serial
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
 import RPi.GPIO as GPIO
@@ -336,7 +336,7 @@ def main():
             tuning_lock()  # tuning locked in maybe different state, but tuning lock should do both
             radio()  # needed??
         if state == 4:
-    # message done -- is this a needed state?
+            nop = True # message done -- is this a needed state?
 
 
 if __name__ == "__main__":
