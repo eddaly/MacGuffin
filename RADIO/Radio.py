@@ -14,6 +14,7 @@ import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import socket
 import threading
+import PIL
 
 import ft5406
 ts = ft5406.Touchscreen()
@@ -65,7 +66,9 @@ else:
     from tkinter import *
 
 class FullscreenWindow:
-    
+
+    cache = []
+    panels = []
 
     def __init__(self):
         self.tk = Tk()
@@ -74,8 +77,10 @@ class FullscreenWindow:
         self.frame.pack()
         self.state = True # full screen state
         self.tk.attributes("-fullscreen", self.state)
+        fill_grid()
+        set_panel_image()
 
-    def background(self):
+    def background(self): # not yet called!!!
         img = Image.open('SYMBOLS/TouchSCreenBackground.jpg')
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
         img = ImageTk.PhotoImage(img)
@@ -83,13 +88,30 @@ class FullscreenWindow:
         panel.image = img
         panel.pack()
 
-    def fill_grid(self):
+    def image_pair(self, num): # the number of the image pair
+        digits = "00" + str(num)
+        digits2 = digits[len(digits) - 2:len(digits) - 1] # a pair of digits
+        imgon = Image.open('SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
+        imgoff = Image.open('SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
+        cache.append(ImageTk.PhotoImage(imgon))
+        cache.append(ImageTk.PhotoImage(imgoff))
+        # 56 images in cache
 
+    def set_panel_image(self):
+        global visible_select
         for i in range(28):
+            selected = 1 # off
             if visible_select[i] == True:
-            # show selected image
-            else
-        # show non selected image
+                selected = 0 # on
+            panels[i].image = cache[i * 2 + selected]
+            panels[i].pack() # redraw!!
+
+    def fill_grid(self):
+        for i in range(28):
+            image_pair(i) # create loaded images
+            panel = Label(root) #is it root NOOOOOOO!!
+            panels.append(panel)
+            #then place in grid
 
 w = FullscreenWindow() # a window
 
