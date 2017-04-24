@@ -92,8 +92,8 @@ class FullscreenWindow:
         panel.pack()
 
     def image_pair(self, num):  # the number of the image pair
-        digits = "00" + str(num)
-        digits2 = digits[len(digits) - 2:len(digits) - 1]  # a pair of digits
+        digits = "00" + str(num + 1)
+        digits2 = digits[len(digits) - 3:len(digits) - 1]  # a pair of digits
         imgon = PIL.Image.open('SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
         imgoff = PIL.Image.open('SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
         self.cache.append(ImageTk.PhotoImage(imgon))
