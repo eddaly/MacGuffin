@@ -82,8 +82,12 @@ class FullscreenWindow:
         self.fill_grid()
         self.set_panel_image()
 
+    def dir:
+        dir, file = os.path.split(os.path.abspath(__file__))  # current path
+        return dir
+
     def background(self):  # not yet called!!!
-        img = Image.open('SYMBOLS/TouchSCreenBackground.jpg')
+        img = Image.open(self.dir() + '/SYMBOLS/TouchSCreenBackground.jpg')
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
         img = ImageTk.PhotoImage(img)
         panel = Label(root, image=img)
@@ -93,9 +97,8 @@ class FullscreenWindow:
     def image_pair(self, num):  # the number of the image pair
         digits = "00" + str(num + 1)
         digits2 = digits[len(digits) - 2:len(digits)]  # a pair of digits
-        dir, file = os.path.split(os.path.abspath(__file__)) # current path
-        imgon = PIL.Image.open(dir + '/SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
-        imgoff = PIL.Image.open(dir + '/SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
+        imgon = PIL.Image.open(self.dir() + '/SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
+        imgoff = PIL.Image.open(self.dir() + '/SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
         self.cache.append(ImageTk.PhotoImage(imgon))
         self.cache.append(ImageTk.PhotoImage(imgoff))
         # 56 images in cache
