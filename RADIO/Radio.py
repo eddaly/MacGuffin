@@ -5,7 +5,7 @@
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
 # import OSC
-# import time
+import time
 
 # import serial
 import Adafruit_GPIO.SPI as SPI
