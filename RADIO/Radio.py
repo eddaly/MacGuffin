@@ -70,8 +70,8 @@ else:
 
 
 class FullscreenWindow:
-    cache = []
-    panels = []
+    self.cache = []
+    self.panels = []
 
     def __init__(self):
         self.tk = Tk()
@@ -154,7 +154,23 @@ near = 0  # A default for the near tuning 100 is spot on 0 is far away
 state = 0  # set initial state
 print 'state:', state
 
+#=======================================
+# A THREADING LOCK
+#=======================================
+# All reads too must be locked due to the atomic condition of read partial write
+# Not really too relevant if the interpreter uses aligned pointers to objects
+# or aligned bus wifth integers
 l = threading.Lock()  # A master lock as some code had no lock on atomic state change
+def state_r():
+    l.acquire()
+    tmp = state
+    l.release()
+    return tmp
+
+def state_w(num):
+    l.acquire()
+    state = num
+    l.release()
 
 SEND_UDP_IP = "10.100.1.100"
 SEND_UDP_PORT = 5001
@@ -172,8 +188,10 @@ def clean_up():
 atexit.register(clean_up)
 
 def send_packet(body):
+    global l
+    l.acquire()
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
-
+    l.release()
 
 def receive_packet():
     print 'r_packet'
@@ -183,25 +201,17 @@ def receive_packet():
 
 def reset_all():
     print 'reset all - wawiting to acquire lock'
-    global state
-    global l
-    l.acquire()
     print 'reset all - got the lock... continue processing'
     gauge.start(0)  # start PWM
-    state = 0  # indicate reset
+    state_w(0)  # indicate reset
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
-    l.release()
     print 'all reset - releasing the lock'
 
 
 def start_game():
-    global state
-    global l
-    l.acquire()
-    state = 1  # indicate enable and play on
+    state_w(1)  # indicate enable and play on
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    l.release()
 
 
 def reset_loop():
@@ -218,12 +228,9 @@ def reset_loop():
 
 
 def heartbeat_loop():
-    global l
     while True:
-        l.acquire()
         send_packet("I am alive!")
         print 'isAlive'
-        l.release()
         time.sleep(10)
 
 
@@ -253,32 +260,25 @@ def initialise():
 # ===================================
 
 def tuning_lock():
-    global state
     global tune_centre
     global percent_tune
     global pot
     global near
-    global l
     time.sleep(0.5)
     pot = mcp.read_adc(0)
-    l.acquire()
     if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
-        state = 2  # better luck next time
+        state_w(2)  # better luck next time
         near = 0
         send_packet('300')
         gauge.start(0)
-        l.release()
     else:
         near = min(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
         gauge.start(near)  # tuning indication, maybe sensitivity needs changing
-        state = 3  # whey hey, tuned in!!
+        state_w(3)  # whey hey, tuned in!!
         if near > 97:  # arbitary? and fine tunning issues 33 buckets
             send_packet('302')
         elif near > 90:
             send_packet('301')
-        send_packet()
-        l.release()
-
 
 tunning_sounds = ['/play1', '/play2']
 
@@ -287,8 +287,6 @@ tunning_sounds = ['/play1', '/play2']
 # SPECIFICS OF RADIO PLAY (NOT USED?)
 # ===================================
 def radio():  # use near global as the closeness of the station.
-    global state
-    global l
     global near
 
     number_sounds = len(tunning_sounds)
@@ -323,31 +321,25 @@ def idle():
 # =========================
 #  STATE MACHINE MAIN LOOP
 # =========================
-
-
 def main():
-    global l
     initialise()
 
     while True:
-        global state
-        print 'state:', state
+        print 'state:', state_r()
         time.sleep(0.001)
-        if state == 0:
+        if state_r() == 0:
             idle()  # in reset so idle and initialize display
-        if state == 1:
+        if state_r() == 1:
             if poll_touch() == False:  # main gaming entry state check for touch events
                 # unlocked
-                l.acquire()
-                state = 2
-                l.release()
-        if state == 2:
+                state_w(2)
+        if state_r() == 2:
             tuning_lock()  # touched success turn on radio
             radio()  # needed??
-        if state == 3:
+        if state_r() == 3:
             tuning_lock()  # tuning locked in maybe different state, but tuning lock should do both
             radio()  # needed??
-        if state == 4:
+        if state_r() == 4:
             nop = True # message done -- is this a needed state?
 
 

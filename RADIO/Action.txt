@@ -1,3 +1,5 @@
+The locking is now done correctly. Maybe a moot point until a regression bug on update to 64 bit processing or such.
+
 The ft5406 module needed an edit to import and use Queue instead of queue. It is installed on the Pi in the RADIO ONLY!
 DIRECTORY: ~/multitouch/library       # this likely needs cloning and so I'll copy it ... with the edits for python 2
 
