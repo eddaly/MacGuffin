@@ -61,7 +61,7 @@ def handle_event(event, touch):
 
 def do_touch():
     for i in range(4):
-        if (touch_grid[i][4] == True) and (time.time() - touch_grid[i][3] > 0.75):
+        if (touch_grid[i][4] == True) and (time.time() - touch_grid[i][3] > 0.5):
             touch_grid[i] = [-1, -1, -1, -1, False]  # reset
     set_touch()
     return correctly_keyed
@@ -89,7 +89,7 @@ def set_touch():
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False]
 
-    debug(str(touch_grid)) # print grid
+    #debug(str(touch_grid)) # print grid
     for touch in touch_grid:
         #debug('touch:' + str(touch))
         if touch[0] > -1:
