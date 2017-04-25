@@ -1,3 +1,7 @@
+The touch screen is now working. There needs to be some fine tuning of the delays for key presses, and perhaps more than
+a four key buffer. Proof of concept ok. Now onto the very simple RFID scan problem.
+
+
 The removal of button borders seems almost impossible. changing the background colour to close match best option.
 
 Regards the electronics of the "meter" the pi pin is connected through a resistor to limit current which is good,

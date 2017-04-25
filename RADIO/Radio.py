@@ -13,18 +13,61 @@ import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import socket
 import threading
+
 import PIL.Image
 from PIL import ImageTk
-
 import ft5406
+
 import sys
 import os
 import atexit
 
+STARTER_STATE = 1  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
+
+# 3008 SPECIFIC MCP ADC
+CLK = 12
+MISO = 24
+MOSI = 23
+CS = 18
+
+# BCM MODE
+gaugePin = 19  # set pin for tunning gauge
+
+rfidPins = [19, 19, 19, 19, 19]  # change??!!!!!!
+
+
+# ===================================
+# RFID CODE
+# ===================================
+def rfid_init():
+    global rfidPins
+    for i in range(5):
+        pin = rfidPins[i]
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
+
+rfid_init()
+
+
+def rfid():
+    global rfidPins
+    flag = True
+    for i in range(5):
+        flag = flag and GPIO.input(rfidPins[i])
+    return flag
+
+
+# ====================================
+# REMOTE DEBUG CODE
+# ====================================
 def debug(show):
     # print to pts on debug console
     os.system('echo "' + show + '" > /dev/pts/0')
 
+
+# ====================================
+# TOUCHSCREEN CODE
+# ====================================
 ts = ft5406.Touchscreen()
 # 7 by 4 icon division
 
@@ -36,28 +79,31 @@ visible_select = [False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False]
 
-touch_grid = [[-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False]] # the four active touches
+touch_grid = [[-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False],
+              [-1, -1, -1, -1, False]]  # the four active touches
 current_touch = 0
 correctly_keyed = False
+
 
 def handle_event(event, touch):
     global touch_grid
     global current_touch
-    #debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
-    if event == 1: # press
+    # debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
+    if event == 1:  # press
         touch_grid[current_touch] = [touch.slot, touch.x, touch.y, -1, False]
         current_touch = (current_touch + 1) % 4
-        #debug('new cur touch:' + str(current_touch))
-    elif event == 2: #move
+        # debug('new cur touch:' + str(current_touch))
+    elif event == 2:  # move
         nop = True
-        #debug('wobbly finger')
+        # debug('wobbly finger')
     else:
-        #debug(str(touch_grid))
+        # debug(str(touch_grid))
         for i in range(4):
             if touch_grid[i][0] == touch.slot:
-                touch_grid[i][4] = True #reset
-                touch_grid[i][3] = time.time() # released
-    #debug('touch_grid set')
+                touch_grid[i][4] = True  # reset
+                touch_grid[i][3] = time.time()  # released
+                # debug('touch_grid set')
+
 
 def do_touch():
     for i in range(4):
@@ -66,12 +112,14 @@ def do_touch():
     set_touch()
     return correctly_keyed
 
+
 for touch in ts.touches:
     touch.on_press = handle_event
     touch.on_release = handle_event
     touch.on_move = handle_event
 
 ts.run()
+
 
 def set_touch():
     global w
@@ -89,27 +137,27 @@ def set_touch():
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False]
 
-    #debug(str(touch_grid)) # print grid
+    # debug(str(touch_grid)) # print grid
     for touch in touch_grid:
-        #debug('touch:' + str(touch))
+        # debug('touch:' + str(touch))
         if touch[0] > -1:
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
-            index = min(27, index) # an extra check
-            visible_select[index] = True # set as on
-            #debug(str(visible_select)) # should show <========= HERE only on multi
+            index = min(27, index)  # an extra check
+            visible_select[index] = True  # set as on
+            # debug(str(visible_select)) # should show <========= HERE only on multi
             for idx in range(4):
                 if index == the_key[idx]:
                     hits[idx] += 1
     locked = False
-    #debug(str(hits))
-    #debug('hit check')
+    # debug(str(hits))
+    # debug('hit check')
     for symbol in hits:
         if symbol < 1:
             locked = True
     # all symbols in the_key have been touched at the same time?
-    #debug('update display')
+    # debug('update display')
     w.set_panel_image()
-    #debug('exit touch_poll')
+    # debug('exit touch_poll')
     correctly_keyed = not locked
 
 
@@ -125,10 +173,10 @@ class FullscreenWindow:
 
     def __init__(self):
         self.tk = Tk()
-        self.tk.config(cursor='none') # check for cursor hide
+        self.tk.config(cursor='none')  # check for cursor hide
         self.tk.attributes('-zoomed',
                            True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
-        self.frame = self.tk # the frame is not required
+        self.frame = self.tk  # the frame is not required
         # self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
         self.frame.bind('<Escape>', self.close)
@@ -145,7 +193,7 @@ class FullscreenWindow:
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
         self.img = ImageTk.PhotoImage(self.img)  # also used as a placeholder image before call to set_panel_image()
         panel = Label(self.frame, image=self.img)
-        panel.image = self.img #-- this is just to maintain a handle and the handle is now a instance var
+        panel.image = self.img  # -- this is just to maintain a handle and the handle is now a instance var
         debug('should have a background but do not. Used solid colour.')
         # the background appears not to show
         panel.place()
@@ -163,7 +211,7 @@ class FullscreenWindow:
 
     def set_panel_image(self):
         global visible_select
-        #debug('update')
+        # debug('update')
         for i in range(28):
             # self.panels[i].grid_forget() #remove the panel from the grid
             selected = 1  # off
@@ -175,7 +223,7 @@ class FullscreenWindow:
 
     def fill_grid(self):
         self.background()
-        #stky = N + E + S + W
+        # stky = N + E + S + W
         for i in range(28):
             self.image_pair(i)  # create loaded images
             panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey9')  # padding test
@@ -184,29 +232,27 @@ class FullscreenWindow:
             panel.grid(row=i / 7, column=i % 7)
 
     def close(self):
-        self.frame.destroy() # should close window
+        self.frame.destroy()  # should close window
 
 
 new_env = dict(os.environ)
 new_env['DISPLAY'] = '0.0'
 w = FullscreenWindow()  # a window
 
+# ===================================
+# MORE CODE PINS ETC.
+# ===================================
+
 # client = OSC.OSCClient()
 # client.connect(('127.0.0.1', 4559))
 
 GPIO.setmode(GPIO.BCM)
 
-gaugePin = 19  # set pin for tunning gauge
-
 GPIO.setup(gaugePin, GPIO.OUT)
-gauge = GPIO.PWM(gaugePin, 100)
+gauge = GPIO.PWM(gaugePin, 0)  # default of no signal
 
 # Import SPI library (for hardware SPI) and MCP3008 library. ADC
 
-CLK = 12
-MISO = 24
-MOSI = 23
-CS = 18
 mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 percent_tune = 20
@@ -215,7 +261,6 @@ pot = 0  # A default, must set before check to aquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
 
 state = 0  # set initial state
-debug('state:' + str(state))
 
 # =======================================
 # A THREADING LOCK
@@ -240,6 +285,9 @@ def state_w(num):
     l.release()
 
 
+# ====================================
+# SOCKET TOOLS
+# ====================================
 SEND_UDP_IP = "10.100.1.100"
 SEND_UDP_PORT = 5001
 send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -251,10 +299,12 @@ recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
 
+# CLEAN UP ROUTINE
 def clean_up():
     global w
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
     w.close()
+
 
 atexit.register(clean_up)
 
@@ -272,6 +322,10 @@ def receive_packet():
     return data
 
 
+# ========================================
+# THE MAIN RESET CONTROL FUNCTIONS
+# ========================================
+
 def reset_all():
     state_w(0)  # indicate reset
     debug('reset all - wawiting to acquire lock')
@@ -282,10 +336,11 @@ def reset_all():
     debug('all reset - releasing the lock')
     start_game()
 
+
 def start_game():
     global correctly_keyed
     correctly_keyed = False
-    state_w(1)  # indicate enable and play on
+    state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
 
 
@@ -309,9 +364,12 @@ def heartbeat_loop():
         time.sleep(10)
 
 
+# ==================================
+# GUI ON MAIN THREAD
+# ==================================
 def gui_loop():
     global w
-    w.tk.mainloop() # needs some checking. I think this blocks.
+    w.tk.mainloop()  # needs some checking. I think this blocks.
 
 
 # ====================================
@@ -385,7 +443,9 @@ def radio():  # use near global as the closeness of the station.
     time.sleep(0.01)
 
 
-# COMPLETE
+# ===============================
+# IDLE WITH SOME SETUP CHECKS
+# ===============================
 def idle():
     # is this needed as it is never used. I guess it initializes the first value on state 1
     global pot
@@ -400,27 +460,31 @@ def idle():
 def main_loop():
     global correctly_keyed
     while True:
-        #debug('state main:' + str(state_r()))
+        # debug('state main:' + str(state_r()))
         time.sleep(0.001)
-        if state_r() == 0:
+        if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
-        if state_r() == 1:
+        if state_r() == 1:  # CODE
             if do_touch() == True:  # main gaming entry state check for touch events
                 # unlocked
                 state_w(2)
                 debug('BINGO!!!!!!')
-        if state_r() == 2:
+        if state_r() == 2:  # TUNE
             tuning_lock()  # touched success turn on radio
             radio()  # needed??
-        if state_r() == 3:
-            tuning_lock()  # tuning locked in maybe different state, but tuning lock should do both
+        if state_r() == 3:  # POST TUNE?????????? <======================= CURRENT TERMINAL STATE
+            tuning_lock()  # tuning locked in maybe different state, but tuning lock should do both??
             radio()  # needed??
-        if state_r() == 4:
-            nop = True  # message done -- is this a needed state?
+        if state_r() == 4:  # RFID
+            if rfid() == True:  # check for 5 active highs
+                state_w(1)
+                debug('MATCH!!!!!!')
+
 
 def main():
     initialise()
-    gui_loop() # TEST ---
+    gui_loop()  # TEST ---
+
 
 if __name__ == "__main__":
     main()
