@@ -14,6 +14,7 @@ import RPi.GPIO as GPIO
 import socket
 import threading
 import PIL.Image
+from PIL import ImageTk
 
 import ft5406
 import sys
