@@ -99,7 +99,7 @@ class FullscreenWindow:
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
         self.img = ImageTk.PhotoImage(self.img)  # also used as a placeholder image before call to set_panel_image()
         panel = Label(self.frame, image=self.img)
-        panel.image = img #-- this is just to maintain a handle and the handle is now a instance var
+        panel.image = self.img #-- this is just to maintain a handle and the handle is now a instance var
         debug('should have a background')
         panel.place()
 
