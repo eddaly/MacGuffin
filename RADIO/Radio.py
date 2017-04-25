@@ -64,14 +64,14 @@ def poll_touch():
                     addto = the_key.index(idx)
                     hits[addto] += 1
     locked = False
-    debug('hit check')
+    #debug('hit check')
     for symbol in hits:
         if symbol < 1:
             locked = True
     # all symbols in the_key have been touched at the same time?
-    debug('update display')
+    #debug('update display')
     w.set_panel_image()
-    debug('exit touch_poll')
+    #debug('exit touch_poll')
     return locked
 
 
@@ -138,7 +138,7 @@ class FullscreenWindow:
         #stky = N + E + S + W
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey12')  # padding test
+            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey9')  # padding test
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
