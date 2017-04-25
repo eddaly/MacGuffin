@@ -1,3 +1,5 @@
+The removal of button borders seems almost impossible. changing the background colour to close match best option.
+
 Regards the electronics of the "meter" the pi pin is connected through a resistor to limit current which is good,
 but the ESD protection on the pi is designed for capacitive discharge. The coil in the meter is an inductor, and has
 a ferromagnetic core, hence high inductance. The discharge characteristic is like such to eventually stress the ESD
