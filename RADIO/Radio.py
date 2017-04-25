@@ -128,7 +128,7 @@ class FullscreenWindow:
 
     def fill_grid(self):
         self.background()
-        stky = self.tk.N + self.tk.E + self.tk.S + self.tk.W
+        stky = N + E + S + W
         for i in range(28):
             self.image_pair(i)  # create loaded images
             panel = Label(self.frame, image=self.img, highlightthickness=0, sticky=stky, padx=0, pady=0)  # padding test
