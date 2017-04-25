@@ -86,6 +86,7 @@ class FullscreenWindow:
         self.frame = Frame(self.tk)
         # self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
+        self.frame.bind('<Escape>', close)
         self.fill_grid()
         self.set_panel_image()
 
@@ -129,6 +130,9 @@ class FullscreenWindow:
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
+
+    def close(self):
+        self.frame.destroy() # should close window
 
 
 new_env = dict(os.environ)
@@ -195,8 +199,9 @@ recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
 
 def clean_up():
+    global w
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
-
+    w.close()
 
 atexit.register(clean_up)
 
