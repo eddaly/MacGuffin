@@ -58,10 +58,13 @@ def handle_event(event, touch):
                 touch_grid[i][4] = True #reset
                 touch_grid[i][3] = time.time() # released
     #debug('touch_grid set')
+
+def do_touch():
     for i in range(4):
         if (touch_grid[i][4] == True) and (time.time() - touch_grid[i][3] > 0.75):
             touch_grid[i] = [-1, -1, -1, -1, False]  # reset
     set_touch()
+    return correctly_keyed
 
 for touch in ts.touches:
     touch.on_press = handle_event
@@ -401,7 +404,7 @@ def main_loop():
         if state_r() == 0:
             idle()  # in reset so idle and initialize display
         if state_r() == 1:
-            if correctly_keyed == True:  # main gaming entry state check for touch events
+            if do_touch() == True:  # main gaming entry state check for touch events
                 # unlocked
                 state_w(2)
                 debug('BINGO!!!!!!')
