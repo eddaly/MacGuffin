@@ -85,15 +85,16 @@ def set_touch():
     debug(str(touch_grid)) # print grid
     for touch in touch_grid:
         #debug('touch:' + str(touch))
-        if touch[0] > 0:
+        if touch[0] > -1:
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
             index = max(27, index) # an extra check
             visible_select[index] = True # set as on
-            debug(str(visible_select)) # should show <========= HERE
+            debug(str(visible_select)) # should show <========= HERE only on multi
             for idx in range(4):
                 if index == the_key[idx]:
                     hits[idx] += 1
     locked = False
+    debug(str(hits))
     #debug('hit check')
     for symbol in hits:
         if symbol < 1:
