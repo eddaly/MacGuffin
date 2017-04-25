@@ -163,7 +163,7 @@ pot = 0  # A default, must set before check to aquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
 
 state = 0  # set initial state
-debug('state:' + state)
+debug('state:' + str(state))
 
 # =======================================
 # A THREADING LOCK
@@ -335,7 +335,7 @@ def idle():
     # is this needed as it is never used. I guess it initializes the first value on state 1
     global pot
     pot = mcp.read_adc(0)
-    debug('pot:' + pot)
+    debug('pot:' + str(pot))
     time.sleep(0.5)
 
 
@@ -346,7 +346,7 @@ def main():
     initialise()
     gui_loop() # TEST ---
     while True:
-        debug('state:' + state_r())
+        debug('state:' + str(state_r()))
         time.sleep(0.001)
         if state_r() == 0:
             idle()  # in reset so idle and initialize display
