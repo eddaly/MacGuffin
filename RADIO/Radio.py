@@ -21,6 +21,10 @@ import sys
 import os
 import atexit
 
+def debug(show):
+    # print to pts on debug console
+    os.system('echo "' + show + '" > /dev/pts/0')
+
 ts = ft5406.Touchscreen()
 # 7 by 4 icon division
 
@@ -155,7 +159,7 @@ pot = 0  # A default, must set before check to aquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
 
 state = 0  # set initial state
-print 'state:', state
+debug('state:' + state)
 
 # =======================================
 # A THREADING LOCK
@@ -205,19 +209,19 @@ def send_packet(body):
 
 
 def receive_packet():
-    print 'r_packet'
+    debug('r_packet')
     data, addr = recv_sock.recvfrom(1024)
     return data
 
 
 def reset_all():
-    print 'reset all - wawiting to acquire lock'
-    print 'reset all - got the lock... continue processing'
+    debug('reset all - wawiting to acquire lock')
+    debug('reset all - got the lock... continue processing')
     gauge.start(0)  # start PWM
     state_w(0)  # indicate reset
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
-    print 'all reset - releasing the lock'
+    debug('all reset - releasing the lock')
 
 
 def start_game():
@@ -228,7 +232,7 @@ def start_game():
 def reset_loop():
     while True:
         result = receive_packet()
-        print 'waiting for interrupt'
+        debug('waiting for interrupt')
 
         if result == "101":
             reset_all()
@@ -241,13 +245,13 @@ def reset_loop():
 def heartbeat_loop():
     while True:
         send_packet("I am alive!")
-        print 'isAlive'
+        debug('isAlive')
         time.sleep(10)
 
 
 def gui_loop():
     global w
-    w.tk.mainloop()
+    w.tk.mainloop() # needs some checking. I think this blocks.
 
 
 # ====================================
@@ -326,7 +330,7 @@ def idle():
     # is this needed as it is never used. I guess it initializes the first value on state 1
     global pot
     pot = mcp.read_adc(0)
-    print 'pot:', pot
+    debug('pot:' + pot)
     time.sleep(0.5)
 
 
@@ -337,7 +341,7 @@ def main():
     initialise()
     gui_loop() # TEST ---
     while True:
-        print 'state:', state_r()
+        debug('state:' + state_r())
         time.sleep(0.001)
         if state_r() == 0:
             idle()  # in reset so idle and initialize display
