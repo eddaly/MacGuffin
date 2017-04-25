@@ -37,7 +37,7 @@ visible_select = [False, False, False, False, False, False, False,
 
 
 def handle_event(event, touch):
-    debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' +  touch.y)
+    debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
 
 
 for touch in ts.touches:
