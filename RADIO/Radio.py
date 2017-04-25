@@ -78,7 +78,7 @@ class FullscreenWindow:
         self.tk.attributes('-zoomed',
                            True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
         self.frame = Frame(self.tk)
-        self.frame.pack()
+        #self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
         self.fill_grid()
         self.set_panel_image()
@@ -88,9 +88,9 @@ class FullscreenWindow:
         return dir
 
     def background(self):  # not yet called!!!
-        img = Image.open(self.dir() + '/SYMBOLS/TouchSCreenBackground.jpg')
+        self.img = Image.open(self.dir() + '/SYMBOLS/TouchSCreenBackground.jpg')
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
-        img = ImageTk.PhotoImage(img)
+        self.img = ImageTk.PhotoImage(self.img) # also used as a placeholder image before call to set_panel_image()
         panel = Label(root, image=img)
         panel.image = img
         panel.place(x=0, y=0, relwidth=1, relheight=1)
@@ -107,22 +107,22 @@ class FullscreenWindow:
     def set_panel_image(self):
         global visible_select
         for i in range(28):
+            #self.panels[i].grid_forget() #remove the panel from the grid
             selected = 1  # off
             if visible_select[i] == True:
                 selected = 0  # on
-            self.panels[i].image = self.cache[i * 2 + selected]
-            self.panels[i].grid(row=i / 7, column=i % 7)
-        self.frame.pack() # redraw again? should nest!!
+            self.panels[i].config(image = self.cache[i * 2 + selected])
+            #self.panels[i].grid(row=i / 7, column=i % 7) should not need re-adding
+        #self.frame.pack() # redraw again? should nest!! (no mix grid and pack)
 
     def fill_grid(self):
         self.background()
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(root)  # is it root NOOOOOOO!! --toplevel
+            panel = Label(self.frame, image=self.img)  # is it root NOOOOOOO!! --toplevel
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
-
 
 new_env = dict(os.environ)
 new_env['DISPLAY'] = '0.0'
