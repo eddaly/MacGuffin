@@ -86,7 +86,7 @@ class FullscreenWindow:
         self.frame = Frame(self.tk)
         # self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
-        self.frame.bind('<Escape>', close)
+        self.frame.bind('<Escape>', self.close)
         self.fill_grid()
         self.set_panel_image()
 
