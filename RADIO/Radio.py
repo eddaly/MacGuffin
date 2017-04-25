@@ -101,13 +101,16 @@ class FullscreenWindow:
         panel = Label(self.frame, image=self.img)
         panel.image = self.img #-- this is just to maintain a handle and the handle is now a instance var
         debug('should have a background')
+        # the background appears not to show
         panel.place()
 
     def image_pair(self, num):  # the number of the image pair
         digits = "00" + str(num + 1)
         digits2 = digits[len(digits) - 2:len(digits)]  # a pair of digits
         imgon = PIL.Image.open(self.dir() + '/SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
+        imgon = imgon.resize((114, 120), Image.ANTIALIAS)
         imgoff = PIL.Image.open(self.dir() + '/SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
+        imgoff = imgoff.resize((114, 120), Image.ANTIALIAS)
         self.cache.append(ImageTk.PhotoImage(imgon))
         self.cache.append(ImageTk.PhotoImage(imgoff))
         # 56 images in cache
@@ -127,7 +130,7 @@ class FullscreenWindow:
         self.background()
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(self.frame, image=self.img)  # is it root NOOOOOOO!! --toplevel
+            panel = Label(self.frame, image=self.img, highlightthickness=0)  # is it root NOOOOOOO!! --toplevel
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
