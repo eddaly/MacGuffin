@@ -28,6 +28,7 @@ def debug(show):
 ts = ft5406.Touchscreen()
 # 7 by 4 icon division
 
+# 0 to 27 for the valid 4 key combination
 the_key = [0, 1, 8, 9]  # a list of the active combination
 
 visible_select = [False, False, False, False, False, False, False,
@@ -35,10 +36,22 @@ visible_select = [False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False]
 
+touch_grid = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1], [-1, -1, -1]] # the four active touches
+current_touch = 0
+correctly_keyed = False
 
 def handle_event(event, touch):
+    global touch_grid
+    global current_touch
     debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
-
+    if event == 2: # press
+        touch_grid[current_touch] = [touch.slot, touch.x, touch.y]
+        current_touch = (current_touch + 1) % 4
+    else:
+        for i in range(4):
+            if touch_grid[i][0] == touch.slot:
+                touch_grid[i] = [-1, -1, -1] #reset
+    set_touch()
 
 for touch in ts.touches:
     touch.on_press = handle_event
@@ -47,35 +60,28 @@ for touch in ts.touches:
 
 ts.run()
 
-def poll_touch():
-    global ts
+def set_touch():
     global w
+    global correctly_keyed
     global visible_select
     global the_key
-    return True # exit for tests
-    xoffset = 0
-    yoffset = 0
-    xsize = 65536
-    ysize = 65536
-    xper = (xsize - 2 * xoffset) / 7
-    yper = (ysize - 2 * yoffset) / 4
+    global touch_grid
+    xper = xsize / 7
+    yper = ysize / 4
     hits = [0, 0, 0, 0]
     visible_select = [False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False]
-    #debug('entered touch_poll')
-    for touch in ts.poll():
-        debug('touch event')
-        #if touch.valid == True:
-        debug(touch.x + ":" + touch.y)
-        index = (touch.x - xoffset) / xper + (touch.y - yoffset) / yper * 7  # create a touch index
-        index = max(27, index) # an extra check
-        visible_select[index] = True # set as on
-            #for idx in the_key:
-            #    if index == idx:
-            #        addto = the_key.index(idx)
-            #        hits[addto] += 1
+
+    for touch in touch_grid:
+        if touch[0] > 0:
+            index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
+            index = max(27, index) # an extra check
+            visible_select[index] = True # set as on
+            for idx in range(4):
+                if index == the_key[idx]:
+                    hits[idx] += 1
     locked = False
     #debug('hit check')
     for symbol in hits:
@@ -85,7 +91,7 @@ def poll_touch():
     #debug('update display')
     w.set_panel_image()
     #debug('exit touch_poll')
-    return locked
+    correctly_keyed = not locked
 
 
 if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
@@ -137,6 +143,7 @@ class FullscreenWindow:
 
     def set_panel_image(self):
         global visible_select
+        debug('update')
         for i in range(28):
             # self.panels[i].grid_forget() #remove the panel from the grid
             selected = 1  # off
@@ -253,10 +260,11 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
-    state_w(1) # move into run phase
-
+    start_game()
 
 def start_game():
+    global correctly_keyed
+    correctly_keyed = False
     state_w(1)  # indicate enable and play on
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
 
@@ -370,13 +378,14 @@ def idle():
 #  STATE MACHINE MAIN LOOP
 # =========================
 def main_loop():
+    global correctly_keyed
     while True:
-        debug('state main:' + str(state_r()))
+        #debug('state main:' + str(state_r()))
         time.sleep(0.001)
         if state_r() == 0:
             idle()  # in reset so idle and initialize display
         if state_r() == 1:
-            if poll_touch() == False:  # main gaming entry state check for touch events
+            if correctly_keyed == True:  # main gaming entry state check for touch events
                 # unlocked
                 state_w(2)
         if state_r() == 2:
