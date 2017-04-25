@@ -4,10 +4,10 @@
 # Cloned: 24/4/2017 S. Jackson
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
-#import OSC
-#import time
+# import OSC
+# import time
 
-#import serial
+# import serial
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
 import RPi.GPIO as GPIO
@@ -64,6 +64,7 @@ def poll_touch():
     w.set_panel_image()
     return locked
 
+
 if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
     from Tkinter import *
 else:
@@ -79,7 +80,7 @@ class FullscreenWindow:
         self.tk.attributes('-zoomed',
                            True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
         self.frame = Frame(self.tk)
-        #self.frame.pack() going to be a grid
+        # self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
         self.fill_grid()
         self.set_panel_image()
@@ -91,9 +92,9 @@ class FullscreenWindow:
     def background(self):  # not yet called!!!
         self.img = PIL.Image.open(self.dir() + '/SYMBOLS/TouchSCreenBackground.jpg')
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
-        self.img = ImageTk.PhotoImage(self.img) # also used as a placeholder image before call to set_panel_image()
-        panel = Label(self.frame, image=img)
-        panel.image = img
+        self.img = ImageTk.PhotoImage(self.img)  # also used as a placeholder image before call to set_panel_image()
+        panel = Label(self.frame, image=self.img)
+        # panel.image = img -- this is just to maintain a handle and the handle is now a instance var
         panel.place(x=0, y=0, relwidth=1, relheight=1)
 
     def image_pair(self, num):  # the number of the image pair
@@ -108,13 +109,13 @@ class FullscreenWindow:
     def set_panel_image(self):
         global visible_select
         for i in range(28):
-            #self.panels[i].grid_forget() #remove the panel from the grid
+            # self.panels[i].grid_forget() #remove the panel from the grid
             selected = 1  # off
             if visible_select[i] == True:
                 selected = 0  # on
-            self.panels[i].config(image = self.cache[i * 2 + selected])
-            #self.panels[i].grid(row=i / 7, column=i % 7) should not need re-adding
-        #self.frame.pack() # redraw again? should nest!! (no mix grid and pack)
+            self.panels[i].config(image=self.cache[i * 2 + selected])
+            # self.panels[i].grid(row=i / 7, column=i % 7) should not need re-adding
+            # self.frame.pack() # redraw again? should nest!! (no mix grid and pack)
 
     def fill_grid(self):
         self.background()
@@ -125,12 +126,13 @@ class FullscreenWindow:
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
 
+
 new_env = dict(os.environ)
 new_env['DISPLAY'] = '0.0'
 w = FullscreenWindow()  # a window
 
-#client = OSC.OSCClient()
-#client.connect(('127.0.0.1', 4559))
+# client = OSC.OSCClient()
+# client.connect(('127.0.0.1', 4559))
 
 GPIO.setmode(GPIO.BCM)
 
@@ -155,23 +157,27 @@ near = 0  # A default for the near tuning 100 is spot on 0 is far away
 state = 0  # set initial state
 print 'state:', state
 
-#=======================================
+# =======================================
 # A THREADING LOCK
-#=======================================
+# =======================================
 # All reads too must be locked due to the atomic condition of read partial write
 # Not really too relevant if the interpreter uses aligned pointers to objects
 # or aligned bus wifth integers
 l = threading.Lock()  # A master lock as some code had no lock on atomic state change
+
+
 def state_r():
     l.acquire()
     tmp = state
     l.release()
     return tmp
 
+
 def state_w(num):
     l.acquire()
     state = num
     l.release()
+
 
 SEND_UDP_IP = "10.100.1.100"
 SEND_UDP_PORT = 5001
@@ -183,16 +189,20 @@ RECV_UDP_PORT = 6000
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
+
 def clean_up():
-    recv_sock.close() # just in case there is a hanging socket reaalocation problem (but it's not C)
+    recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
+
 
 atexit.register(clean_up)
+
 
 def send_packet(body):
     global l
     l.acquire()
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
     l.release()
+
 
 def receive_packet():
     print 'r_packet'
@@ -281,6 +291,7 @@ def tuning_lock():
         elif near > 90:
             send_packet('301')
 
+
 tunning_sounds = ['/play1', '/play2']
 
 
@@ -341,7 +352,7 @@ def main():
             tuning_lock()  # tuning locked in maybe different state, but tuning lock should do both
             radio()  # needed??
         if state_r() == 4:
-            nop = True # message done -- is this a needed state?
+            nop = True  # message done -- is this a needed state?
 
 
 if __name__ == "__main__":
