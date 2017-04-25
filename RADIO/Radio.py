@@ -48,6 +48,8 @@ def handle_event(event, touch):
         touch_grid[current_touch] = [touch.slot, touch.x, touch.y]
         current_touch = (current_touch + 1) % 4
         debug('new cur touch:' + str(current_touch))
+    elif event == 2: #move
+        debug('wobbly finger')
     else:
         debug(str(touch_grid))
         for i in range(4):
