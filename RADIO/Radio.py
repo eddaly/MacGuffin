@@ -36,7 +36,7 @@ visible_select = [False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False]
 
-touch_grid = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1], [-1, -1, -1]] # the four active touches
+touch_grid = [[-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False]] # the four active touches
 current_touch = 0
 correctly_keyed = False
 
@@ -45,7 +45,7 @@ def handle_event(event, touch):
     global current_touch
     #debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
     if event == 1: # press
-        touch_grid[current_touch] = [touch.slot, touch.x, touch.y]
+        touch_grid[current_touch] = [touch.slot, touch.x, touch.y, -1, False]
         current_touch = (current_touch + 1) % 4
         #debug('new cur touch:' + str(current_touch))
     elif event == 2: #move
@@ -55,8 +55,12 @@ def handle_event(event, touch):
         #debug(str(touch_grid))
         for i in range(4):
             if touch_grid[i][0] == touch.slot:
-                touch_grid[i] = [-1, -1, -1] #reset
+                touch_grid[i][4] = True #reset
+                touch_grid[i][3] = time.time() # released
     #debug('touch_grid set')
+    for i in range(4):
+        if (touch_grid[i][4] == True) and (time.time() - touch_grid[i][3] > 0.75):
+            touch_grid[i] = [-1, -1, -1, -1, False]  # reset
     set_touch()
 
 for touch in ts.touches:
