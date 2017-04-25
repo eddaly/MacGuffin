@@ -6,6 +6,7 @@
 # Import SPI library (for hardware SPI) and MCP3008 library.
 # import OSC
 import time
+import datetime
 
 # import serial
 import Adafruit_GPIO.SPI as SPI
@@ -369,7 +370,7 @@ def reset_loop():
 def heartbeat_loop():
     while True:
         send_packet("I am alive!")
-        debug('isAlive')
+        debug('isAlive:' + datetime.datetime.now().strftime('%G-%b-%d %I:%M%p'))
         time.sleep(10)
 
 
