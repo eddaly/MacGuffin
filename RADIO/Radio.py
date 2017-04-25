@@ -54,6 +54,7 @@ def poll_touch():
                       False, False, False, False, False, False, False]
     for touch in ts.poll():
         if touch.valid == True:
+            debug(touch.x + ":" + touch.y)
             index = (touch.x - xoffset) / xper + (touch.y - yoffset) / yper * 7  # create a touch index
             visible_select[index] = True
             for idx in the_key:
@@ -87,6 +88,7 @@ class FullscreenWindow:
         # self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
         self.frame.bind('<Escape>', self.close)
+        debug('should have escape key but do not.')
         self.fill_grid()
         self.set_panel_image()
 
@@ -100,7 +102,7 @@ class FullscreenWindow:
         self.img = ImageTk.PhotoImage(self.img)  # also used as a placeholder image before call to set_panel_image()
         panel = Label(self.frame, image=self.img)
         panel.image = self.img #-- this is just to maintain a handle and the handle is now a instance var
-        debug('should have a background')
+        debug('should have a background but do not. Used solid colour.')
         # the background appears not to show
         panel.place()
 
@@ -131,7 +133,7 @@ class FullscreenWindow:
         #stky = N + E + S + W
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey7')  # padding test
+            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey16')  # padding test
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
