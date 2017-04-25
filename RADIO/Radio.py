@@ -75,6 +75,7 @@ def set_touch():
                       False, False, False, False, False, False, False]
 
     for touch in touch_grid:
+        debug('touch:' + str(touch))
         if touch[0] > 0:
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
             index = max(27, index) # an extra check
