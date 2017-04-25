@@ -1,3 +1,8 @@
+Regards the electronics of the "meter" the pi pin is connected through a resistor to limit current which is good,
+but the ESD protection on the pi is designed for capacitive discharge. The coil in the meter is an inductor, and has
+a ferromagnetic core, hence high inductance. The discharge characteristic is like such to eventually stress the ESD
+protection and it would be a likely failure point. I suggest two series zeners at about 2.5v rating about 1W.
+
 The locking is now done correctly. Maybe a moot point until a regression bug on update to 64 bit processing or such.
 
 The ft5406 module needed an edit to import and use Queue instead of queue. It is installed on the Pi in the RADIO ONLY!
