@@ -1,3 +1,8 @@
+Awaiting final pin allocation for rfids. Needs board circuits and perhaps arduino code.
+A few minor issues with range clarification on radio success and key rollover timer.
+
+
+
 The touch screen is now working. There needs to be some fine tuning of the delays for key presses, and perhaps more than
 a four key buffer. Proof of concept ok. Now onto the very simple RFID scan problem.
 
