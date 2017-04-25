@@ -77,6 +77,7 @@ def set_touch():
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False]
 
+    debug(str(touch_grid)) # print grid
     for touch in touch_grid:
         debug('touch:' + str(touch))
         if touch[0] > 0:
