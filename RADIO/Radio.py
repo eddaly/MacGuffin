@@ -56,7 +56,7 @@ def handle_event(event, touch):
         for i in range(4):
             if touch_grid[i][0] == touch.slot:
                 touch_grid[i] = [-1, -1, -1] #reset
-    debug('touch_grid set')
+    #debug('touch_grid set')
     set_touch()
 
 for touch in ts.touches:
@@ -89,7 +89,7 @@ def set_touch():
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
             index = max(27, index) # an extra check
             visible_select[index] = True # set as on
-            debug(str(visible_select))
+            debug(str(visible_select)) # should show <========= HERE
             for idx in range(4):
                 if index == the_key[idx]:
                     hits[idx] += 1
@@ -154,7 +154,7 @@ class FullscreenWindow:
 
     def set_panel_image(self):
         global visible_select
-        debug('update')
+        #debug('update')
         for i in range(28):
             # self.panels[i].grid_forget() #remove the panel from the grid
             selected = 1  # off
