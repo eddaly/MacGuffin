@@ -43,15 +43,16 @@ correctly_keyed = False
 def handle_event(event, touch):
     global touch_grid
     global current_touch
-    debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
+    #debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
     if event == 1: # press
         touch_grid[current_touch] = [touch.slot, touch.x, touch.y]
         current_touch = (current_touch + 1) % 4
-        debug('new cur touch:' + str(current_touch))
+        #debug('new cur touch:' + str(current_touch))
     elif event == 2: #move
-        debug('wobbly finger')
+        nop = True
+        #debug('wobbly finger')
     else:
-        debug(str(touch_grid))
+        #debug(str(touch_grid))
         for i in range(4):
             if touch_grid[i][0] == touch.slot:
                 touch_grid[i] = [-1, -1, -1] #reset
@@ -83,11 +84,12 @@ def set_touch():
 
     debug(str(touch_grid)) # print grid
     for touch in touch_grid:
-        debug('touch:' + str(touch))
+        #debug('touch:' + str(touch))
         if touch[0] > 0:
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
             index = max(27, index) # an extra check
             visible_select[index] = True # set as on
+            debug(str(visible_select))
             for idx in range(4):
                 if index == the_key[idx]:
                     hits[idx] += 1
