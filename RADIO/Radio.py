@@ -130,7 +130,7 @@ class FullscreenWindow:
         self.background()
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(self.frame, image=self.img, highlightthickness=0, padding=(0,0,0,0), padx=0, pady=0)  # padding test
+            panel = Label(self.frame, image=self.img, highlightthickness=0, ipadx=0, ipady=0, padx=0, pady=0)  # padding test
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
