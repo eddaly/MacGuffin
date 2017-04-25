@@ -69,6 +69,8 @@ def set_touch():
     global visible_select
     global the_key
     global touch_grid
+    xsize = 800
+    ysize = 480
     xper = xsize / 7
     yper = ysize / 4
     hits = [0, 0, 0, 0]
