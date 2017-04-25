@@ -125,6 +125,7 @@ class FullscreenWindow:
 
     def __init__(self):
         self.tk = Tk()
+        self.tk.config(cursor='none') # check for cursor hide
         self.tk.attributes('-zoomed',
                            True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
         self.frame = self.tk # the frame is not required
