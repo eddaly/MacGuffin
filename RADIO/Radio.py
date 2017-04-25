@@ -131,7 +131,7 @@ class FullscreenWindow:
         #stky = N + E + S + W
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey20')  # padding test
+            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey7')  # padding test
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
@@ -187,6 +187,7 @@ def state_r():
 
 
 def state_w(num):
+    global state
     l.acquire()
     state = num
     l.release()
@@ -270,7 +271,6 @@ def gui_loop():
 # ====================================
 def initialise():
     reset_all()
-    state_w(1) # must enter state 1 to start touchscreen
     t1 = threading.Thread(target=reset_loop)
     t1.daemon = False
     t1.start()
