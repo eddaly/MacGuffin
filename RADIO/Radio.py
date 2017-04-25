@@ -52,17 +52,18 @@ def poll_touch():
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False]
-    debug('entered touch_poll')
+    #debug('entered touch_poll')
     for touch in ts.poll():
         debug('touch event')
-        if touch.valid == True:
-            debug(touch.x + ":" + touch.y)
-            index = (touch.x - xoffset) / xper + (touch.y - yoffset) / yper * 7  # create a touch index
-            visible_select[index] = True
-            for idx in the_key:
-                if index == idx:
-                    addto = the_key.index(idx)
-                    hits[addto] += 1
+        #if touch.valid == True:
+        debug(touch.x + ":" + touch.y)
+        index = (touch.x - xoffset) / xper + (touch.y - yoffset) / yper * 7  # create a touch index
+        index = max(27, index) # an extra check
+        visible_select[index] = True # set as on
+            #for idx in the_key:
+            #    if index == idx:
+            #        addto = the_key.index(idx)
+            #        hits[addto] += 1
     locked = False
     #debug('hit check')
     for symbol in hits:
