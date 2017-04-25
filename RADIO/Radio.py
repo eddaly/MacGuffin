@@ -52,7 +52,9 @@ def poll_touch():
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False,
                       False, False, False, False, False, False, False]
+    debug('entered touch_poll')
     for touch in ts.poll():
+        debug('touch event')
         if touch.valid == True:
             debug(touch.x + ":" + touch.y)
             index = (touch.x - xoffset) / xper + (touch.y - yoffset) / yper * 7  # create a touch index
@@ -133,7 +135,7 @@ class FullscreenWindow:
         #stky = N + E + S + W
         for i in range(28):
             self.image_pair(i)  # create loaded images
-            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey16')  # padding test
+            panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey12')  # padding test
             self.panels.append(panel)
             # then place in grid
             panel.grid(row=i / 7, column=i % 7)
