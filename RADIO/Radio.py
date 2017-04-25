@@ -92,7 +92,7 @@ class FullscreenWindow:
         self.img = PIL.Image.open(self.dir() + '/SYMBOLS/TouchSCreenBackground.jpg')
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
         self.img = ImageTk.PhotoImage(self.img) # also used as a placeholder image before call to set_panel_image()
-        panel = Label(root, image=img)
+        panel = Label(self.frame, image=img)
         panel.image = img
         panel.place(x=0, y=0, relwidth=1, relheight=1)
 
