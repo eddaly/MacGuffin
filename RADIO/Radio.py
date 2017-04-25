@@ -29,7 +29,7 @@ ts = ft5406.Touchscreen()
 # 7 by 4 icon division
 
 # 0 to 27 for the valid 4 key combination
-the_key = [0, 1, 8, 9]  # a list of the active combination
+the_key = [0, 1, 2, 3]  # a list of the active combination
 
 visible_select = [False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False,
@@ -89,12 +89,12 @@ def set_touch():
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
             index = min(27, index) # an extra check
             visible_select[index] = True # set as on
-            debug(str(visible_select)) # should show <========= HERE only on multi
+            #debug(str(visible_select)) # should show <========= HERE only on multi
             for idx in range(4):
                 if index == the_key[idx]:
                     hits[idx] += 1
     locked = False
-    debug(str(hits))
+    #debug(str(hits))
     #debug('hit check')
     for symbol in hits:
         if symbol < 1:
@@ -400,6 +400,7 @@ def main_loop():
             if correctly_keyed == True:  # main gaming entry state check for touch events
                 # unlocked
                 state_w(2)
+                debug('BINGO!!!!!!')
         if state_r() == 2:
             tuning_lock()  # touched success turn on radio
             radio()  # needed??
