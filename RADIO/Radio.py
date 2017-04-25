@@ -270,9 +270,9 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    #t3 = threading.Thread(target=gui_loop)
-    #t3.daemon = False
-    #t3.start()
+    t3 = threading.Thread(target=main_loop)
+    t3.daemon = False
+    t3.start()
 
 
 # ===================================
@@ -342,9 +342,7 @@ def idle():
 # =========================
 #  STATE MACHINE MAIN LOOP
 # =========================
-def main():
-    initialise()
-    gui_loop() # TEST ---
+def main_loop():
     while True:
         debug('state:' + str(state_r()))
         time.sleep(0.001)
@@ -363,6 +361,9 @@ def main():
         if state_r() == 4:
             nop = True  # message done -- is this a needed state?
 
+def main():
+    initialise()
+    gui_loop() # TEST ---
 
 if __name__ == "__main__":
     main()
