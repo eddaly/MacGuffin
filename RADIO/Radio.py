@@ -261,9 +261,9 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    t3 = threading.Thread(target=gui_loop)
-    t3.daemon = False
-    t3.start()
+    #t3 = threading.Thread(target=gui_loop)
+    #t3.daemon = False
+    #t3.start()
 
 
 # ===================================
@@ -335,7 +335,7 @@ def idle():
 # =========================
 def main():
     initialise()
-
+    gui_loop() # TEST ---
     while True:
         print 'state:', state_r()
         time.sleep(0.001)
