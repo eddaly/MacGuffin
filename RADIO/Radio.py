@@ -63,12 +63,15 @@ def poll_touch():
                 if index == idx:
                     addto = the_key.index(idx)
                     hits[addto] += 1
-    locked = false
+    locked = False
+    debug('hit check')
     for symbol in hits:
         if symbol < 1:
-            locked = true
+            locked = True
     # all symbols in the_key have been touched at the same time?
+    debug('update display')
     w.set_panel_image()
+    debug('exit touch_poll')
     return locked
 
 
