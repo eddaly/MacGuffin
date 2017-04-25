@@ -36,11 +36,23 @@ visible_select = [False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False]
 
 
+def handle_event(event, touch):
+    debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' +  touch.y)
+
+
+for touch in ts.touches:
+    touch.on_press = handle_event
+    touch.on_release = handle_event
+    touch.on_move = handle_event
+
+ts.run()
+
 def poll_touch():
     global ts
     global w
     global visible_select
     global the_key
+    return True # exit for tests
     xoffset = 0
     yoffset = 0
     xsize = 65536
