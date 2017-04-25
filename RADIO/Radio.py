@@ -70,8 +70,8 @@ else:
 
 
 class FullscreenWindow:
-    self.cache = []
-    self.panels = []
+    cache = []
+    panels = []
 
     def __init__(self):
         self.tk = Tk()
