@@ -83,7 +83,7 @@ class FullscreenWindow:
         self.tk = Tk()
         self.tk.attributes('-zoomed',
                            True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
-        self.frame = Frame(self.tk)
+        self.frame = self.tk # the frame is not required
         # self.frame.pack() going to be a grid
         self.tk.attributes("-fullscreen", True)
         self.frame.bind('<Escape>', self.close)
@@ -99,8 +99,9 @@ class FullscreenWindow:
         # img = img.resize((250, 250), Image.ANTIALIAS) 800 * 480
         self.img = ImageTk.PhotoImage(self.img)  # also used as a placeholder image before call to set_panel_image()
         panel = Label(self.frame, image=self.img)
-        # panel.image = img -- this is just to maintain a handle and the handle is now a instance var
-        panel.place(x=0, y=0, relwidth=1, relheight=1)
+        panel.image = img #-- this is just to maintain a handle and the handle is now a instance var
+        debug('should have a background')
+        panel.place()
 
     def image_pair(self, num):  # the number of the image pair
         digits = "00" + str(num + 1)
@@ -220,13 +221,14 @@ def receive_packet():
 
 
 def reset_all():
+    state_w(0)  # indicate reset
     debug('reset all - wawiting to acquire lock')
     debug('reset all - got the lock... continue processing')
     gauge.start(0)  # start PWM
-    state_w(0)  # indicate reset
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
+    state_w(1) # move into run phase
 
 
 def start_game():
@@ -335,8 +337,8 @@ def idle():
     # is this needed as it is never used. I guess it initializes the first value on state 1
     global pot
     pot = mcp.read_adc(0)
-    debug('pot:' + str(pot))
-    time.sleep(0.5)
+    debug('pot idle:' + str(pot))
+    time.sleep(3)
 
 
 # =========================
@@ -344,7 +346,7 @@ def idle():
 # =========================
 def main_loop():
     while True:
-        debug('state:' + str(state_r()))
+        debug('state main:' + str(state_r()))
         time.sleep(0.001)
         if state_r() == 0:
             idle()  # in reset so idle and initialize display
