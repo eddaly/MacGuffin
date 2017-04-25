@@ -108,9 +108,9 @@ class FullscreenWindow:
         digits = "00" + str(num + 1)
         digits2 = digits[len(digits) - 2:len(digits)]  # a pair of digits
         imgon = PIL.Image.open(self.dir() + '/SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
-        imgon = imgon.resize((114, 120), Image.ANTIALIAS)
+        imgon = imgon.resize((114, 120), PIL.Image.ANTIALIAS)
         imgoff = PIL.Image.open(self.dir() + '/SYMBOLS/OFF/SymbolsOFF_' + digits2 + '.jpg')
-        imgoff = imgoff.resize((114, 120), Image.ANTIALIAS)
+        imgoff = imgoff.resize((114, 120), PIL.Image.ANTIALIAS)
         self.cache.append(ImageTk.PhotoImage(imgon))
         self.cache.append(ImageTk.PhotoImage(imgoff))
         # 56 images in cache
