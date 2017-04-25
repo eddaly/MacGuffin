@@ -44,13 +44,16 @@ def handle_event(event, touch):
     global touch_grid
     global current_touch
     debug(["Release", "Press", "Move"][event] + ':' + str(touch.slot) + ':'+ str(touch.x) + ':' + str(touch.y))
-    if event == 2: # press
+    if event == 1: # press
         touch_grid[current_touch] = [touch.slot, touch.x, touch.y]
         current_touch = (current_touch + 1) % 4
+        debug('new cur touch:' + str(current_touch))
     else:
+        debug(str(touch_grid))
         for i in range(4):
             if touch_grid[i][0] == touch.slot:
                 touch_grid[i] = [-1, -1, -1] #reset
+    debug('touch_grid set')
     set_touch()
 
 for touch in ts.touches:
