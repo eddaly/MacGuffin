@@ -87,7 +87,7 @@ def set_touch():
         #debug('touch:' + str(touch))
         if touch[0] > -1:
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
-            index = max(27, index) # an extra check
+            index = min(27, index) # an extra check
             visible_select[index] = True # set as on
             debug(str(visible_select)) # should show <========= HERE only on multi
             for idx in range(4):
