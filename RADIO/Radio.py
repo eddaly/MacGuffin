@@ -376,6 +376,7 @@ def reset_all():
 def start_game():
     global correctly_keyed
     correctly_keyed = False
+    tunning_change()
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
 
@@ -460,6 +461,12 @@ def tuning_lock():
         send_packet('300')
     return False
 
+def tunning_change():
+    global tune_centre
+    global pot
+    while abs(pot - tune_centre) < 300:
+        tune_centre = random.randrange(1024)
+
 tunning_sounds = ['/play1', '/play2']
 
 
@@ -518,6 +525,7 @@ def main_loop():
         if state_r() == 2:  # TUNE
             if tuning_lock() == True:  # touched success turn on radio
                 state_w(3)
+                gauge.start(0) #reset guage
             radio()  # needed??
         if state_r() == 3:  # POST TUNE?????????? <======================= CURRENT TERMINAL STATE
             # tuning locked in maybe different state, but tuning lock should do both??
