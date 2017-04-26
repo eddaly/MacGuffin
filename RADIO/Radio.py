@@ -418,9 +418,10 @@ def initialise():
 def non_terminal():  # a non terminal condition?
     global pot
     global mcp
+    global near
     time.sleep(0.5)
     pot = mcp.read_adc(0)
-    debug('tunning: ' + str(pot) + ' near: ' + str(near))
+    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
 
 
 def tuning_lock():
