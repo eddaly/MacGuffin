@@ -429,14 +429,16 @@ def tuning_lock():
     global pot
     global near
     non_terminal()
-    if pot >= tune_centre + percent_tune or pot <= tune_centre - percent_tune:
+    p_tune = 1024 / percent_tune
+    if pot >= tune_centre + p_tune or pot <= tune_centre - p_tune:
         state_w(2)  # better luck next time
         near = 0
         send_packet('300')
         gauge.start(0)
     else:
-        near = max(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
-        gauge.start(near)  # tuning indication, maybe sensitivity needs changing
+        scale = abs(pot - tune_centre)
+        near = scale / p_tune * 100
+        gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
         state_w(3)  # whey hey, tuned in!!
         if near > 97:  # arbitary? and fine tuning issues 33 buckets
             send_packet('302')
