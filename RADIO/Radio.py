@@ -23,7 +23,7 @@ import sys
 import os
 import atexit
 
-STARTER_STATE = 2  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
+STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 
 # ============================================
 # ============================================
