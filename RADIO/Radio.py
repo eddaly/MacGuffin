@@ -421,7 +421,7 @@ def non_terminal():  # a non terminal condition?
     global near
     time.sleep(0.5)
     pot = mcp.read_adc(0)
-    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r())) #strangely near global is 0
+    #debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))  # strangely near global is 0
 
 
 def tuning_lock():
@@ -431,14 +431,16 @@ def tuning_lock():
     global near
     non_terminal()
     p_tune = 1024 * percent_tune / 100 # yep percent!
-    if pot >= tune_centre + p_tune or pot <= tune_centre - p_tune:
+    if (pot >= tune_centre + p_tune) or (pot <= tune_centre - p_tune):
         #state_w(2)  # better luck next time
         near = 0
         send_packet('300')
         gauge.start(0)
+        debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
     else:
         scale = abs(pot - tune_centre)
         near = scale / p_tune * 100
+        debug('tunning-on: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
         gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
         if near > 97:  # arbitary? and fine tuning issues 33 buckets
             if state_r() == 2: # just in case the controller restarts timer!!!
