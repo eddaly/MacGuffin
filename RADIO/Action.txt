@@ -1,3 +1,8 @@
+RFID tests? Have duinos been flashed, code specific sketches? RFID and blue tack?
+The stage controller being UDP, is there expected to be routing packet loss?
+The meter should not be a problem in general operation, except with kids with curious magnets or such.
+
+
 Got final pin allocation through process of elimination. There exists a "effect" of off tuning half way through a
 message. Query? The code has not been tested in this almost complete state.
 

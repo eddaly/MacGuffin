@@ -22,8 +22,10 @@ import ft5406
 import sys
 import os
 import atexit
+import random
 
 STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
+SIMULATE = True
 
 # ============================================
 # ============================================
@@ -56,21 +58,31 @@ def rfid_init():
 
 rfid_init()
 
+def sim_pin():
+    return random.random() > 0.3 # should be almost there
+
 
 def rfid():
     global rfidPins
     flag = True
     for i in range(5):
-        j = GPIO.input(rfidPins[i])
+        if SIMULATE:
+            j = sim_pin()
+        else:
+            j = GPIO.input(rfidPins[i])
         if j:
             send_packet('1' + str(i) + '1')
+            debug('rnd T:' + str(i))
         else:
             send_packet('1' + str(i) + '0')
+            debug('rnd F:' + str(i))
         flag = flag and j
     if flag:
         send_packet('201')
+        debug('Yes!!!!!!!!!')
     else:
         send_packet('200')
+        debug('No :(')
     return flag
 
 
