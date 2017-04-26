@@ -431,7 +431,8 @@ def tuning_lock():
     global near
     non_terminal()
     p_tune = 1024 * percent_tune / 100 # yep percent!
-    if (pot >= tune_centre + p_tune) or (pot <= tune_centre - p_tune):
+    debug('pt: ' + p_tune)
+    if not((pot < tune_centre + p_tune) and (pot > tune_centre - p_tune)):
         #state_w(2)  # better luck next time
         near = 0
         send_packet('300')
