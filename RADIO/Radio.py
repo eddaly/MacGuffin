@@ -433,9 +433,9 @@ def tuning_lock():
     p_tune = 1024 * percent_tune / 100 # yep percent!
     #debug('pt: ' + str(p_tune))
     offset = abs(pot - tune_centre) # offset
-    near = (1 - min(offset / p_tune, 1)) * 100 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
+    near = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-    gauge.start(near)  # tuning indication, maybe sensitivity needs changing
+    gauge.start(int(near))  # tuning indication, maybe sensitivity needs changing
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         if state_r() == 2: # just in case the controller restarts timer!!!
             send_packet('302')
