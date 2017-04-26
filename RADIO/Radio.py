@@ -430,7 +430,7 @@ def tuning_lock():
     global pot
     global near
     non_terminal()
-    p_tune = 1024 / percent_tune
+    p_tune = 1024 * percent_tune / 100 # yep percent!
     if pot >= tune_centre + p_tune or pot <= tune_centre - p_tune:
         #state_w(2)  # better luck next time
         near = 0
@@ -443,10 +443,11 @@ def tuning_lock():
         if near > 97:  # arbitary? and fine tuning issues 33 buckets
             send_packet('302')
             if state_r() == 2: # just in case the controller restarts timer!!!
-                state_w(3)  # whey hey, tuned in!!
+                #state_w(3)  # whey hey, tuned in!!
+                return True
         elif near > 90:
             send_packet('301')
-
+    return False
 
 tunning_sounds = ['/play1', '/play2']
 
@@ -504,7 +505,8 @@ def main_loop():
                 state_w(2)
                 debug('BINGO!!!!!!')
         if state_r() == 2:  # TUNE
-            tuning_lock()  # touched success turn on radio
+            if tuning_lock() == True:  # touched success turn on radio
+                state_w(3)
             radio()  # needed??
         if state_r() == 3:  # POST TUNE?????????? <======================= CURRENT TERMINAL STATE
             # tuning locked in maybe different state, but tuning lock should do both??
