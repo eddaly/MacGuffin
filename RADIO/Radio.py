@@ -432,25 +432,20 @@ def tuning_lock():
     non_terminal()
     p_tune = 1024 * percent_tune / 100 # yep percent!
     debug('pt: ' + str(p_tune))
-    if not((pot < tune_centre + p_tune) and (pot > tune_centre - p_tune)):
-        #state_w(2)  # better luck next time
-        near = 0
-        send_packet('300')
-        gauge.start(0)
-        debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
+    scale = abs(pot - tune_centre)
+    near = scale / p_tune * 100
+    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
+    gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
+    if near > 97:  # arbitary? and fine tuning issues 33 buckets
+        if state_r() == 2: # just in case the controller restarts timer!!!
+            send_packet('302')
+            #state_w(3)  # whey hey, tuned in!!
+            debug('Yup!!!!!!!!!!!!!!!!!!')
+            return True
+    elif near > 90:
+        send_packet('301')
     else:
-        scale = abs(pot - tune_centre)
-        near = scale / p_tune * 100
-        debug('tunning-on: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-        gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
-        if near > 97:  # arbitary? and fine tuning issues 33 buckets
-            if state_r() == 2: # just in case the controller restarts timer!!!
-                send_packet('302')
-                #state_w(3)  # whey hey, tuned in!!
-                debug('Yup!!!!!!!!!!!!!!!!!!')
-                return True
-        elif near > 90:
-            send_packet('301')
+        send_packet('300')
     return False
 
 tunning_sounds = ['/play1', '/play2']
