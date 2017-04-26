@@ -34,7 +34,7 @@ CS = 18
 # BCM MODE
 gaugePin = 19  # set pin for tunning gauge
 
-rfidPins = [19, 19, 19, 19, 19]  # change??!!!!!! TODO: NB===================================
+rfidPins = [25, 8, 7, 16, 20]  # change??!!!!!! TODO: NB===================================
 
 
 # ===================================
@@ -56,9 +56,9 @@ def rfid():
     for i in range(5):
         j = GPIO.input(rfidPins[i])
         if j:
-            send_packet('1' + i + '1')
+            send_packet('1' + str(i) + '1')
         else:
-            send_packet('1' + i + '0')
+            send_packet('1' + str(i) + '0')
         flag = flag and j
     if flag:
         send_packet('201')
