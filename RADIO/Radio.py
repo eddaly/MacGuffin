@@ -431,11 +431,11 @@ def tuning_lock():
     global near
     non_terminal()
     p_tune = 1024 * percent_tune / 100 # yep percent!
-    debug('pt: ' + str(p_tune))
+    #debug('pt: ' + str(p_tune))
     scale = abs(pot - tune_centre)
-    near = scale / p_tune * 100
+    near = 100 - scale / p_tune * 100
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-    gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
+    gauge.start(max(near, 0))  # tuning indication, maybe sensitivity needs changing
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         if state_r() == 2: # just in case the controller restarts timer!!!
             send_packet('302')
