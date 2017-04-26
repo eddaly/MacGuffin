@@ -274,7 +274,7 @@ mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 percent_tune = 20
 tune_centre = 50  # MUST CHANGE
-pot = 0  # A default, must set before check to aquire position
+pot = 0  # A default, must set before check to acquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
 
 state = 0  # set initial state
@@ -420,7 +420,7 @@ def non_terminal():  # a non terminal condition?
     global mcp
     time.sleep(0.5)
     pot = mcp.read_adc(0)
-    debug('tunning: ' + str(pot))
+    debug('tunning: ' + str(pot) + ' near: ' + str(near))
 
 
 def tuning_lock():
@@ -429,7 +429,7 @@ def tuning_lock():
     global pot
     global near
     non_terminal()
-    if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
+    if pot >= tune_centre + percent_tune or pot <= tune_centre - percent_tune:
         state_w(2)  # better luck next time
         near = 0
         send_packet('300')
@@ -438,7 +438,7 @@ def tuning_lock():
         near = max(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
         gauge.start(near)  # tuning indication, maybe sensitivity needs changing
         state_w(3)  # whey hey, tuned in!!
-        if near > 97:  # arbitary? and fine tunning issues 33 buckets
+        if near > 97:  # arbitary? and fine tuning issues 33 buckets
             send_packet('302')
         elif near > 90:
             send_packet('301')
