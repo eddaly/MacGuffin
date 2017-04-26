@@ -23,7 +23,7 @@ import sys
 import os
 import atexit
 
-STARTER_STATE = 1  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
+STARTER_STATE = 2  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 
 # ============================================
 # ============================================
@@ -420,6 +420,7 @@ def non_terminal():  # a non terminal condition?
     global mcp
     time.sleep(0.5)
     pot = mcp.read_adc(0)
+    debug('tunning: ' + str(pot))
 
 
 def tuning_lock():
@@ -434,7 +435,7 @@ def tuning_lock():
         send_packet('300')
         gauge.start(0)
     else:
-        near = min(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
+        near = max(100 - (pot - tune_centre) * (pot - tune_centre) / 4, 0)  # divide by 4 for 20% tune => 0
         gauge.start(near)  # tuning indication, maybe sensitivity needs changing
         state_w(3)  # whey hey, tuned in!!
         if near > 97:  # arbitary? and fine tunning issues 33 buckets
