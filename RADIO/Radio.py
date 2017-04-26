@@ -431,7 +431,7 @@ def tuning_lock():
     global near
     non_terminal()
     p_tune = 1024 * percent_tune / 100 # yep percent!
-    debug('pt: ' + p_tune)
+    debug('pt: ' + str(p_tune))
     if not((pot < tune_centre + p_tune) and (pot > tune_centre - p_tune)):
         #state_w(2)  # better luck next time
         near = 0
