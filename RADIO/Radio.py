@@ -466,6 +466,8 @@ def tunning_change():
     global pot
     random.seed(a=pot)
     tmp = random.randrange(370)
+    non_terminal()
+    debug('tmp: ' + str(tmp) + ' pot: ' + str(pot))
     if pot - 512 > 0:
         tune_centre = tmp
     else:
