@@ -216,6 +216,7 @@ class FullscreenWindow:
         panel.place()
 
     def image_pair(self, num):  # the number of the image pair
+        debug('building image: ' + str(num))
         digits = "00" + str(num + 1)
         digits2 = digits[len(digits) - 2:len(digits)]  # a pair of digits
         imgon = PIL.Image.open(self.dir() + '/SYMBOLS/ON/SymbolsON_' + digits2 + '.jpg')
@@ -246,6 +247,7 @@ class FullscreenWindow:
             panel = Label(self.frame, image=self.img, highlightthickness=0, padx=0, pady=0, bg='grey9')  # padding test
             self.panels.append(panel)
             # then place in grid
+            debug('placing image: ' + str(i))
             panel.grid(row=i / 7, column=i % 7)
 
     def close(self):
@@ -264,7 +266,7 @@ w = FullscreenWindow()  # a window
 # client.connect(('127.0.0.1', 4559))
 
 GPIO.setup(gaugePin, GPIO.OUT)
-gauge = GPIO.PWM(gaugePin, 0)  # default of no signal
+gauge = GPIO.PWM(gaugePin, 50)  # default of no signal
 
 # Import SPI library (for hardware SPI) and MCP3008 library. ADC
 
