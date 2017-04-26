@@ -1,3 +1,6 @@
+Got final pin allocation through process of elimination. There exists a "effect" of off tuning half way through a
+message. Query? The code has not been tested in this almost complete state.
+
 Awaiting final pin allocation for rfids. Needs board circuits and perhaps arduino code.
 A few minor issues with range clarification on radio success and key rollover timer.
 

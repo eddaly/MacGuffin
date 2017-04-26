@@ -25,6 +25,13 @@ import atexit
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 
+# ============================================
+# ============================================
+# SET MODE FIRST (NO PIN DEFS BEFORE)
+# ============================================
+# ============================================
+GPIO.setmode(GPIO.BCM)
+
 # 3008 SPECIFIC MCP ADC
 CLK = 12
 MISO = 24
@@ -34,7 +41,7 @@ CS = 18
 # BCM MODE
 gaugePin = 19  # set pin for tunning gauge
 
-rfidPins = [25, 8, 7, 16, 20]  # change??!!!!!! TODO: NB===================================
+rfidPins = [25, 8, 7, 16, 20]  # change??!!
 
 
 # ===================================
@@ -154,7 +161,7 @@ def set_touch():
             index = touch[1] / xper + touch[2] / yper * 7  # create a touch index
             index = min(27, index)  # an extra check
             visible_select[index] = True  # set as on
-            # debug(str(visible_select)) # should show <========= HERE only on multi
+            # debug(str(visible_select)) # should show
             for idx in range(4):
                 if index == the_key[idx]:
                     hits[idx] += 1
@@ -255,8 +262,6 @@ w = FullscreenWindow()  # a window
 
 # client = OSC.OSCClient()
 # client.connect(('127.0.0.1', 4559))
-
-GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(gaugePin, GPIO.OUT)
 gauge = GPIO.PWM(gaugePin, 0)  # default of no signal
@@ -399,16 +404,21 @@ def initialise():
 
 
 # ===================================
-# EVERTHING BELOW SPECIFIC TO RADIO
+# EVERYTHING BELOW SPECIFIC TO RADIO
 # ===================================
+def non_terminal():  # a non terminal condition?
+    global pot
+    global mcp
+    time.sleep(0.5)
+    pot = mcp.read_adc(0)
+
 
 def tuning_lock():
     global tune_centre
     global percent_tune
     global pot
     global near
-    time.sleep(0.5)
-    pot = mcp.read_adc(0)
+    non_terminal()
     if pot >= tune_centre + percent_tune and pot <= tune_centre - percent_tune:
         state_w(2)  # better luck next time
         near = 0
@@ -432,7 +442,7 @@ tunning_sounds = ['/play1', '/play2']
 # ===================================
 def radio():  # use near global as the closeness of the station.
     global near
-
+    non_terminal()
     number_sounds = len(tunning_sounds)
     per_sound = 100.0 / float(number_sounds)
     toplay = max(number_sounds, near / per_sound)
@@ -483,7 +493,10 @@ def main_loop():
             tuning_lock()  # touched success turn on radio
             radio()  # needed??
         if state_r() == 3:  # POST TUNE?????????? <======================= CURRENT TERMINAL STATE
-            tuning_lock()  # tuning locked in maybe different state, but tuning lock should do both??
+            # tuning locked in maybe different state, but tuning lock should do both??
+            # ===============================================
+            # What happens when the announcement half made?
+            # ===============================================
             radio()  # needed??
         if state_r() == 4:  # RFID
             if rfid() == True:  # check for 5 active highs
