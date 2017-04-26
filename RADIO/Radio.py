@@ -448,7 +448,7 @@ def tuning_lock():
     offset = float(abs(pot - tune_centre)) # offset
     near = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-    gauge.start(int(near / 2))  # tuning indication, maybe sensitivity needs changing 1.3
+    gauge.start(int(near / 1.85))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         if state_r() == 2: # just in case the controller restarts timer!!!
             send_packet('302')
@@ -467,6 +467,7 @@ def tunning_change():
     random.seed(a=pot)
     tmp = random.randrange(370)
     non_terminal()
+    guage.start(0)
     debug('tmp: ' + str(tmp) + ' pot: ' + str(pot))
     if pot - 512 > 0:
         tune_centre = tmp
@@ -532,7 +533,7 @@ def main_loop():
         if state_r() == 2:  # TUNE
             if tuning_lock() == True:  # touched success turn on radio
                 state_w(3)
-                gauge.start(0) #reset guage
+                # gauge.start(0) #reset guage
             radio()  # needed??
         if state_r() == 3:  # POST TUNE?????????? <======================= CURRENT TERMINAL STATE
             # tuning locked in maybe different state, but tuning lock should do both??
