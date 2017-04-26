@@ -273,11 +273,11 @@ gauge = GPIO.PWM(gaugePin, 50)  # default of no signal
 mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 
 percent_tune = 20
-tune_centre = 50  # MUST CHANGE
+tune_centre = 711  # MUST CHANGE
 pot = 0  # A default, must set before check to acquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
 
-state = 0  # set initial state
+state = 0  # set initial state to RESET, use STARTER_STATE to control entry ^^^^^^^ (see above)
 
 # =======================================
 # A THREADING LOCK
@@ -421,7 +421,7 @@ def non_terminal():  # a non terminal condition?
     global near
     time.sleep(0.5)
     pot = mcp.read_adc(0)
-    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
+    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r())) #strangely near global is 0
 
 
 def tuning_lock():
@@ -432,7 +432,7 @@ def tuning_lock():
     non_terminal()
     p_tune = 1024 / percent_tune
     if pot >= tune_centre + p_tune or pot <= tune_centre - p_tune:
-        state_w(2)  # better luck next time
+        #state_w(2)  # better luck next time
         near = 0
         send_packet('300')
         gauge.start(0)
@@ -440,9 +440,10 @@ def tuning_lock():
         scale = abs(pot - tune_centre)
         near = scale / p_tune * 100
         gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
-        state_w(3)  # whey hey, tuned in!!
         if near > 97:  # arbitary? and fine tuning issues 33 buckets
             send_packet('302')
+            if state_r() == 2: # just in case the controller restarts timer!!!
+                state_w(3)  # whey hey, tuned in!!
         elif near > 90:
             send_packet('301')
 
