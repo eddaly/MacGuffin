@@ -441,9 +441,10 @@ def tuning_lock():
         near = scale / p_tune * 100
         gauge.start(min(near, 100))  # tuning indication, maybe sensitivity needs changing
         if near > 97:  # arbitary? and fine tuning issues 33 buckets
-            send_packet('302')
             if state_r() == 2: # just in case the controller restarts timer!!!
+                send_packet('302')
                 #state_w(3)  # whey hey, tuned in!!
+                debug('Yup!!!!!!!!!!!!!!!!!!')
                 return True
         elif near > 90:
             send_packet('301')
