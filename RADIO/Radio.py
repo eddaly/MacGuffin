@@ -136,7 +136,7 @@ def handle_event(event, touch):
 
 def do_touch():
     for i in range(4):
-        if (touch_grid[i][4] == True) and (time.time() - touch_grid[i][3] > 0.5):
+        if (touch_grid[i][4] == True) and (time.time() - touch_grid[i][3] > 0.3): #harder
             touch_grid[i] = [-1, -1, -1, -1, False]  # reset
     set_touch()
     return correctly_keyed
@@ -448,7 +448,7 @@ def tuning_lock():
     offset = float(abs(pot - tune_centre)) # offset
     near = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-    gauge.start(int(near / 1.5))  # tuning indication, maybe sensitivity needs changing 1.3
+    gauge.start(int(near / 2))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         if state_r() == 2: # just in case the controller restarts timer!!!
             send_packet('302')
@@ -464,8 +464,13 @@ def tuning_lock():
 def tunning_change():
     global tune_centre
     global pot
-    while abs(pot - tune_centre) < 300:
-        tune_centre = random.randrange(1024)
+    random.seed(a=pot)
+    tmp = random.randrange(370)
+    if pot - 512 > 0:
+        tune_centre = tmp
+    else:
+        tune_centre = 1024 - tmp
+
 
 tunning_sounds = ['/play1', '/play2']
 
