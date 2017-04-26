@@ -278,7 +278,7 @@ w = FullscreenWindow()  # a window
 # client.connect(('127.0.0.1', 4559))
 
 GPIO.setup(gaugePin, GPIO.OUT)
-gauge = GPIO.PWM(gaugePin, 50)  # default of no signal
+gauge = GPIO.PWM(gaugePin, 237)  # default of no signal
 
 # Import SPI library (for hardware SPI) and MCP3008 library. ADC
 
@@ -448,7 +448,7 @@ def tuning_lock():
     offset = float(abs(pot - tune_centre)) # offset
     near = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-    gauge.start(int(near / 1.3))  # tuning indication, maybe sensitivity needs changing 1.3
+    gauge.start(int(near / 1.5))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         if state_r() == 2: # just in case the controller restarts timer!!!
             send_packet('302')
