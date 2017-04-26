@@ -467,7 +467,7 @@ def tunning_change():
     random.seed(a=pot)
     tmp = random.randrange(370)
     non_terminal()
-    guage.start(0)
+    gauge.start(0)
     debug('tmp: ' + str(tmp) + ' pot: ' + str(pot))
     if pot - 512 > 0:
         tune_centre = tmp
