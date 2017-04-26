@@ -343,8 +343,15 @@ def receive_packet():
 # THE MAIN RESET CONTROL FUNCTIONS
 # ========================================
 
+#BCM of PIN 7
+RESET = 4
+GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
+
 def reset_all():
     state_w(0)  # indicate reset
+    GPIO.output(RESET, GPIO.LOW)
+    time.sleep(0.5) # wait active low reset
+    GPIO.output(RESET, GPIO.HIGH)
     debug('reset all - wawiting to acquire lock')
     debug('reset all - got the lock... continue processing')
     gauge.start(0)  # start PWM
