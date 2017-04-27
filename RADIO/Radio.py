@@ -456,7 +456,7 @@ def tuning_lock():
     else: # a bit of var reuse
         if dnear < 0.000001:
             dnear = pot # initializer
-        dnear = 0.75 * dnear + 0.25 * pot
+        dnear = 0.5 * dnear + 0.5 * pot
         potin = dnear
     offset = float(abs(potin - tune_centre)) # offset
     nearnew = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
@@ -470,7 +470,7 @@ def tuning_lock():
         near = max(0.6 * near + 0.4 * nearnew - 2.0 * dnear, 0.0) # some fine tuning slow inducement
         debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
     else:
-        near = 0.75 * near + 0.25 * nearnew # some fine tuning slow inducement
+        near = 0.5 * near + 0.5 * nearnew # some fine tuning slow inducement
         debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
