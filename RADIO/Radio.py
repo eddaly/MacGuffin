@@ -456,7 +456,7 @@ def tuning_lock():
     else: # a bit of var reuse
         if dnear < 0.000001:
             dnear = pot # initializer
-        dnear = 0.5 * dnear + 0.5 * pot
+        dnear = 0.25 * dnear + 0.75 * pot
         potin = dnear
     offset = float(abs(potin - tune_centre)) # offset
     nearnew = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
