@@ -458,7 +458,7 @@ def tuning_lock():
     #debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
     dnear = 0.8 * dnear + 0.2 * dnearnew
     #debug('tunning dn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-    near = max(0.8 * near + 0.2 * nearnew - 8.0 * dnear, 0) # some fine tuning slow inducement
+    near = max(0.8 * near + 0.2 * nearnew - 8.0 * dnear, 0.0) # some fine tuning slow inducement
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
