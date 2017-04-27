@@ -13,6 +13,7 @@ byte size = sizeof(buffer);
 const int signalPin = 2; //output pin on which signal is communicated.
 const int readerID = 1; //output pin will activate when reader ID matches tag ID.
 const int shorter = 13; //pin D13 is the shorting pin was CLK!!!!!!!!!! (sort to ground to activate)
+const int shorter2 = 9;
 /* pin D9 is also an option for RST on short to ground in circuit utility */
 
 
@@ -26,6 +27,7 @@ void setup()
 { 
   pinMode(signalPin, OUTPUT);
   pinMode(shorter, INPUT_PULLUP);  // NOT ACTIVATED DEFAULT
+  pinMode(shorter2, INPUT_PULLUP);  // NOT ACTIVATED DEFAULT
   digitalWrite(signalPin, 0);
 
   pinMode(11, OUTPUT);
