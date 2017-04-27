@@ -27,6 +27,7 @@ import random
 STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 SIMULATE = True
 TX_UDP_MANY = 3 # UDP reliability retransmit number of copies
+CHAOS_GUAGE = False
 
 # ============================================
 # ============================================
@@ -450,16 +451,27 @@ def tuning_lock():
     non_terminal()
     p_tune = 1024.0 * percent_tune / 100 # yep percent!
     #debug('pt: ' + str(p_tune))
-    offset = float(abs(pot - tune_centre)) # offset
+    if CHAOS_GUAGE:
+        potin = pot
+    else: # a bit of var reuse
+        if dnear < 0.000001:
+            dnear = pot # initializer
+        dnear = 0.75 * dnear + 0.25 * pot
+        potin = dnear
+    offset = float(abs(potin - tune_centre)) # offset
     nearnew = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
-    #debug('tunning nn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-    #continuous approximation running average filter
-    dnearnew = abs(nearnew - near) / 50.0 # speed scaling
-    #debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) )
-    dnear = 0.2 * dnear + 0.2 * dnearnew # damping first constant
-    #debug('tunning dn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-    near = max(0.6 * near + 0.4 * nearnew - 2.0 * dnear, 0.0) # some fine tuning slow inducement
-    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
+    if CHAOS_GUAGE:
+        #debug('tunning nn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
+        #continuous approximation running average filter
+        dnearnew = abs(nearnew - near) / 50.0 # speed scaling
+        #debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) )
+        dnear = 0.2 * dnear + 0.2 * dnearnew # damping first constant
+        #debug('tunning dn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
+        near = max(0.6 * near + 0.4 * nearnew - 2.0 * dnear, 0.0) # some fine tuning slow inducement
+        debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
+    else:
+        near = 0.75 * near + 0.25 * nearnew # some fine tuning slow inducement
+        debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
         send_packet('302')
