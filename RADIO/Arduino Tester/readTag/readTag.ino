@@ -21,7 +21,8 @@ byte trailerBlock = 3;
 void setup() 
 { 
   CLKPR = (1<<CLKPCE);
-  CLKPR = B00000011; //2 MHZ -> /128 SPI is 12.5 kHz approx !!
+  CLKPR = B00000001; //4 MHZ -> /128 SPI is 25 kHz approx !! -- ABOUT 4 SCANS PER SECOND WORKS
+  //BUT STILL NEED NEW CABLES WITH GOOD DIAELECTRIC SPACING
   pinMode(signalPin, OUTPUT);
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus
