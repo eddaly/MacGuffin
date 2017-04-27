@@ -28,6 +28,7 @@ STARTER_STATE = 4  # the initial state after reset for the ease of build does va
 SIMULATE = True
 TX_UDP_MANY = 3 # UDP reliability retransmit number of copies
 CHAOS_GUAGE = False
+POT_DAMP = False
 
 # ============================================
 # ============================================
@@ -280,7 +281,7 @@ w = FullscreenWindow()  # a window
 # client.connect(('127.0.0.1', 4559))
 
 GPIO.setup(gaugePin, GPIO.OUT)
-gauge = GPIO.PWM(gaugePin, 100)  # default of no signal
+gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
 
 # Import SPI library (for hardware SPI) and MCP3008 library. ADC
 
@@ -454,10 +455,16 @@ def tuning_lock():
     if CHAOS_GUAGE:
         potin = pot
     else: # a bit of var reuse
-        if dnear < 0.000001:
-            dnear = pot # initializer
-        dnear = 0.25 * dnear + 0.75 * pot
-        potin = dnear
+        if POT_DAMP:
+            if dnear < 0.000001:
+                dnear = pot # initializer
+            dnear = 0.1 * dnear + 0.9 * pot
+            # ======================================
+            # The twist dial fast tunning ....
+            # ======================================
+            potin = dnear
+        else:
+            potin = pot # does a a bit of a fast twist capture effect without some locking
     offset = float(abs(potin - tune_centre)) # offset
     nearnew = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
     if CHAOS_GUAGE:
@@ -473,6 +480,10 @@ def tuning_lock():
         near = 0.5 * near + 0.5 * nearnew # some fine tuning slow inducement
         debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
+    if abs(potin - pot) > 1.0:
+        # escape from routine to prevent fast tune capture effect
+        send_packet('300')
+        return False
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
         send_packet('302')
         #state_w(3)  # whey hey, tuned in!!
