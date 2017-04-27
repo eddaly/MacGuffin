@@ -455,11 +455,11 @@ def tuning_lock():
     #debug('tunning nn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
     #continuous approximation running average filter
     dnearnew = abs(nearnew - near)
-    #debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
+    #debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) )
     dnear = 0.8 * dnear + 0.2 * dnearnew
     #debug('tunning dn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-    near = max(0.8 * near + 0.2 * nearnew - 8.0 * dnear, 0.0) # some fine tuning slow inducement
-    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
+    near = max(0.6 * near + 0.4 * nearnew - 4.0 * dnear, 0.0) # some fine tuning slow inducement
+    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
         send_packet('302')
