@@ -451,7 +451,7 @@ def tuning_lock():
     offset = float(abs(pot - tune_centre)) # offset
     near = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
-    gauge.start(int(near / 1.75))  # tuning indication, maybe sensitivity needs changing 1.3
+    gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         send_packet('302')
         #state_w(3)  # whey hey, tuned in!!
