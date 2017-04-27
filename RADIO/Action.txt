@@ -1,3 +1,14 @@
+
+Fine tune meter range.
+Duinos programmed, 8 scans a second, cable replacement underway (might be duff RFID board? Sam?).
+Set SIMULATE = False.
+Acitate codes to find symbols to press. Set the_key = [ z, z, z, z ].
+z is symbol located on display at (x + 7 * y). Zero based for top left.
+Show controller UDP connection and response to message repeats?
+Set TX_UDP_MANY to greater than or equal to 1. 1 is no repeats, but packet loss of UDP is subject to noise in TX to RX.
+Full sequence testing.
+
+=============================== END OF 27/4/2017 ====================================
 RFID tests? Have duinos been flashed, code specific sketches? RFID and blue tack?
 The stage controller being UDP, is there expected to be routing packet loss?
 The meter should not be a problem in general operation, except with kids with curious magnets or such.

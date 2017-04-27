@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Radio.py
+Comment=The Radio (in /etc/xdg/autostart
+NoDisplay=false
+Exec=python /home/pi/radioRepo/RADIO/Radio.py
