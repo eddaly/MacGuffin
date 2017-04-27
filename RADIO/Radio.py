@@ -288,8 +288,8 @@ mcp = Adafruit_MCP3008.MCP3008(clk=CLK, cs=CS, miso=MISO, mosi=MOSI)
 percent_tune = 20
 tune_centre = 711  # MUST CHANGE
 pot = 0  # A default, must set before check to acquire position
-near = 0  # A default for the near tuning 100 is spot on 0 is far away
-dnear = 0 # smooth needle
+near = 0.0  # A default for the near tuning 100 is spot on 0 is far away
+dnear = 0.0 # smooth needle
 
 state = 0  # set initial state to RESET, use STARTER_STATE to control entry ^^^^^^^ (see above)
 
@@ -458,15 +458,15 @@ def tuning_lock():
     #debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
     dnear = 0.8 * dnear + 0.2 * dnearnew
     #debug('tunning dn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-    near = max(0.8 * near + 0.2 * nearnew - 8 * dnear, 0) # some fine tuning slow inducement
+    near = max(0.8 * near + 0.2 * nearnew - 8.0 * dnear, 0) # some fine tuning slow inducement
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
-    if near > 97:  # arbitary? and fine tuning issues 33 buckets
+    if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
         send_packet('302')
         #state_w(3)  # whey hey, tuned in!!
         debug('Yup!!!!!!!!!!!!!!!!!!')
         return True
-    elif near > 90:
+    elif near > 90.0:
         send_packet('301')
     else:
         send_packet('300')
