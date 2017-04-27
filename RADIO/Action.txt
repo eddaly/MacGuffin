@@ -1,5 +1,5 @@
 
-Fine tune meter range.
+Fine tune meter range. --- DONE
 Duinos programmed, 8 scans a second, cable replacement underway (might be duff RFID board? Sam?).
 Set SIMULATE = False.
 Acitate codes to find symbols to press. Set the_key = [ z, z, z, z ].

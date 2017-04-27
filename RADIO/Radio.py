@@ -279,7 +279,7 @@ w = FullscreenWindow()  # a window
 # client.connect(('127.0.0.1', 4559))
 
 GPIO.setup(gaugePin, GPIO.OUT)
-gauge = GPIO.PWM(gaugePin, 237)  # default of no signal
+gauge = GPIO.PWM(gaugePin, 100)  # default of no signal
 
 # Import SPI library (for hardware SPI) and MCP3008 library. ADC
 
@@ -289,6 +289,7 @@ percent_tune = 20
 tune_centre = 711  # MUST CHANGE
 pot = 0  # A default, must set before check to acquire position
 near = 0  # A default for the near tuning 100 is spot on 0 is far away
+dnear = 0 # smooth needle
 
 state = 0  # set initial state to RESET, use STARTER_STATE to control entry ^^^^^^^ (see above)
 
@@ -445,12 +446,17 @@ def tuning_lock():
     global percent_tune
     global pot
     global near
+    global dnear
     non_terminal()
     p_tune = 1024.0 * percent_tune / 100 # yep percent!
     #debug('pt: ' + str(p_tune))
     offset = float(abs(pot - tune_centre)) # offset
-    near = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
-    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
+    nearnew = (1.0 - min(offset / p_tune, 1.0)) * 100.0 # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
+    debug('tunning: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
+    #continuous approximation running average filter
+    dnearnew = nearnew - near
+    dnear = 0.8 * dnear + 0.2 * dnearnew
+    near = 0.8 * near + 0.2 * nearnew - 8 * abs(dnear) # some fine tuning slow inducement
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
         send_packet('302')
