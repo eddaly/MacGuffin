@@ -26,6 +26,7 @@ import random
 
 STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 SIMULATE = True
+TX_UDP_MANY = 3 # UDP reliability retransmit number of copies
 
 # ============================================
 # ============================================
@@ -43,7 +44,7 @@ CS = 18
 # BCM MODE
 gaugePin = 19  # set pin for tunning gauge
 
-rfidPins = [25, 8, 7, 16, 20]  # change??!!
+rfidPins = [25, 8, 7, 16, 20]  # Yep, confirmed
 
 
 # ===================================
@@ -341,7 +342,9 @@ atexit.register(clean_up)
 def send_packet(body):
     global l
     l.acquire()
-    send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
+    for i in range(TX_UDP_MANY):
+        send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
+        time.sleep(0.1) # slight spread of packets for burst noise spectrum avoidance
     l.release()
 
 
@@ -397,7 +400,7 @@ def reset_loop():
 def heartbeat_loop():
     while True:
         send_packet("I am alive!")
-        debug('isAlive:' + datetime.datetime.now().strftime('%G-%b-%d %I:%M%p'))
+        debug('isAlive: ' + datetime.datetime.now().strftime('%G-%b-%d %I:%M %p'))
         time.sleep(10)
 
 
@@ -450,11 +453,10 @@ def tuning_lock():
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))
     gauge.start(int(near / 1.75))  # tuning indication, maybe sensitivity needs changing 1.3
     if near > 97:  # arbitary? and fine tuning issues 33 buckets
-        if state_r() == 2: # just in case the controller restarts timer!!!
-            send_packet('302')
-            #state_w(3)  # whey hey, tuned in!!
-            debug('Yup!!!!!!!!!!!!!!!!!!')
-            return True
+        send_packet('302')
+        #state_w(3)  # whey hey, tuned in!!
+        debug('Yup!!!!!!!!!!!!!!!!!!')
+        return True
     elif near > 90:
         send_packet('301')
     else:
