@@ -480,11 +480,11 @@ def tuning_lock():
         near = 0.5 * near + 0.5 * nearnew # some fine tuning slow inducement
         debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
-    if abs(potin - pot) > 1.0:
-        # escape from routine to prevent fast tune capture effect
-        send_packet('300')
-        return False
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
+        if abs(potin - pot) > 1.0:
+            # escape from routine to prevent fast tune capture effect
+            send_packet('301')
+            return False
         send_packet('302')
         #state_w(3)  # whey hey, tuned in!!
         debug('Yup!!!!!!!!!!!!!!!!!!')
