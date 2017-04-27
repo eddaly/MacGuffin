@@ -1,7 +1,7 @@
 
 Fine tune meter range. --- DONE
 Duinos programmed, 8 scans a second, cable replacement underway (might be duff RFID board? Sam?).
-Set SIMULATE = False.
+Set SIMULATE = False. --- DONE PASSED RFID TEST, NEED ID NUMBER REPROGRAM DUINOS
 Acitate codes to find symbols to press. Set the_key = [ z, z, z, z ].
 z is symbol located on display at (x + 7 * y). Zero based for top left.
 Show controller UDP connection and response to message repeats?
