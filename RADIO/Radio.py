@@ -105,7 +105,7 @@ ts = ft5406.Touchscreen()
 # 7 by 4 icon division
 
 # 0 to 27 for the valid 4 key combination
-the_key = [0, 1, 2, 3]  # a list of the active combination
+the_key = [10, 16, 27, 1]  # a list of the active combination
 
 visible_select = [False, False, False, False, False, False, False,
                   False, False, False, False, False, False, False,

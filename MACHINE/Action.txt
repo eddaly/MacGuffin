@@ -1,0 +1,3 @@
+Created initial commit from RADIO. Lots to delete. No GUI, basic boot rc.local.
+The RFID has bee programmed as number 6.
+
