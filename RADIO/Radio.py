@@ -322,11 +322,11 @@ def state_w(num):
 # SOCKET TOOLS
 # ====================================
 SEND_UDP_IP = "10.100.1.100"
-SEND_UDP_PORT = 5001
+SEND_UDP_PORT = 5000
 send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 RECV_UDP_IP = "0.0.0.0"
-RECV_UDP_PORT = 6000
+RECV_UDP_PORT = 5001
 
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
