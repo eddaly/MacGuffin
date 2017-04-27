@@ -15,10 +15,10 @@ height = 480
 width = 800
 off = 200
 delay = 1
-debug = 1
+debug = 0
 
 # First set up the figure, the axis, and the plot element we want to animate
-back = image.imread('OSC_backgorund.png')
+back = image.imread('/home/pi/MacGuffin/OSCILLOSCOPE/OSC_backgorund.png')
 
 # set up the figure and the axis, and the plot element we want to animate
 plt.rcParams['toolbar'] = 'None'
