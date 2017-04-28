@@ -2,8 +2,8 @@
 Fine tune meter range. --- DONE
 Duinos programmed, 8 scans a second, cable replacement underway (might be duff RFID board? Sam?).
 Set SIMULATE = False. --- DONE PASSED RFID TEST, NEED ID NUMBER REPROGRAM DUINOS
-Acitate codes to find symbols to press. Set the_key = [ z, z, z, z ].
-z is symbol located on display at (x + 7 * y). Zero based for top left.
+Acitate codes to find symbols to press. Set the_key = [ z, z, z, z ]. --- DONE
+z is symbol located on display at (x + 7 * y). Zero based for top left. --- DONE
 Show controller UDP connection and response to message repeats?
 Set TX_UDP_MANY to greater than or equal to 1. 1 is no repeats, but packet loss of UDP is subject to noise in TX to RX.
 Full sequence testing.
