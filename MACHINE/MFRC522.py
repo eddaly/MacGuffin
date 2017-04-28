@@ -7,6 +7,11 @@ import RPi.GPIO as GPIO
 import spi
 import signal
 import time
+import os
+
+def debug(show):
+    # print to pts on debug console
+    os.system('echo "' + show + '" > /dev/pts/0')
 
 
 class MFRC522:
@@ -215,7 +220,7 @@ class MFRC522:
 
         return (status, backData, backLen)
 
-    def MFRC522_Request(self, reqMode):
+    def MFRC522_Request(self, reqMode): # called first
         status = None
         backBits = None
         TagType = []
@@ -224,6 +229,8 @@ class MFRC522:
 
         TagType.append(reqMode);
         (status, backData, backBits) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, TagType)
+
+        debug('stat: ' + str(status) + ' bd: ' + str(backData) + ' bb: ' + str(backBits))
 
         if ((status != self.MI_OK) | (backBits != 0x10)):
             status = self.MI_ERR
