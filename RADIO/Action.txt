@@ -1,0 +1,105 @@
+
+Fine tune meter range. --- DONE
+Duinos programmed, 8 scans a second, cable replacement underway (might be duff RFID board? Sam?).
+Set SIMULATE = False. --- DONE PASSED RFID TEST, NEED ID NUMBER REPROGRAM DUINOS
+Acitate codes to find symbols to press. Set the_key = [ z, z, z, z ]. --- DONE
+z is symbol located on display at (x + 7 * y). Zero based for top left. --- DONE
+Show controller UDP connection and response to message repeats?
+Set TX_UDP_MANY to greater than or equal to 1. 1 is no repeats, but packet loss of UDP is subject to noise in TX to RX.
+Full sequence testing.
+
+=============================== END OF 27/4/2017 ====================================
+RFID tests? Have duinos been flashed, code specific sketches? RFID and blue tack?
+The stage controller being UDP, is there expected to be routing packet loss?
+The meter should not be a problem in general operation, except with kids with curious magnets or such.
+
+
+Got final pin allocation through process of elimination. There exists a "effect" of off tuning half way through a
+message. Query? The code has not been tested in this almost complete state.
+
+Awaiting final pin allocation for rfids. Needs board circuits and perhaps arduino code.
+A few minor issues with range clarification on radio success and key rollover timer.
+
+
+
+The touch screen is now working. There needs to be some fine tuning of the delays for key presses, and perhaps more than
+a four key buffer. Proof of concept ok. Now onto the very simple RFID scan problem.
+
+
+The removal of button borders seems almost impossible. changing the background colour to close match best option.
+
+Regards the electronics of the "meter" the pi pin is connected through a resistor to limit current which is good,
+but the ESD protection on the pi is designed for capacitive discharge. The coil in the meter is an inductor, and has
+a ferromagnetic core, hence high inductance. The discharge characteristic is like such to eventually stress the ESD
+protection and it would be a likely failure point. I suggest two series zeners at about 2.5v rating about 1W.
+
+The locking is now done correctly. Maybe a moot point until a regression bug on update to 64 bit processing or such.
+
+The ft5406 module needed an edit to import and use Queue instead of queue. It is installed on the Pi in the RADIO ONLY!
+DIRECTORY: ~/multitouch/library       # this likely needs cloning and so I'll copy it ... with the edits for python 2
+
+
+
+SSH is set up, a new password needs issuing for security reasons.
+The general outline is done. The specifics of the radio sound and how many if any?
+TEST PLAN:
+==========
+All modules which pip-ed are pip-ed
+There are likely some syntax issues
+The placing of a background alpha blend is an issue with .jpg files. (.png?)
+There is likely a switch needing for removing the fullscreen border (if any)
+There is some issue in touch to screen coordination. The offsets will have to be tested and back filled.
+
+
+
+State machine enumeration
+The calibration of the LCD is missing the top of the screen. I think it's capacitive to the brass fittings.
+
+
+
+The following https://github.com/pimoroni/python-multitouch driver is beta but allows the following example code
+[code]
+import ft5406
+ts = ft5406.Touchscreen()
+
+while True:
+    for touch in ts.poll():
+        print(touch.slot, touch.id, touch.valid, touch.x, touch.y)
+
+[/code]
+
+tkinter looks the best option for GUI fullscreen
+
+[code]
+import sys
+if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
+    from Tkinter import *
+else:
+    from tkinter import *
+
+
+class Fullscreen_Window:
+
+    def __init__(self):
+        self.tk = Tk()
+        self.tk.attributes('-zoomed', True)  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
+        self.frame = Frame(self.tk)
+        self.frame.pack()
+        self.state = False
+        self.tk.bind("<F11>", self.toggle_fullscreen)
+        self.tk.bind("<Escape>", self.end_fullscreen)
+
+    def toggle_fullscreen(self, event=None):
+        self.state = not self.state  # Just toggling the boolean
+        self.tk.attributes("-fullscreen", self.state)
+        return "break"
+
+    def end_fullscreen(self, event=None):
+        self.state = False
+        self.tk.attributes("-fullscreen", False)
+        return "break"
+
+if __name__ == '__main__':
+    w = Fullscreen_Window()
+    w.tk.mainloop()
+[/code]

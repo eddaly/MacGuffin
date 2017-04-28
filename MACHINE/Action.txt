@@ -1,0 +1,22 @@
+Found library for Pi reading of basic ID information.
+
+Created initial commit from RADIO. Lots to delete. No GUI, basic boot rc.local.
+The RFID has bee programmed as number 6. (needed?) --- NOPE the Pi is the RFID master.
+
+DUINO PINS
+==========
+A0 -> RES to 5V and MID socket, MID socket other to GND (=> MID socket is POT to GND?)
+D2 -> BCM 18 PWM0 (current duino flashed is output) WARN!!! Pi set as input on boot so ok for now)
+
+OTHER (lower) 2 PIN socket is POWER to DUINO
+
+8 PIN (upper)
+=============
+1 -> 3V3 (left most, key top)
+2 -> (pin 22) BCM 25
+3 -> (pin 9) GND
+4 -> VOID
+5 -> (pin 21) BCM 9 (MISO)
+6 -> (pin 19) BCM 10 (MOSI)
+7 -> (pin 23) BCM 11 (SCLK)
+8 -> (pin 24) BCM 8 (CE0) -> Technically SDA on RFID reader
