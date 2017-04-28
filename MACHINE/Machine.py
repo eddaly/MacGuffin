@@ -64,6 +64,7 @@ def rfid():
 
         # Scan for cards
         (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+        debug(str(status) + " : " + str(TagType))
 
         # If a card is found
         if status == MIFAREReader.MI_OK:
