@@ -54,7 +54,7 @@ id_code = -1
 timeout_rfid = 100
 current_time = 0
 
-ser = serial.Serial('/dev/ttyACM0', 9600) # maybe change after device scan
+ser = serial.Serial('/dev/ttyUSB0', 9600) # maybe change after device scan
 
 def rfid():
     global id_code
