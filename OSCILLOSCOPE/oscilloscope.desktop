@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Oscilloscope
-Comment=The Oscilloscope (in /etc/xdg/autostart
-NoDisplay=false
-Exec=/bin/bash /home/pi/MacGuffin/OSCILLOSCOPE/startgame.sh
