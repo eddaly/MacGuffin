@@ -1,4 +1,4 @@
-# Mc Guffin Theremin 
+# Mac Guffin Theremin 
 # 
 # Author: A.T. seeper
 
@@ -46,28 +46,25 @@ low_t = 50
 high_t = 70
 pot = 50
 old_pot = 50
-delay = 1 #set turn speed delay here
-
 wheel_pack = 0
-
-state = 4 #set initial state, should be 0 at showtime
-print 'state:', state
-
-
 turn_speed = 0
-
 pitch=840
 old_pitch=840
 f=0
-t=10
+old_f = 30
+t_message = "200"
+old_t_message = "202"
+
+t=10 #starting pressure level
+delay = 0.5 #set turn speed delay here
+state = 6 #set initial state, should be 0 at showtime
 
 SEND_UDP_IP = "10.100.1.100"
 SEND_UDP_PORT = 5001
+RECV_UDP_IP = "10.100.1.22"
+RECV_UDP_PORT = 5000
+
 send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-RECV_UDP_IP = "0.0.0.0"
-RECV_UDP_PORT = 6000
-
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
@@ -78,40 +75,58 @@ def send_packet(body):
 def receive_packet():
     print 'r_packet'
     data, addr = recv_sock.recvfrom(1024)
+    print 'r_packet:',data
     return data
 
 def reset_all():
-    print 'reset all - wawiting to acquire lock'
+    print 'reset all'
     global state
+    global wheel_pack
+    global t
+    global t_message
+    global old_t_message
+    global old_f
     l = threading.Lock()
     l.acquire
-    print 'reset all - got the lock... continue processing'
+    # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
-    state = 0
+    state = 5
     wheel_pack = 0
-    # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
+    t = 10
+    t_message = "200"
+    old_t_message = "202"
+    old_f = 440
+    s = 100
+    # ////////////////////////////////////////////////////
     
     l.release
-    print 'all reset - releasing the lock'
+    print 'all reset'
     
 def start_game():
     global state
+    print 'start game'
     l = threading.Lock()
     l.acquire
-    state = 1
-    wheel_pack = 0
+    state = 4
+
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
+    ## actually this should probably go in reset_all(), start game shoudl never be called from the show controller without reset_all having already been called.  
+    
+    
+    # ////////////////////////////////////////////////////
     l.release
 
 def reset_loop():
+    
     while True:
-        result = receive_packet()
         print 'waiting for interupt'
+        result = receive_packet()
+        print 'received interupt'
         
-        if result == "101":
+        if result == "reset":
             reset_all()
-        if result == "102":
+        if result == "start":
             start_game()
         
         time.sleep(0.01)
@@ -121,10 +136,10 @@ def heartbeat_loop():
     while True:
         l = threading.Lock()
         l.acquire
-        send_packet("I am alive!")
-        print 'isAlive'
+        send_packet("H")
+        print 'H'
         l.release
-        time.sleep(10)
+        time.sleep(5)
     
 
 def initialise():
@@ -147,10 +162,12 @@ def lock(low_t, high_t):
     if pot >= low_t and pot <= high_t:
         wheel_pack += 1
         state = 1
+        send_packet("101")
         l.release
     else:
         wheel_pack = 0
         state = 4
+        send_packet("100")
         l.release
         
         
@@ -214,10 +231,13 @@ def clear():
 def theremin():
     GPIO.output(ledPin,GPIO.HIGH)
     global t
-    global f
+    global s
     global pitch
     global old_pitch
     global state
+    global t_message
+    global old_t_message
+    global old_f
     l = threading.Lock()
     ser.flushInput()
     msg = OSC.OSCMessage()
@@ -225,35 +245,40 @@ def theremin():
     play = OSC.OSCMessage()
     play.setAddress("/play")
     
+    old_f = s
     s = int(ser.readline())
     pitch = s
     print 't:',t
     #gauge.ChangeDutyCycle(t)
     l.acquire       
-    if s == 100:
-        f = f + 1
-        print("OOR")
-    
-    elif s > 109 and s < 881:
+
+    if s > 109 and s < 881:
         f = 0
         if pitch != old_pitch:
             msg.insert(0,pitch)
             client.send(msg)
      
-    if f == 0 :
+    if s != 100 and old_f == 100 :
         play.insert(0,1)
         client.send(play)
-    if f > 30 :
+    if s == 100 and old_f != 100 :
         t = 0
         play.insert(0,0)
         client.send(play)
-        
+    
+    
+    
     if pitch > 420 and pitch < 460:
         t = t + 1
     elif pitch == 100:
         pass
     else:
         t = t - 1
+    
+    if t > 60:
+        t_message = "201"
+    if t < 61:
+        t_message = "200"
     
     if t > 90:
         t = 90
@@ -268,15 +293,21 @@ def theremin():
         play.insert(0,0)
         client.send(play)
         state = 6
+        t_message = "202"
+        
+    if t_message != old_t_message:
+        send_packet(t_message)
+        
+    old_t_message = t_message
     
     l.release
-    time.sleep(0.01)
+    time.sleep(0.0048)
 
 
 def idle():
     
     pot = mcp.read_adc(0)
-    print 'pot:',pot
+    #print 'pot:',pot
     time.sleep(0.5)    
 
 
@@ -298,7 +329,7 @@ def main():
         global wheel_pack
         print 'state:',state
         print 'wheel_pack:', wheel_pack
-        time.sleep(0.001)
+        time.sleep(0.0001)
         if state == 0:
             idle()
         if state == 1:
@@ -306,6 +337,7 @@ def main():
             old_pot = pot
             if wheel_pack == 4:
                 state = 5
+                send_packet("102")
             else:
                 waiting()
         if state == 2:
