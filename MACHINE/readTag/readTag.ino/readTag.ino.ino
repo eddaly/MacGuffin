@@ -20,10 +20,10 @@ byte trailerBlock = 3;
 
 void setup() 
 { 
-  CLKPR = (1<<CLKPCE);
-  CLKPR = B00000001; //4 MHZ -> /64 SPI is 50 kHz approx !! -- ABOUT 8 SCANS PER SECOND WORKS
+  //CLKPR = (1<<CLKPCE);
+  //CLKPR = B00000001; //4 MHZ -> /64 SPI is 50 kHz approx !! -- ABOUT 8 SCANS PER SECOND WORKS
   //BUT STILL NEED NEW CABLES WITH GOOD DIAELECTRIC SPACING
-  pinMode(signalPin, OUTPUT);
+  //pinMode(signalPin, OUTPUT);
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus
   mfrc522.PCD_Init(); // Init MFRC522
@@ -41,7 +41,7 @@ void loop()
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
     //digitalWrite(signalPin, LOW);
-    Serial.println("NONE");
+    //Serial.println(F("NONE"));
     return;
   }
 
@@ -54,7 +54,7 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     //digitalWrite(signalPin, LOW);
-    Serial.println("AFAIL");
+    //Serial.println(F("AFAIL"));
     //Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   }
@@ -65,13 +65,13 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     //digitalWrite(signalPin, LOW);
-    Serial.println("RFAIL");
+    //Serial.println(F("RFAIL"));
     //Serial.println(mfrc522.GetStatusCodeName(status));
     mfrc522.PCD_Init();
     return;
   }
-  int tagID = buffer[0];
-  Serial.println(tagID);
+  byte tagID = buffer[0];
+  Serial.println(tagID, DEC);
 
   /* if(tagID == readerID)
   {
