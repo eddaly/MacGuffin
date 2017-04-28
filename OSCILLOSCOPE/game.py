@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import OSC
 import random
 import numpy as np
 from matplotlib import pyplot as plt
@@ -10,19 +11,32 @@ import time
 import Adafruit_MCP3008
 import os
 import socket
+import pyaudio
+
+debug = 0
 
 height = 480
 width = 800
 off = 200
 delay = 1
-debug = 0
+min_dial_range = 56
+max_dial_range = 57
+target_pitch = 440
+pitch_mult = 2.0
+pitch = target_pitch-(pitch_mult*min_dial_range)
+max_pot_value = 1023.0
+min_pot_value = 5.0 # the default pot value so that the wave is always moving
+
+# connect to pd
+client = OSC.OSCClient()
+client.connect(('127.0.0.1', 4559))
 
 # First set up the figure, the axis, and the plot element we want to animate
 back = image.imread('/home/pi/MacGuffin/OSCILLOSCOPE/OSC_backgorund.png')
 
 # set up the figure and the axis, and the plot element we want to animate
 plt.rcParams['toolbar'] = 'None'
-fig = plt.figure()
+fig = plt.figure(facecolor="black", edgecolor="black", linewidth=0.0)
 ax = plt.gca()
 
 # create data and the plot
@@ -40,7 +54,7 @@ ax.set_frame_on(False)
 fig.tight_layout(pad=0)
 
 # the state variable
-state = 0;
+state = -1;
 
 # Dial variables
 dial_value = 2;
@@ -76,10 +90,22 @@ def receive_packet():
 
 def reset_all():
     global state
-    state = -1;
+    global dial_value
 
+    dial_value = 2
+    state = -1
+    msg = OSC.OSCMessage()
+    msg.setAddress("/play")
+    msg.insert(0,1)
+    client.send(msg)
+    
 def start_game():
     global state
+    global pitch
+    msg = OSC.OSCMessage()
+    msg.setAddress("/play")
+    msg.insert(0,pitch)
+    client.send(msg)
     state = 0
 
 def reset_loop():
@@ -107,14 +133,26 @@ def heartbeat_loop():
 def dial_thread():
     global dial_value
     global state
-    global plt
-    max_pot_value = 1023.0
-    min_pot_value = 5.0 # the default pot value so that the wave is always moving
+    global debug
+    global max_pot_value
+    global min_pot_value
+    global pitch
+    global pitch_mult
+
+    old_dial_value = dial_value
+    msg = OSC.OSCMessage()
+
     while True:
         time.sleep(delay)
         if state == 0:
             dial_value = max(100.0*(mcp.read_adc(0)/max_pot_value),min_pot_value)
-        
+            if dial_value != old_dial_value:
+                msg.clearData()
+                msg.setAddress("/play_this")
+                msg.insert(0,pitch+(pitch_mult*dial_value))
+                client.send(msg)
+            old_dial_value = dial_value
+
         if debug == 1:
             print "Dial value = ", dial_value
     
@@ -128,13 +166,19 @@ def init():
 def animate(k):
     global dial_value
     global state
+    global min_dial_range
+    global max_dial_range
+    global target_pitch
     # update the wave
-    y = (height/4) * np.sin(0.01*np.pi * (x -1* k*dial_value)) + (height/2)
+    y = (height/4) * np.sin(0.01*np.pi * (x - k*dial_value)) + (height/2)
     line.set_data(xx, y) # plot the data
-
-    if dial_value >= 56 and dial_value <= 57 and state == 0:
+    if dial_value >= min_dial_range and dial_value <= max_dial_range and state == 0:
         if debug == 1:
             print "stop!"
+        msg = OSC.OSCMessage()
+        msg.setAddress("/play_this")
+        msg.insert(0,target_pitch)
+        client.send(msg)
         state = 1
         send_packet("201")
         os.system('/usr/bin/omxplayer --win "0 0 800 480" /home/pi/MacGuffin/OSCILLOSCOPE/OSC_SCREEN_MACGUFFIN.mp4')
@@ -143,7 +187,7 @@ def animate(k):
 
 # call the animator.  blit=True means only re-draw the parts that have changed.
 anim = animation.FuncAnimation(fig, animate, init_func=init,
-			interval=1, blit=True)
+			interval=10, blit=True)
 
 # do final configuration to the figure... yes I know... this is odd this being here but for some reason it has to be :/
 mgr = plt.get_current_fig_manager()
@@ -158,6 +202,8 @@ t2.start()
 
 t3 = threading.Thread(target=heartbeat_loop)
 t3.start()
+
+reset_all()
 
 # game blocks in a loop here
 plt.show()
