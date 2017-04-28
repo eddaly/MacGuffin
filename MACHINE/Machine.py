@@ -55,7 +55,7 @@ def rfid():
     global id_code
     global current_time
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
-    while continue_reading:
+    while True:
         time.sleep(0.1)
         current_time += 1
         if current_time > timeout_rfid:
