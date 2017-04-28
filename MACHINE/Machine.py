@@ -9,20 +9,17 @@ import time
 import datetime
 
 # import serial
-import Adafruit_GPIO.SPI as SPI
-import Adafruit_MCP3008
+#import Adafruit_GPIO.SPI as SPI
+#import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import socket
 import threading
-
-import PIL.Image
-from PIL import ImageTk
-import ft5406
 
 import sys
 import os
 import atexit
 import random
+import MFRC522 # the RFID lib
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 SIMULATE = True
