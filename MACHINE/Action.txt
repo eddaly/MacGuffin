@@ -6,7 +6,7 @@ The RFID has bee programmed as number 6. (needed?) --- NOPE the Pi is the RFID m
 DUINO PINS
 ==========
 A0 -> RES to 5V and MID socket, MID socket other to GND (=> MID socket is POT to GND?)
-D2 -> BCM 18 PWM0
+D2 -> BCM 18 PWM0 (current duino flashed is output) WARN!!! Pi set as input on boot so ok for now)
 
 OTHER (lower) 2 PIN socket is POWER to DUINO
 
