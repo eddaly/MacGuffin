@@ -11,7 +11,7 @@ byte buffer[18];
 byte size = sizeof(buffer);
 
 const int signalPin = 2; //output pin on which signal is communicated.
-const int readerID = 6; //output pin will activate when reader ID matches tag ID.
+//const int readerID = 1; //output pin will activate when reader ID matches tag ID.
 
 //do not change these variables!
 byte sector = 0;
@@ -40,7 +40,8 @@ void loop()
   //identify any tags in range.
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
-    digitalWrite(signalPin, LOW);
+    //digitalWrite(signalPin, LOW);
+    Serial.println("NONE");
     return;
   }
 
@@ -52,9 +53,9 @@ void loop()
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK)
   {
-    digitalWrite(signalPin, LOW);
-    Serial.print(F("Authentication failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
+    //digitalWrite(signalPin, LOW);
+    Serial.println("AFAIL");
+    //Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   }
 
@@ -63,20 +64,20 @@ void loop()
   status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
   if (status != MFRC522::STATUS_OK)
   {
-    digitalWrite(signalPin, LOW);
-    Serial.print(F("Read operation failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
+    //digitalWrite(signalPin, LOW);
+    Serial.println("RFAIL");
+    //Serial.println(mfrc522.GetStatusCodeName(status));
     mfrc522.PCD_Init();
     return;
   }
   int tagID = buffer[0];
   Serial.println(tagID);
 
-  if(tagID == readerID)
+  /* if(tagID == readerID)
   {
     digitalWrite(signalPin, HIGH);
   }
-  else {digitalWrite(signalPin, LOW);}
+  else {digitalWrite(signalPin, LOW);} */
 
   mfrc522.PCD_Init();
 }
