@@ -1,4 +1,12 @@
-Found library for Pi reading of basic ID information.
+
+
+The install of the pi spi library is no longer required.
+
+Using serial RFAIL, AFAIL, NONE or <num> Duino script.
+
+======================================================================================
+Found library for Pi reading of basic ID information. --- IT DOES NOT WORK!!!!!
+======================================================================================
 
 Created initial commit from RADIO. Lots to delete. No GUI, basic boot rc.local.
 The RFID has bee programmed as number 6. (needed?) --- NOPE the Pi is the RFID master.

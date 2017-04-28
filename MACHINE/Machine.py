@@ -19,7 +19,10 @@ import sys
 import os
 import atexit
 import random
-import MFRC522 # the RFID lib
+
+import serial
+
+# import MFRC522 # the RFID lib
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 SIMULATE = True
@@ -46,56 +49,26 @@ CS = 8 # technically SDA (check spec on RFID reader)
 # ===================================
 
 # Create an object of the class MFRC522
-MIFAREReader = MFRC522.MFRC522()
+# MIFAREReader = MFRC522.MFRC522()
 id_code = -1
-timeout_rfid = 10
+timeout_rfid = 100
 current_time = 0
+
+ser = serial.Serial('/dev/ttyACM0', 9600) # maybe change after device scan
 
 def rfid():
     global id_code
     global current_time
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
-        time.sleep(0.1)
+        time.sleep(0.01)
         current_time += 1
         if current_time > timeout_rfid:
             current_time = 0
             id_w(-1)
 
-        # Scan for cards
-        (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
-        #debug(str(status) + " : " + str(TagType))
-
-        # If a card is found
-        if status == MIFAREReader.MI_OK:
-            debug("Card detected")
-
-        # Get the UID of the card
-        (status, uid) = MIFAREReader.MFRC522_Anticoll()
-
-        # If we have the UID, continue
-        if status == MIFAREReader.MI_OK:
-
-            # Print UID
-            debug("Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3]))
-            id_w(uid[0]) # + uid[1] + uid[2] + uid[3] # duino code implies buffer[0]
-            current_time = 0
-
-            # This is the default key for authentication
-            key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
-
-            # Select the scanned tag
-            MIFAREReader.MFRC522_SelectTag(uid)
-
-            # Authenticate
-            status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 8, key, uid)
-
-            # Check if authenticated
-            if status == MIFAREReader.MI_OK:
-                MIFAREReader.MFRC522_Read(8)
-                MIFAREReader.MFRC522_StopCrypto1()
-            else:
-                debug("Authentication error")
+        input = ser.readline()
+        debug(input)
 
 
 # ====================================
