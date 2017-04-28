@@ -45,6 +45,56 @@ CS = 8 # technically SDA (check spec on RFID reader)
 # RFID CODE
 # ===================================
 
+# Create an object of the class MFRC522
+MIFAREReader = MFRC522.MFRC522()
+id_code = -1
+timeout_rfid = 10
+current_time = 0
+
+def rfid():
+    global id_code
+    global current_time
+    # This loop keeps checking for chips. If one is near it will get the UID and authenticate
+    while continue_reading:
+        time.sleep(0.1)
+        current_time += 1
+        if current_time > timeout_rfid:
+            current_time = 0
+            id_w(-1)
+
+        # Scan for cards
+        (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+
+        # If a card is found
+        if status == MIFAREReader.MI_OK:
+            debug("Card detected")
+
+        # Get the UID of the card
+        (status, uid) = MIFAREReader.MFRC522_Anticoll()
+
+        # If we have the UID, continue
+        if status == MIFAREReader.MI_OK:
+
+            # Print UID
+            debug("Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3]))
+            id_w(uid[0]) # + uid[1] + uid[2] + uid[3] # duino code implies buffer[0]
+            current_time = 0
+
+            # This is the default key for authentication
+            key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+
+            # Select the scanned tag
+            MIFAREReader.MFRC522_SelectTag(uid)
+
+            # Authenticate
+            status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 8, key, uid)
+
+            # Check if authenticated
+            if status == MIFAREReader.MI_OK:
+                MIFAREReader.MFRC522_Read(8)
+                MIFAREReader.MFRC522_StopCrypto1()
+            else:
+                debug("Authentication error")
 
 
 # ====================================
@@ -83,6 +133,19 @@ def state_w(num):
     state = num
     l.release()
 
+# could use an extra lock but for such average performant code it's not required
+
+def id_r():
+    l.acquire()
+    tmp = id_code
+    l.release()
+    return tmp
+
+def id_w(num):
+    global id_code
+    l.acquire()
+    id_code = num
+    l.release()
 
 # ====================================
 # SOCKET TOOLS
@@ -178,9 +241,9 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    #t3 = threading.Thread(target=main_loop)
-    #t3.daemon = False
-    #t3.start()
+    t3 = threading.Thread(target=rfid)
+    t3.daemon = False
+    t3.start()
 
 # ===============================
 # IDLE WITH SOME SETUP CHECKS
