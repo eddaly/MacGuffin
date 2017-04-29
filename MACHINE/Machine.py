@@ -9,8 +9,8 @@ import time
 import datetime
 
 # import serial
-#import Adafruit_GPIO.SPI as SPI
-#import Adafruit_MCP3008
+# import Adafruit_GPIO.SPI as SPI
+# import Adafruit_MCP3008
 import RPi.GPIO as GPIO
 import socket
 import threading
@@ -25,11 +25,13 @@ import serial
 # import MFRC522 # the RFID lib
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-USES_BUTTON = False
+USES_BUTTON = True
 BUTTON_ONLY_AT_EXIT = True
-PI_BUTTON_PULL_UP = 18 # A BCM of the CS on the 3008 empty socket??????????????????
-TX_UDP_MANY = 3  # UDP reliability retransmit number of copies
-RX_PORT = 8080 # Change when allocated, but to run independent of controller is 8080
+PI_BUTTON_PULL_UP = 18  # A BCM of the CS on the 3008 empty socket??????????????????
+TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
+RX_PORT = 8080  # Change when allocated, but to run independent of controller is 8080
+
+gaugePin = 19  # set pin for gauge for use as some kind of indicator
 
 # ============================================
 # ============================================
@@ -45,15 +47,17 @@ if USES_BUTTON:
 CLK = 11
 MISO = 9
 MOSI = 10
-CS = 8 # technically SDA (check spec on RFID reader)
+CS = 8  # technically SDA (check spec on RFID reader)
 
 # BCM MODE (other definitions for pins)
+GPIO.setup(gaugePin, GPIO.OUT)
+gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
 
 # ===================================
 # RFID CODE
 # ===================================
 
-the_key = [ 0, 1, 2, 3 ]
+the_key = [0, 1, 2, 3]
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
@@ -61,9 +65,10 @@ id_code = -1
 timeout_rfid = 100
 current_time = 0
 
-ser = serial.Serial('/dev/ttyUSB0', 9600) # maybe change after device scan
+ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 
 button_dbounce = 1;
+
 
 def rfid():
     global id_code
@@ -79,40 +84,44 @@ def rfid():
 
         input = ser.readline()
         debug(input)
-        id_w(int(input)) # load in number to use next
+        id_w(int(input))  # load in number to use next
 
-        button_dbounce = GPIO.input(PI_BUTTON_PULL_UP) # uses the 0.1 sleep as a debounce
+        button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
+
 
 current_step = 0
+
 
 def check_button():
     if USES_BUTTON:
         if BUTTON_ONLY_AT_EXIT and current_step != len(the_key):
             return True
-        elif button_dbounce == 0: # BUTTON PRESSED
+        elif button_dbounce == 0:  # BUTTON PRESSED
             return True
         else:
-            return False # didn't press button
+            return False  # didn't press button
     else:
         return True
+
 
 def code():
     global current_step
     length = len(the_key)
-    if id_r() == the_key[current_step]: # a correct digit
-        while (check_button() == False) and (id_r() != -1): # check button and delay reset
+    if id_r() == the_key[current_step]:  # a correct digit
+        while (check_button() == False) and (id_r() != -1):  # check button and delay reset
             if id_r() == -1:
-                send_packet('100') # didn't click button
+                send_packet('100')  # didn't click button
                 current_step = 0
                 return False
         current_step += 1
         send_packet('10' + str(current_step))
-    elif id_r() != -1: # reset combination unless daudling
+    elif id_r() != -1:  # reset combination unless daudling
         send_packet('100')
         current_step = 0
-    if length == current_step: # yep got combination
+    if length == current_step:  # yep got combination
         return True
     return False
+
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -126,6 +135,17 @@ def debug(show):
 # MORE CODE PINS ETC.
 # ===================================
 
+# ====================================
+# A GAUGE ON THE MACHINE
+# ====================================
+
+def gauge(num):  # a 0 to 100% dial approximatly. Could be upto 10% out depending on situation
+    gauge.start(int(num / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
+
+
+def gauge_motion():
+    time.sleep(0.3)
+    gauge(random.random() * 100.0)
 
 
 # =======================================
@@ -136,6 +156,7 @@ def debug(show):
 # or aligned bus wifth integers
 l = threading.Lock()  # A master lock as some code had no lock on atomic state change
 state = 0  # set initial state to RESET, use STARTER_STATE to control entry ^^^^^^^ (see above)
+
 
 def state_r():
     l.acquire()
@@ -150,6 +171,7 @@ def state_w(num):
     state = num
     l.release()
 
+
 # could use an extra lock but for such average performant code it's not required
 
 def id_r():
@@ -158,11 +180,13 @@ def id_r():
     l.release()
     return tmp
 
+
 def id_w(num):
     global id_code
     l.acquire()
     id_code = num
     l.release()
+
 
 # ====================================
 # SOCKET TOOLS
@@ -206,15 +230,15 @@ def receive_packet():
 # ========================================
 
 # BCM of PIN 7
-#RESET = 4
-#GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
+# RESET = 4
+# GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
     state_w(0)  # indicate reset
-    #GPIO.output(RESET, GPIO.LOW)
-    #time.sleep(0.5)  # wait active low reset
-    #GPIO.output(RESET, GPIO.HIGH)
+    # GPIO.output(RESET, GPIO.LOW)
+    # time.sleep(0.5)  # wait active low reset
+    # GPIO.output(RESET, GPIO.HIGH)
     debug('reset all - wawiting to acquire lock')
     debug('reset all - got the lock... continue processing')
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
@@ -224,6 +248,7 @@ def reset_all():
 
 
 def start_game():
+    global current_step
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     current_step = 0
@@ -248,6 +273,7 @@ def heartbeat_loop():
         debug('isAlive: ' + datetime.datetime.now().strftime('%G-%b-%d %I:%M %p'))
         time.sleep(10)
 
+
 # ====================================
 # BACKGROUND RESET AND ALIVE DEAMONS
 # ====================================
@@ -262,6 +288,10 @@ def initialise():
     t3 = threading.Thread(target=rfid)
     t3.daemon = False
     t3.start()
+    t4 = threading.Thread(target=gauge_motion)
+    t4.daemon = False
+    t4.start()
+
 
 # ===============================
 # IDLE WITH SOME SETUP CHECKS
@@ -282,13 +312,14 @@ def main_loop():
             idle()  # in reset so idle and initialize display
             send_packet('200')
         if state_r() == 1:  # CODE
-            if code() == True: # run the code finder
+            if code() == True:  # run the code finder
                 state_w(2)
 
-            # more states?
+                # more states?
 
-        if state_r() == 2: # final state
+        if state_r() == 2:  # final state
             send_packet('201')
+
 
 def main():
     initialise()
