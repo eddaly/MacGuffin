@@ -26,7 +26,7 @@ import serial
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = True
-BUTTON_ONLY_AT_EXIT = True
+BUTTON_ONLY_AT_EXIT = False
 PI_BUTTON_PULL_UP = 8  # A BCM of the CS
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
