@@ -38,7 +38,8 @@ RX_PORT = 8080 # Change when allocated, but to run independent of controller is 
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+if USES_BUTTON:
+    GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # SPECIFIC SPI (Use default SPI library for Pi)
 CLK = 11
