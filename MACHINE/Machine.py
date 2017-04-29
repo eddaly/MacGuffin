@@ -145,7 +145,7 @@ def gauge(num):  # a 0 to 100% dial approximatly. Could be upto 10% out dependin
 
 def gauge_motion():
     time.sleep(0.3)
-    gauge(random.random() * 100.0)
+    gauge(random.random() * 25.0 * (current_step + 1))
 
 
 # =======================================
