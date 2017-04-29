@@ -230,15 +230,15 @@ def receive_packet():
 # ========================================
 
 # BCM of PIN 7
-# RESET = 4
-# GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
+RESET = 4
+GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
     state_w(0)  # indicate reset
-    # GPIO.output(RESET, GPIO.LOW)
-    # time.sleep(0.5)  # wait active low reset
-    # GPIO.output(RESET, GPIO.HIGH)
+    GPIO.output(RESET, GPIO.LOW)
+    time.sleep(0.5)  # wait active low reset
+    GPIO.output(RESET, GPIO.HIGH)
     debug('reset all - wawiting to acquire lock')
     debug('reset all - got the lock... continue processing')
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
