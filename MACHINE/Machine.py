@@ -27,7 +27,8 @@ import serial
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = True
 BUTTON_ONLY_AT_EXIT = True
-PI_BUTTON_PULL_UP = 18  # A BCM of the CS on the 3008 empty socket??????????????????
+PI_BUTTON_PULL_UP = 8  # A BCM of the CS
+# 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 8080  # Change when allocated, but to run independent of controller is 8080
 

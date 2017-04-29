@@ -1,4 +1,11 @@
+The pi is connected via USB0 to the duino.
+The duino script is to be reloaded and and placed in the #1 socket.
+The gauge is connected on the same socket as was per the radio (19 BCM).
+A pi pin (physical pin 24) BCM 8 was use for the push button (as no 3008 ADC is used).
+This pin must be connected to the push button, and the other button contact is 3V3 pull up.
 
+THE CODE IS BEING / HAS BEEN WROTE TO THIS ABOVE SPEC.
+===========================================================================================
 
 The install of the pi spi library is no longer required.
 
