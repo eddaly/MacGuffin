@@ -75,11 +75,11 @@ def rfid():
         else:
             j = GPIO.input(rfidPins[i])
         if j:
-            send_packet('1' + str(i) + '1')
-            debug('rnd T:' + str(i))
+            send_packet('1' + str(i + 1) + '1')
+            debug('rnd T:' + str(i + 1))
         else:
-            send_packet('1' + str(i) + '0')
-            debug('rnd F:' + str(i))
+            send_packet('1' + str(i + 1) + '0')
+            debug('rnd F:' + str(i + 1))
         flag = flag and j
     if flag:
         send_packet('201')

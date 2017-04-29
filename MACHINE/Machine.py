@@ -25,7 +25,9 @@ import serial
 # import MFRC522 # the RFID lib
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-SIMULATE = True
+USES_BUTTON = False
+BUTTON_ONLY_AT_EXIT = True
+PI_BUTTON_PULL_UP = 18 # A BCM of the CS on the 3008 empty socket??????????????????
 TX_UDP_MANY = 3  # UDP reliability retransmit number of copies
 RX_PORT = 8080 # Change when allocated, but to run independent of controller is 8080
 
@@ -35,6 +37,8 @@ RX_PORT = 8080 # Change when allocated, but to run independent of controller is 
 # ============================================
 # ============================================
 GPIO.setmode(GPIO.BCM)
+
+GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # SPECIFIC SPI (Use default SPI library for Pi)
 CLK = 11
@@ -58,12 +62,15 @@ current_time = 0
 
 ser = serial.Serial('/dev/ttyUSB0', 9600) # maybe change after device scan
 
+button_dbounce = 1;
+
 def rfid():
     global id_code
     global current_time
+    global button_dbounce
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
-        time.sleep(0.01)
+        time.sleep(0.1)
         current_time += 1
         if current_time > timeout_rfid:
             current_time = 0
@@ -73,15 +80,36 @@ def rfid():
         debug(input)
         id_w(int(input)) # load in number to use next
 
+        button_dbounce = GPIO.input(PI_BUTTON_PULL_UP) # uses the 0.1 sleep as a debounce
+
 current_step = 0
 
+def check_button():
+    if USES_BUTTON:
+        if BUTTON_ONLY_AT_EXIT and current_step != len(the_key):
+            return True
+        elif button_dbounce == 0: # BUTTON PRESSED
+            return True
+        else:
+            return False # didn't press button
+    else:
+        return True
+
 def code():
+    global current_step
     length = len(the_key)
-    if(id_r() == the_key[current_step]): # a correct digit
+    if id_r() == the_key[current_step]: # a correct digit
+        while (check_button() == False) and (id_r() != -1): # check button and delay reset
+            if id_r() == -1:
+                send_packet('100') # didn't click button
+                current_step = 0
+                return False
         current_step += 1
+        send_packet('10' + str(current_step))
     elif id_r() != -1: # reset combination unless daudling
+        send_packet('100')
         current_step = 0
-    if(length == current_step): # yep got combination
+    if length == current_step: # yep got combination
         return True
     return False
 
@@ -255,12 +283,10 @@ def main_loop():
         if state_r() == 1:  # CODE
             if code() == True: # run the code finder
                 state_w(2)
-                send_packet('101')
-            else:
-                send_packet('100')
+
+            # more states?
 
         if state_r() == 2: # final state
-            send_packet('104')
             send_packet('201')
 
 def main():
