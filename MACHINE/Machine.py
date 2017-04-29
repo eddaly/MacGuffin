@@ -48,6 +48,8 @@ CS = 8 # technically SDA (check spec on RFID reader)
 # RFID CODE
 # ===================================
 
+the_key = [ 0, 1, 2, 3 ]
+
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
 id_code = -1
@@ -69,7 +71,19 @@ def rfid():
 
         input = ser.readline()
         debug(input)
+        id_w(int(input)) # load in number to use next
 
+current_step = 0
+
+def code():
+    length = len(the_key)
+    if(id_r() == the_key[current_step]): # a correct digit
+        current_step += 1
+    elif id_r() != -1: # reset combination unless daudling
+        current_step = 0
+    if(length == current_step): # yep got combination
+        return True
+    return False
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -183,6 +197,7 @@ def reset_all():
 def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
+    current_step = 0
 
 
 def reset_loop():
@@ -236,10 +251,17 @@ def main_loop():
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
+            send_packet('200')
         if state_r() == 1:  # CODE
-            #entry state play
-            nop =  True
+            if code() == True: # run the code finder
+                state_w(2)
+                send_packet('101')
+            else:
+                send_packet('100')
 
+        if state_r() == 2: # final state
+            send_packet('104')
+            send_packet('201')
 
 def main():
     initialise()
