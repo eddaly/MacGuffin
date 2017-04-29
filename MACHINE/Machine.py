@@ -62,7 +62,7 @@ the_key = [0, 1, 2, 3]
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
 id_code = -1
-timeout_rfid = 100
+timeout_rfid = 5
 current_time = 0
 
 ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
