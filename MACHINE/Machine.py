@@ -58,7 +58,7 @@ gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
 # RFID CODE
 # ===================================
 
-the_key = [0, 1, 2, 3]
+the_key = [1, 2, 3, 4] # tag ids must be 1 to 255
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
