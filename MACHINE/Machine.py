@@ -97,7 +97,7 @@ def check_button():
     if USES_BUTTON:
         if BUTTON_ONLY_AT_EXIT and current_step != len(the_key):
             return True
-        elif button_dbounce == 0:  # BUTTON PRESSED
+        elif button_dbounce == 1:  # BUTTON PRESSED
             return True
         else:
             return False  # didn't press button
