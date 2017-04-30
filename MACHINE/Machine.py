@@ -83,7 +83,9 @@ def rfid():
             current_time = 0
             id_w(-1)
 
-        input = ser.readline() # BLOCKING
+        input = -1
+        while input == -1: #clean buffer, just in case baud rate exceeds python iteration rate due to sleep
+            input = ser.readline() # BLOCKING
         debug(input)
         id_w(int(input))  # load in number to use next
 
