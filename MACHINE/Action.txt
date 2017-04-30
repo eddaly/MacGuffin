@@ -6,6 +6,12 @@ A pi pin (physical pin 24) BCM 8 was use for the push button (as no 3008 ADC is 
 This pin must be connected to the push button, and the other button contact is 3V3 pull up.
 The USB port far from the network socket, and far from the board was used as /dev/ttyUSB0.
 
+Don't forget to edit:
+sudo nano /etc/rc.local
+And add the line:
+python /home/pi/machineRepo/Machine.py
+
+This is for auto starting the script
 ^^^^^^^^^^^^^ THE CODE IS BEING / HAS BEEN WROTE TO THIS ABOVE SPEC. ^^^^^^^^^^^^^^^^^^^^
 ===========================================================================================
 ===========================================================================================
