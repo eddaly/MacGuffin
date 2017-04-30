@@ -41,7 +41,7 @@ void loop()
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
     //digitalWrite(signalPin, LOW);
-    //Serial.println(F("NONE"));
+    Serial.println(-1, DEC);
     return;
   }
 
@@ -54,7 +54,7 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     //digitalWrite(signalPin, LOW);
-    //Serial.println(F("AFAIL"));
+    Serial.println(-1, DEC);
     //Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   }
@@ -65,7 +65,7 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     //digitalWrite(signalPin, LOW);
-    //Serial.println(F("RFAIL"));
+    Serial.println(-1, DEC);
     //Serial.println(mfrc522.GetStatusCodeName(status));
     mfrc522.PCD_Init();
     return;
