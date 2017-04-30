@@ -109,7 +109,7 @@ def code():
     global current_step
     length = len(the_key)
     if id_r() == the_key[current_step]:  # a correct digit
-        while (check_button() == False) and (id_r() != -1):  # check button and delay reset
+        while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and delay reset
             time.sleep(0.1) # wait
             if id_r() == -1:
                 send_packet('100')  # didn't click button
@@ -117,7 +117,8 @@ def code():
                 return False
         current_step += 1
         send_packet('10' + str(current_step))
-        while (id_r() != -1) or (USES_BUTTON and (check_button() == True)): # check button release and pulled out
+        while USES_BUTTON and (check_button() == True) and not(BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
+            # check button release and pulled out
             time.sleep(0.1)
     elif id_r() != -1:  # reset combination unless daudling
         send_packet('100')
