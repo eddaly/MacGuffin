@@ -78,14 +78,12 @@ def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
-        current_time += 1
-        if current_time > timeout_rfid:
-            current_time = 0
-            id_w(-1)
+#        current_time += 1
+#        if current_time > timeout_rfid:
+#            current_time = 0
+#            id_w(-1)
 
-        input = -1
-        while input == -1: #clean buffer, just in case baud rate exceeds python iteration rate due to sleep
-            input = ser.readline() # BLOCKING
+        input = ser.readline() # BLOCKING
         debug(input)
         id_w(int(input))  # load in number to use next
 

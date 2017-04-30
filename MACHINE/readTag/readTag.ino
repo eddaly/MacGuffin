@@ -37,6 +37,7 @@ void setup()
 
 void loop()
 {
+  delay(120); //delay 120 ms so as to have lower output rate than python reading
   //identify any tags in range.
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
