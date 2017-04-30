@@ -120,6 +120,8 @@ def code():
         while USES_BUTTON and (check_button() == True) and not(BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
             # check button release and pulled out
             time.sleep(0.1)
+        while (not USES_BUTTON) and (id_r() != -1): # not using button wait for remove
+            time.sleep(0.1)
     elif id_r() != -1:  # reset combination unless daudling
         send_packet('100')
         current_step = 0
