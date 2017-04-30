@@ -26,7 +26,7 @@ import random
 
 STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 SIMULATE = False
-TX_UDP_MANY = 3  # UDP reliability retransmit number of copies
+TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 CHAOS_GUAGE = False
 POT_DAMP = False
 

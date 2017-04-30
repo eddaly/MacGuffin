@@ -1,5 +1,5 @@
 The pi is connected via USB0 to the duino.
-The duino script is to be reloaded and and placed in the #1 socket.
+The duino script is to be reloaded and and placed in the #1 socket. (in readTag folder)
 The reader is connected to #1 reader socket.
 The gauge is connected on the same socket as was per the radio (19 BCM).
 A pi pin (physical pin 24) BCM 8 was use for the push button (as no 3008 ADC is used).
@@ -12,6 +12,17 @@ And add the line:
 python /home/pi/machineRepo/Machine.py
 
 This is for auto starting the script
+
+The code is 1 2 3 4 so the tags have to be on the correct paddles.
+The variables at the top of the pyton script set up various features.
+The default is a button push after each paddle is placed in. This is editable to only have one button push at the end,
+or not to need button pushes as per required.
+The RX_PORT needs setting to the receive port of the machine.
+
+The MACHINE was behaving strange and insisted on being on IP 192.168.1.109 and would not load the correct config.
+This was likely a spelling mistake in config, and/or a DHCP lease issue.
+
+The RADIO also needs a pull, as the messages to the show controller for the id tags were off by 1.
 ^^^^^^^^^^^^^ THE CODE IS BEING / HAS BEEN WROTE TO THIS ABOVE SPEC. ^^^^^^^^^^^^^^^^^^^^
 ===========================================================================================
 ===========================================================================================
