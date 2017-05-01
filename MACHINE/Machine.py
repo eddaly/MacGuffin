@@ -25,12 +25,12 @@ import serial
 # import MFRC522 # the RFID lib
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-USES_BUTTON = True
+USES_BUTTON = False
 BUTTON_ONLY_AT_EXIT = False
-PI_BUTTON_PULL_UP = 8  # A BCM of the CS
+PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
-RX_PORT = 8080  # Change when allocated, but to run independent of controller is 8080
+RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 
@@ -58,7 +58,7 @@ gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
 # RFID CODE
 # ===================================
 
-the_key = [1, 2, 3, 4] # tag ids must be 1 to 255
+the_key = [101, 102, 103, 104]  # tag ids must be 1 to 255
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
@@ -68,7 +68,7 @@ current_time = 0
 
 ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 
-button_dbounce = 1;
+button_dbounce = 1
 
 
 def rfid():
@@ -78,16 +78,17 @@ def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
-#        current_time += 1
-#        if current_time > timeout_rfid:
-#            current_time = 0
-#            id_w(-1)
+        #        current_time += 1
+        #        if current_time > timeout_rfid:
+        #            current_time = 0
+        #            id_w(-1)
 
-        input = ser.readline() # BLOCKING
-        debug(input)
+        input = ser.readline()  # BLOCKING
+        ##debug(input)
         id_w(int(input))  # load in number to use next
 
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
+        debug(str(button_dbounce))
 
 
 current_step = 0
@@ -110,19 +111,19 @@ def code():
     length = len(the_key)
     if id_r() == the_key[current_step]:  # a correct digit
         while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and delay reset
-            time.sleep(0.1) # wait
+            time.sleep(0.1)  # wait
             if id_r() == -1:
                 send_packet('100')  # didn't click button
                 current_step = 0
                 return False
         current_step += 1
         send_packet('10' + str(current_step))
-        while USES_BUTTON and (check_button() == True) and not(BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
+        while USES_BUTTON and (check_button() == True) and not (BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
             # check button release and pulled out
             time.sleep(0.1)
-        while (not USES_BUTTON) and (id_r() != -1): # not using button wait for remove
+        while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
             time.sleep(0.1)
-        while BUTTON_ONLY_AT_EXIT and (current_step != len(the_key)) and (id_r() != -1): # remove wait
+        while BUTTON_ONLY_AT_EXIT and (current_step != len(the_key)) and (id_r() != -1):  # remove wait
             time.sleep(0.1)
     elif id_r() != -1:  # reset combination unless daudling
         send_packet('100')
@@ -149,12 +150,13 @@ def debug(show):
 # ====================================
 
 def gauge(num):  # a 0 to 100% dial approximatly. Could be upto 10% out depending on situation
-    gauge.start(int(num / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
+    # gauge.start(int(num / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
+    time.sleep(0.001)
 
 
 def gauge_motion():
     time.sleep(0.3)
-    gauge(random.random() * 25.0 * (current_step + 1))
+    # gauge(random.random() * 25.0 * (current_step + 1))
 
 
 # =======================================
@@ -268,9 +270,9 @@ def reset_loop():
         result = receive_packet()
         debug('waiting for interrupt')
 
-        if result == "101":
+        if result == "reset":
             reset_all()
-        if result == "102":
+        if result == "start":
             start_game()
 
         time.sleep(0.01)
@@ -278,8 +280,8 @@ def reset_loop():
 
 def heartbeat_loop():
     while True:
-        send_packet("I am alive!")
-        debug('isAlive: ' + datetime.datetime.now().strftime('%G-%b-%d %I:%M %p'))
+        send_packet("H")
+        ##debug('isAlive: ' + datetime.datetime.now().strftime('%G-%b-%d %I:%M %p'))
         time.sleep(10)
 
 
@@ -315,7 +317,7 @@ def idle():
 # =========================
 def main_loop():
     while True:
-        # debug('state main:' + str(state_r()))
+        ##debug('state main:' + str(state_r()))
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
