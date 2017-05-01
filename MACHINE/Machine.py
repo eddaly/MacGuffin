@@ -170,14 +170,15 @@ def debug(show):
 # A GAUGE ON THE MACHINE
 # ====================================
 
-def gauge(num):  # a 0 to 100% dial approximatly. Could be upto 10% out depending on situation
-    # gauge.start(int(num / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
+def gauge_func(num):  # a 0 to 100% dial approximatly. Could be upto 10% out depending on situation
+    # A name space collision function has priority over variable
+    gauge.start(int(num / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
     time.sleep(0.001)
 
 
 def gauge_motion():
     time.sleep(0.3)
-    # gauge(random.random() * 25.0 * (current_step + 1))
+    gauge_func(random.random() * 25.0 * (current_step + 1))
 
 
 # =======================================
