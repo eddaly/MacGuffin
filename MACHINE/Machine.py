@@ -31,6 +31,8 @@ PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slo
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
+BUTTON_PRESS_POLARITY = 1
+RESET_LOCK_ON_WRONG = False
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 
@@ -42,7 +44,10 @@ gaugePin = 19  # set pin for gauge for use as some kind of indicator
 GPIO.setmode(GPIO.BCM)
 
 if USES_BUTTON:
-    GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    if BUTTON_PRESS_POLARITY == 1:
+        GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    else:
+        GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # SPECIFIC SPI (Use default SPI library for Pi)
 CLK = 11
@@ -68,8 +73,10 @@ current_time = 0
 
 ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 
-button_dbounce = 1
-
+if BUTTON_PRESS_POLARITY == 1:
+    button_dbounce = 0
+else:
+    button_dbounce = 1
 
 def rfid():
     global id_code
@@ -98,7 +105,7 @@ def check_button():
     if USES_BUTTON:
         if BUTTON_ONLY_AT_EXIT and current_step != len(the_key):
             return True
-        elif button_dbounce == 1:  # BUTTON PRESSED
+        elif button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
             return True
         else:
             return False  # didn't press button
@@ -110,25 +117,39 @@ def code():
     global current_step
     length = len(the_key)
     if id_r() == the_key[current_step]:  # a correct digit
-        while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and delay reset
+        debug('correct digit: ' + str(id_r()))
+        while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and not pulled out
             time.sleep(0.1)  # wait
-            if id_r() == -1:
-                send_packet('100')  # didn't click button
-                current_step = 0
-                return False
-        current_step += 1
-        send_packet('10' + str(current_step))
+            debug('waiting for press')
+        if id_r() == -1: # pulled out before button
+            send_packet('100')  # didn't click button
+            debug('pulled out')
+            if RESET_LOCK_ON_WRONG:
+                debug('reset combination')
+                current_step = 0 # reset combination to start
+            return False
+        current_step += 1 # move onto next digit
+        debug('correct digit: ' + str(current_step))
+        send_packet('10' + str(current_step)) # send correct code for digit the_key[0] => 101
         while USES_BUTTON and (check_button() == True) and not (BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
             # check button release and pulled out
+            debug('check button release.')
             time.sleep(0.1)
         while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
+            debug('Not using button. key pulled out')
             time.sleep(0.1)
         while BUTTON_ONLY_AT_EXIT and (current_step != len(the_key)) and (id_r() != -1):  # remove wait
+            debug('last button press only. pulled out.')
             time.sleep(0.1)
     elif id_r() != -1:  # reset combination unless daudling
+        debug('some wrong inserted.')
         send_packet('100')
-        current_step = 0
+        if RESET_LOCK_ON_WRONG:
+            debug('reset combination')
+            current_step = 0
+        # MUST BE -1 HERE
     if length == current_step:  # yep got combination
+        debug('combination valid')
         return True
     return False
 
