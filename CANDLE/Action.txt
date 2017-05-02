@@ -1,1 +1,9 @@
 Created repo from machine copy
+A simple script so that all pis can run same code.
+The following pins make the pi behave as:
+
+# a set up pins. pull one up to indicate which candle is being
+IS_21 = 8 # pin 12
+IS_22 = 9 # pin 18
+IS_23 = 10 # pin 16
+IS_24 = 11 # pin 32
