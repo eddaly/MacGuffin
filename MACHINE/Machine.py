@@ -76,8 +76,6 @@ the_key = [101, 102, 103, 104, 105, 106]  # tag ids must be 1 to 255
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
 id_code = -1
-timeout_rfid = 5
-current_time = 0
 
 ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 
@@ -87,20 +85,13 @@ else:
     button_dbounce = 1
 
 def rfid():
-    global id_code
-    global current_time
     global button_dbounce
     global wired
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
-        #        current_time += 1
-        #        if current_time > timeout_rfid:
-        #            current_time = 0
-        #            id_w(-1)
-
         input = ser.readline()  # BLOCKING
-        debug('RX serial: ' + str(int(input)))
+        debug(input)
         id_w(int(input))  # load in number to use next
 
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
