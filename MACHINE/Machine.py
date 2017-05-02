@@ -26,14 +26,12 @@ import serial
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = False
-BUTTON_ONLY_AT_EXIT = False
 PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
-ALLOW_LAST_DIGIT = True # for debouncing
 WOBBLE_BYPASS = True # prevent -1 occasionals from resetting code
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
@@ -102,11 +100,11 @@ def rfid():
         #            id_w(-1)
 
         input = ser.readline()  # BLOCKING
-        ##debug(input)
+        debug('RX serial: ' + str(int(input)))
         id_w(int(input))  # load in number to use next
 
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
-        debug(str(button_dbounce))
+        # debug(str(button_dbounce))
         if GPIO.input(wiredPin) == 1:
             wired = 1 # latch??
 
@@ -116,9 +114,7 @@ current_step = 0
 
 def check_button():
     if USES_BUTTON:
-        if BUTTON_ONLY_AT_EXIT and current_step != len(the_key):
-            return True
-        elif button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
+        if button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
             return True
         else:
             return False  # didn't press button
@@ -128,41 +124,44 @@ def check_button():
 
 def code():
     global current_step
+    # GETS TO HERE
     length = len(the_key)
+    debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
     if id_r() == the_key[current_step]:  # a correct digit
-        debug('correct digit: ' + str(id_r()))
+        debug('correct digit: ' + str(id_r()) + ' or line 161')
         while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and not pulled out
             time.sleep(0.1)  # wait
-            debug('waiting for press')
+            debug('waiting for press or removal')
         if id_r() == -1: # pulled out before button
             # send_packet('100')  # didn't click button
             debug('pulled out')
-            if RESET_LOCK_ON_WRONG and not WOBBLE_BYPASS:
+            if RESET_LOCK_ON_WRONG and not WOBBLE_BYPASS: # should be ignored as no BUTTON used??
                 debug('reset combination. or wobbled?')
                 current_step = 0 # reset combination to start
             return False
         current_step += 1 # move onto next digit
-        debug('correct digit: ' + str(current_step))
+        debug('correct digit (increased and packet out): ' + str(current_step))
         send_packet('10' + str(current_step)) # send correct code for digit the_key[0] => 101
-        while USES_BUTTON and (check_button() == True) and not (BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
-            # check button release and pulled out
+        while USES_BUTTON and (check_button() == True):
+            # check button release
             debug('check button release.')
             time.sleep(0.1)
         while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
             debug('Not using button. key pulled out')
             time.sleep(0.1)
-        while BUTTON_ONLY_AT_EXIT and (current_step != len(the_key)) and (id_r() != -1):  # remove wait
-            debug('last button press only. pulled out.')
-            time.sleep(0.1)
-    elif (id_r() != -1) and not (ALLOW_LAST_DIGIT and id_r() == the_key[max(current_step - 1, 0)]):  # reset combination unless daudling
+    elif id_r() != -1:  # reset combination unless daudling
         # a bit of a work around to allow the last digit to not reset the combination
-        debug('some wrong inserted.')
-        send_packet('100')
-        if RESET_LOCK_ON_WRONG:
-            debug('reset combination')
-            current_step = 0
+        if id_r() != the_key[max(current_step - 1, 0)]: # last key or first key so not indexing array [-1]
+            debug('some wrong card inserted.')
+            send_packet('100')
+            if RESET_LOCK_ON_WRONG:
+                debug('reset combination')
+                current_step = 0
+                return False
         # MUST BE -1 HERE
-    if length == current_step:  # yep got combination
+    else: # -1
+        debug('no card detected')
+    if length == current_step:  # yep got combination as line 142 would have made current step == 6
         debug('combination valid')
         return True
     return False
