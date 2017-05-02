@@ -32,7 +32,7 @@ PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slo
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 BUTTON_PRESS_POLARITY = 1
-RESET_LOCK_ON_WRONG = False
+RESET_LOCK_ON_WRONG = True
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 
