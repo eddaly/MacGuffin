@@ -60,7 +60,7 @@ GPIO.output(chestPin, 0) # lock chest by default
 # RFID CODE
 # ===================================
 
-the_key = [201, 202, 203, 204]  # tag ids must be 1 to 255
+the_key = [1, 1, 1, 1]  # tag ids must be 1 to 255
 
 correct = [False, False, False, False]
 
