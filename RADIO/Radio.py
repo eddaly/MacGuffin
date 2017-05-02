@@ -65,9 +65,11 @@ rfid_init()
 def sim_pin():
     return random.random() > 0.3  # should be almost there
 
+acitate = [False, False, False, False, False]
 
 def rfid():
     global rfidPins
+    global acitate
     flag = True
     for i in range(5):
         if SIMULATE:
@@ -75,10 +77,14 @@ def rfid():
         else:
             j = GPIO.input(rfidPins[i])
         if j:
-            send_packet('1' + str(i + 1) + '1')
+            if acitate[i] == False:
+                send_packet('1' + str(i + 1) + '1')
+                acitate[i] = True
             debug('rnd T:' + str(i + 1))
         else:
-            send_packet('1' + str(i + 1) + '0')
+            if acitate[i] == True:
+                send_packet('1' + str(i + 1) + '0')
+                acitate[i] = False
             debug('rnd F:' + str(i + 1))
         flag = flag and j
     if flag:
