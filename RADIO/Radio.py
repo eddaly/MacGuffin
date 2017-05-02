@@ -76,7 +76,7 @@ def rfid():
             j = sim_pin()
         else:
             j = GPIO.input(rfidPins[i])
-        if j:
+        if j == 1:
             if acitate[i] == False:
                 send_packet('1' + str(i + 1) + '1')
                 acitate[i] = True

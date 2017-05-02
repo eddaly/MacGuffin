@@ -124,7 +124,7 @@ def led():
         rgb = [0, 0, 0]
         err = False
     else: # colour modulation
-        
+
 
 
 
