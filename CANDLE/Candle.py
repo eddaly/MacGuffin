@@ -89,7 +89,10 @@ def code(): # check for right id code return true on got
                     correct[i] = True
                     send_packet('1' + str(i + 1) + '1') #on
                     debug('on')
-                    return True
+                    if BUILD:
+                        return False # just to test
+                    else:
+                        return True
             elif correct[i] == True:
                 correct[i] = False
                 send_packet('1' + str(i + 1) + '0')  # off
@@ -244,7 +247,7 @@ def heartbeat_loop():
     while True:
         send_packet("H")
         ##debug('isAlive: ' + datetime.datetime.now().strftime('%G-%b-%d %I:%M %p'))
-        time.sleep(3)
+        time.sleep(10)
 
 
 # ====================================
