@@ -1,3 +1,8 @@
+Some serching on the net revealed https://www.youtube.com/watch?v=tZPWXnMdIRU as a demo of RFID on Pi, there is
+details of a bug fix to check out later.
+
+
+
 The pi is connected via USB0 to the duino.
 The duino script is to be reloaded and and placed in the #1 socket. (in readTag folder)
 The reader is connected to #1 reader socket.

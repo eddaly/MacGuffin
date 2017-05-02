@@ -18,6 +18,20 @@ byte sector = 0;
 byte blockAddr = 1;
 byte trailerBlock = 3;
 
+int id = -1;
+int delayed_id = -1;
+int compare_id = -1; // A delay slot
+int compare2_id = -1; // A second delay slot
+
+void indicate() {
+  if(id == delayed_id) {// id 
+    compare_id = id; // A WOBBLE FIX
+    compare2_id = id;
+  }
+  if(id != delayed_id) return; // fresh wobble
+  Serial.println(delayed_id, DEC);// NO CARD
+}
+
 void setup() 
 { 
   //CLKPR = (1<<CLKPCE);
@@ -37,25 +51,31 @@ void setup()
 
 void loop()
 {
+  // delayed comparison for wiggle debounce
+  delayed_id = compare2_id;
+  compare2_id = compare_id;
+  compare_id = id;
+
   delay(120); //delay 120 ms so as to have lower output rate than python reading
   //identify any tags in range.
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
     //digitalWrite(signalPin, LOW);
-    Serial.println(-1, DEC);
+    id = -1;
+    indicate();// NO CARD
     return;
   }
 
   //verify data has been read from tag.
   if ( ! mfrc522.PICC_ReadCardSerial() )
-  {return;}
+  {return;} // A POTENTIAL READ ERROR IGNORED
 
   //authentication:
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK)
   {
     //digitalWrite(signalPin, LOW);
-    Serial.println(-1, DEC);
+    //Serial.println(-1, DEC); // A POTENTIAL AUTHENTICATION ERROR IGNORED
     //Serial.println(mfrc522.GetStatusCodeName(status));
     return;
   }
@@ -66,13 +86,14 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     //digitalWrite(signalPin, LOW);
-    Serial.println(-1, DEC);
+    //Serial.println(-1, DEC); // READ FAIL IGNORE
     //Serial.println(mfrc522.GetStatusCodeName(status));
     mfrc522.PCD_Init();
     return;
   }
   byte tagID = buffer[0];
-  Serial.println(tagID, DEC);
+  id = tagID;
+  indicate();// PRINT CARD ID
 
   /* if(tagID == readerID)
   {
