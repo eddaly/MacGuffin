@@ -116,9 +116,9 @@ def reset_loop():
         packet = receive_packet()
         if debug == 1:
             print 'Received packet: ', packet
-        if packet == "101":
+        if packet == "reset":
             reset_all()
-        if packet == "102":
+        if packet == "start":
             start_game()
         time.sleep(delay)
             
