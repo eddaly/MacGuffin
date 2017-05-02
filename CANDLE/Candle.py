@@ -48,7 +48,7 @@ piID = 1
 GPIO.setmode(GPIO.BCM)
 
 # motor
-GPIO.setup(chestPin, GPIO.OUT)
+GPIO.setup(chestPin, GPIO.OUT, initial=GPIO.LOW)
 GPIO.output(chestPin, 0) # lock chest by default
 
 #GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -87,10 +87,12 @@ def code(): # check for right id code return true on got
                 if correct[i] == False:
                     correct[i] = True
                     send_packet('1' + str(i + 1) + '1') #on
+                    debug('on')
                     return True
             elif correct[i] == True:
                 correct[i] = False
                 send_packet('1' + str(i + 1) + '0')  # off
+                debug('off')
                 return False
     return False
 
