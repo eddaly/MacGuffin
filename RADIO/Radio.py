@@ -394,9 +394,9 @@ def reset_loop():
         result = receive_packet()
         debug('waiting for interrupt')
 
-        if result == "101":
+        if result == "reset":
             reset_all()
-        if result == "102":
+        if result == "start":
             start_game()
 
         time.sleep(0.01)
