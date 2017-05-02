@@ -21,12 +21,14 @@ byte trailerBlock = 3;
 int id = -1;
 int delayed_id = -1;
 int compare_id = -1; // A delay slot
-int compare2_id = -1; // A second delay slot
 
 void indicate() {
-  if(id == delayed_id) {// id 
+  if(id == delayed_id && id != -1) {// id 
     compare_id = id; // A WOBBLE FIX
-    compare2_id = id;
+  }
+  if(id == -1) {
+    compare_id = -1;
+    delayed_id = -1;
   }
   if(id != delayed_id) return; // fresh wobble
   Serial.println(delayed_id, DEC);// NO CARD
@@ -34,8 +36,9 @@ void indicate() {
 
 int delayr = 100;
 
-void reset() // Restarts program from beginning but does not reset the peripherals and registers
+void reset(int l) // Restarts program from beginning but does not reset the peripherals and registers
 {
+  delay(l);//prevent serial parse error
   asm volatile ("  jmp 0");  
 }  
 
@@ -58,15 +61,13 @@ void setup()
 
 void loop()
 {
-  if(delayr > 0) {
+  /* if(delayr > 0) {
     delayr--;
   } else {
-    delay(100);//prevent serial parse error
     reset();// try a soft reset fix
-  }
+  } */
   // delayed comparison for wiggle debounce
-  delayed_id = compare2_id;
-  compare2_id = compare_id;
+  delayed_id = compare_id;
   compare_id = id;
 
   delay(120); //delay 120 ms so as to have lower output rate than python reading
@@ -81,7 +82,7 @@ void loop()
 
   //verify data has been read from tag.
   if ( ! mfrc522.PICC_ReadCardSerial() )
-  {return;} // A POTENTIAL READ ERROR IGNORED
+  {reset(10);} // A POTENTIAL READ ERROR IGNORED
 
   //authentication:
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
@@ -90,7 +91,7 @@ void loop()
     //digitalWrite(signalPin, LOW);
     //Serial.println(-1, DEC); // A POTENTIAL AUTHENTICATION ERROR IGNORED
     //Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
+    reset(200);
   }
 
 
@@ -102,6 +103,7 @@ void loop()
     //Serial.println(-1, DEC); // READ FAIL IGNORE
     //Serial.println(mfrc522.GetStatusCodeName(status));
     mfrc522.PCD_Init();
+    reset(200);
     return;
   }
   byte tagID = buffer[0];
