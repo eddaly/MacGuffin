@@ -35,6 +35,8 @@ BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
+wiredPin = 21 # BCM detect wired up connectors.
+wired = 0
 
 # ============================================
 # ============================================
@@ -48,6 +50,9 @@ if USES_BUTTON:
         GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     else:
         GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+# wired
+GPIO.setup(wiredPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # SPECIFIC SPI (Use default SPI library for Pi)
 CLK = 11
@@ -82,6 +87,7 @@ def rfid():
     global id_code
     global current_time
     global button_dbounce
+    global wired
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
@@ -96,6 +102,8 @@ def rfid():
 
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
         debug(str(button_dbounce))
+        if GPIO.input(wiredPin) == 1:
+            wired = 1 # latch??
 
 
 current_step = 0
@@ -268,6 +276,7 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
+    global wired
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -277,6 +286,7 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
+    wired = 0
     # start_game() -- should not start game yet
 
 
@@ -347,10 +357,12 @@ def main_loop():
         if state_r() == 1:  # CODE
             if code() == True:  # run the code finder
                 state_w(2)
-
                 # more states?
 
-        if state_r() == 2:  # final state
+        if state_r() == 2:  # check wired
+            if wired == 1: # can be set any time
+                state_w(3)
+        if state_r() == 3:
             send_packet('201')
 
 
