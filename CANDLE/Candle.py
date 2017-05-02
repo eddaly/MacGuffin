@@ -24,11 +24,17 @@ import serial
 
 # import MFRC522 # the RFID lib
 
+BUILD = True
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
 chestPin = 19  # set pin for gauge for use as some kind of indicator
+
+IS_21 = 8 # pin 12
+IS_22 = 9 # pin 18
+IS_23 = 10 # pin 16
+IS_24 = 11 # pin 32
 
 # ============================================
 # ============================================
@@ -40,6 +46,8 @@ GPIO.setmode(GPIO.BCM)
 # motor
 GPIO.setup(chestPin, GPIO.OUT)
 GPIO.output(chestPin, 0) # lock chest by default
+
+GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # ===================================
 # RFID CODE
@@ -57,11 +65,6 @@ def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
-        #        current_time += 1
-        #        if current_time > timeout_rfid:
-        #            current_time = 0
-        #            id_w(-1)
-
         input = ser.readline()  # BLOCKING
         ##debug(input)
         id_w(int(input))  # load in number to use next
@@ -70,6 +73,9 @@ def rfid():
 def code(): # check for right id code return true on got
     #
 
+def wait_remove():
+    while id_r() != -1:
+        time.sleep(2) # sleep 2 seconds until reader is empty
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -180,13 +186,15 @@ def reset_all():
 
     debug('all reset - releasing the lock')
     GPIO.output(chestPin, 0)  # lock chest
-    # start_game() -- should not start game yet
+    if BUILD:
+        start_game() -- should not start game yet
 
 
 def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     GPIO.output(chestPin, 0)  # lock chest
+    wait_remove()
 
 
 def reset_loop():
