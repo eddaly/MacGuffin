@@ -277,7 +277,7 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
-    start_game()
+    # start_game() -- should not start game yet
 
 
 def start_game():
