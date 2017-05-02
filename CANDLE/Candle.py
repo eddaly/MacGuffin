@@ -25,21 +25,10 @@ import serial
 # import MFRC522 # the RFID lib
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-USES_BUTTON = False
-BUTTON_ONLY_AT_EXIT = False
-PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
-# 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
-BUTTON_PRESS_POLARITY = 1
-RESET_LOCK_ON_WRONG = True
-ALLOW_LAST_DIGIT = True # for debouncing
-WOBBLE_BYPASS = True # prevent -1 occasionals from resetting code
 
-gaugePin = 19  # set pin for gauge for use as some kind of indicator
-wiredPin = 21 # BCM detect wired up connectors.
-motorPin = 26 # motor control
-wired = 0
+chestPin = 19  # set pin for gauge for use as some kind of indicator
 
 # ============================================
 # ============================================
@@ -48,27 +37,9 @@ wired = 0
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-if USES_BUTTON:
-    if BUTTON_PRESS_POLARITY == 1:
-        GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    else:
-        GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# wired
-GPIO.setup(wiredPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 # motor
-GPIO.setup(motorPin, GPIO.OUT)
-GPIO.output(motorPin, 0) # turn off motor by default
-
-# SPECIFIC SPI (Use default SPI library for Pi)
-CLK = 11
-MISO = 9
-MOSI = 10
-CS = 8  # technically SDA (check spec on RFID reader)
-
-# BCM MODE (other definitions for pins)
-GPIO.setup(gaugePin, GPIO.OUT)
-gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
+GPIO.setup(chestPin, GPIO.OUT)
+GPIO.output(chestPin, 0) # lock chest by default
 
 # ===================================
 # RFID CODE
@@ -78,22 +49,11 @@ the_key = [101, 102, 103, 104, 105, 106]  # tag ids must be 1 to 255
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
-id_code = -1
-timeout_rfid = 5
-current_time = 0
 
 ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
-
-if BUTTON_PRESS_POLARITY == 1:
-    button_dbounce = 0
-else:
-    button_dbounce = 1
+id_code = -1 # default no read
 
 def rfid():
-    global id_code
-    global current_time
-    global button_dbounce
-    global wired
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
@@ -106,67 +66,9 @@ def rfid():
         ##debug(input)
         id_w(int(input))  # load in number to use next
 
-        button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
-        debug(str(button_dbounce))
-        if GPIO.input(wiredPin) == 1:
-            wired = 1 # latch??
 
-
-current_step = 0
-
-
-def check_button():
-    if USES_BUTTON:
-        if BUTTON_ONLY_AT_EXIT and current_step != len(the_key):
-            return True
-        elif button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
-            return True
-        else:
-            return False  # didn't press button
-    else:
-        return True
-
-
-def code():
-    global current_step
-    length = len(the_key)
-    if id_r() == the_key[current_step]:  # a correct digit
-        debug('correct digit: ' + str(id_r()))
-        while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and not pulled out
-            time.sleep(0.1)  # wait
-            debug('waiting for press')
-        if id_r() == -1: # pulled out before button
-            # send_packet('100')  # didn't click button
-            debug('pulled out')
-            if RESET_LOCK_ON_WRONG and not WOBBLE_BYPASS:
-                debug('reset combination. or wobbled?')
-                current_step = 0 # reset combination to start
-            return False
-        current_step += 1 # move onto next digit
-        debug('correct digit: ' + str(current_step))
-        send_packet('10' + str(current_step)) # send correct code for digit the_key[0] => 101
-        while USES_BUTTON and (check_button() == True) and not (BUTTON_ONLY_AT_EXIT and current_step != len(the_key)):
-            # check button release and pulled out
-            debug('check button release.')
-            time.sleep(0.1)
-        while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
-            debug('Not using button. key pulled out')
-            time.sleep(0.1)
-        while BUTTON_ONLY_AT_EXIT and (current_step != len(the_key)) and (id_r() != -1):  # remove wait
-            debug('last button press only. pulled out.')
-            time.sleep(0.1)
-    elif (id_r() != -1) and not (ALLOW_LAST_DIGIT and id_r() == the_key[max(current_step - 1, 0)]):  # reset combination unless daudling
-        # a bit of a work around to allow the last digit to not reset the combination
-        debug('some wrong inserted.')
-        send_packet('100')
-        if RESET_LOCK_ON_WRONG:
-            debug('reset combination')
-            current_step = 0
-        # MUST BE -1 HERE
-    if length == current_step:  # yep got combination
-        debug('combination valid')
-        return True
-    return False
+def code(): # check for right id code return true on got
+    #
 
 
 # ====================================
@@ -180,35 +82,6 @@ def debug(show):
 # ===================================
 # MORE CODE PINS ETC.
 # ===================================
-
-def motor():
-    global current_step
-    length = len(the_key)
-    complete = float(length - min(current_step, length)) / float(length)
-    complete *= complete # bias toward the end of the entry conditions
-    rand = (1.0 - complete) + random.random() * 0.25
-
-    if (rand > 0.5) and not((state_r() == 0) or (state_r() == 3)): # not idle or ended game
-        GPIO.output(motorPin, 1)  # turn on motor
-    else:
-        GPIO.output(motorPin, 0)  # turn off motor
-
-
-# ====================================
-# A GAUGE ON THE MACHINE
-# ====================================
-
-def gauge_func(num):  # a 0 to 100% dial approximatly. Could be upto 10% out depending on situation
-    # A name space collision function has priority over variable
-    gauge.start(int(num / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
-    time.sleep(0.001)
-
-
-def gauge_motion():
-    time.sleep(0.3)
-    gauge_func(random.random() * 25.0 * min(current_step + 1, 4)) # a limit check so the last digit does not go over !!
-    motor() # update the motor too
-
 
 # =======================================
 # A THREADING LOCK
@@ -297,7 +170,6 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
-    global wired
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -307,17 +179,14 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
-    wired = 0
-    GPIO.output(motorPin, 0)  # turn off motor by default
+    GPIO.output(chestPin, 0)  # lock chest
     # start_game() -- should not start game yet
 
 
 def start_game():
-    global current_step
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    current_step = 0
-    GPIO.output(motorPin, 1)  # start motor
+    GPIO.output(chestPin, 0)  # lock chest
 
 
 def reset_loop():
@@ -354,9 +223,9 @@ def initialise():
     t3 = threading.Thread(target=rfid)
     t3.daemon = False
     t3.start()
-    t4 = threading.Thread(target=gauge_motion)
-    t4.daemon = False
-    t4.start()
+    #t4 = threading.Thread(target=gauge_motion)
+    #t4.daemon = False
+    #t4.start()
 
 
 # ===============================
@@ -381,12 +250,8 @@ def main_loop():
             if code() == True:  # run the code finder
                 state_w(2)
                 # more states?
-
-        if state_r() == 2:  # check wired
-            if wired == 1: # can be set any time
-                state_w(3)
-        if state_r() == 3:
-            GPIO.output(motorPin, 0)  # turn off motor
+        if state_r() == 2:
+            GPIO.output(chestPin, 1)  # open chest
             send_packet('201')
 
 
