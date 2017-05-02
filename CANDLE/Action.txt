@@ -9,3 +9,7 @@ IS_23 = 10 # pin 16
 IS_24 = 11 # pin 32
 
 #this may get changed later
+
+DON' FORGET TO CHANGE BUILD = False in production.
+piID is pi number 0 to 3 based.
+all of them can handle chest. "open" from show controller.
