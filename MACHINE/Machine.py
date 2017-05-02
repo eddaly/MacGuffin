@@ -34,6 +34,7 @@ RX_PORT = 5000  # Change when allocated, but to run independent of controller is
 BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
 ALLOW_LAST_DIGIT = True # for debouncing
+WOBBLE_BYPASS = True # prevent -1 occasionals from resetting code
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 wiredPin = 21 # BCM detect wired up connectors.
@@ -131,10 +132,10 @@ def code():
             time.sleep(0.1)  # wait
             debug('waiting for press')
         if id_r() == -1: # pulled out before button
-            send_packet('100')  # didn't click button
+            # send_packet('100')  # didn't click button
             debug('pulled out')
-            if RESET_LOCK_ON_WRONG:
-                debug('reset combination')
+            if RESET_LOCK_ON_WRONG and not WOBBLE_BYPASS:
+                debug('reset combination. or wobbled?')
                 current_step = 0 # reset combination to start
             return False
         current_step += 1 # move onto next digit
