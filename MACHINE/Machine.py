@@ -38,6 +38,7 @@ WOBBLE_BYPASS = True # prevent -1 occasionals from resetting code
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 wiredPin = 21 # BCM detect wired up connectors.
+motorPin = 26 # motor control
 wired = 0
 
 # ============================================
@@ -55,6 +56,9 @@ if USES_BUTTON:
 
 # wired
 GPIO.setup(wiredPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# motor
+GPIO.setup(motorPin, GPIO.OUT)
+GPIO.output(motorPin, 0) # turn off motor by default
 
 # SPECIFIC SPI (Use default SPI library for Pi)
 CLK = 11
@@ -290,6 +294,7 @@ def reset_all():
 
     debug('all reset - releasing the lock')
     wired = 0
+    GPIO.output(motorPin, 0)  # turn off motor by default
     # start_game() -- should not start game yet
 
 
@@ -298,6 +303,7 @@ def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     current_step = 0
+    GPIO.output(motorPin, 1)  # start motor
 
 
 def reset_loop():
@@ -366,6 +372,7 @@ def main_loop():
             if wired == 1: # can be set any time
                 state_w(3)
         if state_r() == 3:
+            GPIO.output(motorPin, 0)  # turn off motor
             send_packet('201')
 
 
