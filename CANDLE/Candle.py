@@ -31,10 +31,13 @@ RX_PORT = 5000  # Change when allocated, but to run independent of controller is
 
 chestPin = 19  # set pin for gauge for use as some kind of indicator
 
+# a set up pins. pull one up to indicate which candle is being
 IS_21 = 8 # pin 12
 IS_22 = 9 # pin 18
 IS_23 = 10 # pin 16
 IS_24 = 11 # pin 32
+
+identity = [IS_21, IS_22, IS_23, IS_24]
 
 # ============================================
 # ============================================
@@ -47,13 +50,18 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(chestPin, GPIO.OUT)
 GPIO.output(chestPin, 0) # lock chest by default
 
-GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(IS_23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(IS_24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # ===================================
 # RFID CODE
 # ===================================
 
-the_key = [101, 102, 103, 104, 105, 106]  # tag ids must be 1 to 255
+the_key = [201, 202, 203, 204]  # tag ids must be 1 to 255
+
+correct = [False, False, False, False]
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
@@ -71,11 +79,23 @@ def rfid():
 
 
 def code(): # check for right id code return true on got
-    #
+    for i in range(len(identity)):
+        if GPIO.input(identity[i]) == 1:
+            if the_key[i] == id_r(): # correct rune for candle
+                if correct[i] == False:
+                    correct[i] = True
+                    send_packet('1' + str(i + 1) + '1') #on
+                    return True
+            elif correct[i] == True:
+                correct[i] = False
+                send_packet('1' + str(i + 1) + '0')  # off
+                return False
+    return False
 
 def wait_remove():
     while id_r() != -1:
         time.sleep(2) # sleep 2 seconds until reader is empty
+    time.sleep(2) # and away with the tag
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -187,7 +207,7 @@ def reset_all():
     debug('all reset - releasing the lock')
     GPIO.output(chestPin, 0)  # lock chest
     if BUILD:
-        start_game() -- should not start game yet
+        start_game() # should not start game yet
 
 
 def start_game():
@@ -206,6 +226,10 @@ def reset_loop():
             reset_all()
         if result == "start":
             start_game()
+
+        # OPEN CHEST VIA SHOW CONTROLLER
+        if result == "open":
+            GPIO.output(chestPin, 1)  # open chest
 
         time.sleep(0.01)
 
@@ -259,7 +283,7 @@ def main_loop():
                 state_w(2)
                 # more states?
         if state_r() == 2:
-            GPIO.output(chestPin, 1)  # open chest
+            # GPIO.output(chestPin, 1)  # open chest
             send_packet('201')
 
 
