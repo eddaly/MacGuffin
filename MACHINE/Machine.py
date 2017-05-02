@@ -309,6 +309,7 @@ def reset_all():
     debug('all reset - releasing the lock')
     wired = 0
     GPIO.output(motorPin, 0)  # turn off motor by default
+    input = ser.readline() # flush
     # start_game() -- should not start game yet
 
 

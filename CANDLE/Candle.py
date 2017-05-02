@@ -210,6 +210,7 @@ def reset_all():
 
     debug('all reset - releasing the lock')
     GPIO.output(chestPin, 0)  # lock chest
+    input = ser.readline()
     if BUILD:
         start_game() # should not start game yet
 
