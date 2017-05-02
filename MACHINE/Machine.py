@@ -129,37 +129,54 @@ def code():
     debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
     if id_r() == the_key[current_step]:  # a correct digit
         debug('correct digit: ' + str(id_r()) + ' or line 161')
-        while (USES_BUTTON and check_button() == False) and (id_r() != -1):  # check button and not pulled out
-            time.sleep(0.1)  # wait
-            debug('waiting for press or removal')
-        if id_r() == -1: # pulled out before button
-            # send_packet('100')  # didn't click button
-            debug('pulled out')
-            if RESET_LOCK_ON_WRONG and not WOBBLE_BYPASS: # should be ignored as no BUTTON used??
-                debug('reset combination. or wobbled?')
-                current_step = 0 # reset combination to start
-            return False
-        current_step += 1 # move onto next digit
+        current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
         send_packet('10' + str(current_step)) # send correct code for digit the_key[0] => 101
+        # ==============================
+        # INPUT OK
+        # ==============================
+        while USES_BUTTON and (check_button() == False):  # check button
+            time.sleep(0.1)  # wait
+            debug('waiting for press')
+        while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
+            debug('Not using button. key pulled out?')
+            time.sleep(0.1)
+        # ===============================
+        # SO HAVE REGISTERED PADDLE
+        # ===============================
         while USES_BUTTON and (check_button() == True):
             # check button release
             debug('check button release.')
             time.sleep(0.1)
-        while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
-            debug('Not using button. key pulled out')
-            time.sleep(0.1)
+        # ==================================
+        # SO HAVE REMOVED OR BUTTON RELEASE
+        # ==================================
     elif id_r() != -1:  # reset combination unless daudling
+        # ==================================
+        # SO WRONG PADDLE
+        # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
         if id_r() != the_key[max(current_step - 1, 0)]: # last key or first key so not indexing array [-1]
+            # ============================================================
+            # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
+            # ============================================================
             debug('some wrong card inserted.')
             send_packet('100')
             if RESET_LOCK_ON_WRONG:
+                # ===================================
+                # START OVER
+                # ===================================
                 debug('reset combination')
                 current_step = 0
                 return False
         # MUST BE -1 HERE
+        else:
+            debug('clone of last digit/paddle')
+            return False
     else: # -1
+        # =========================================
+        # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
+        # =========================================
         debug('no card detected')
     if length == current_step:  # yep got combination as line 142 would have made current step == 6
         debug('combination valid')
