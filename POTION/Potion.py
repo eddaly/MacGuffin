@@ -29,15 +29,9 @@ STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
-chestPin = 19  # set pin for gauge for use as some kind of indicator
-
-# a set up pins. pull one up to indicate which candle is being
-IS_21 = 8 # pin 12
-IS_22 = 9 # pin 18
-IS_23 = 10 # pin 16
-IS_24 = 11 # pin 32
-
-identity = [IS_21, IS_22, IS_23, IS_24]
+RGB_LED = [8, 9, 10] # R, G, B PWM? Software POV effect??!!
+RFID_TAG_ACK = [25, 8, 7] # Duino #1, #2, #3
+PUMP_IN = [16, 20, 21] # Duino #4, #5, #6 pulse on pull script
 
 # ============================================
 # ============================================
@@ -46,27 +40,21 @@ identity = [IS_21, IS_22, IS_23, IS_24]
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-# motor
-GPIO.setup(chestPin, GPIO.OUT)
-GPIO.output(chestPin, 0) # lock chest by default
-
-GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(IS_23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(IS_24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+for i in range(3):
+    GPIO.setup(RFID_TAG_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(PUMP_IN[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(RGB_LED[i], GPIO.OUT)
 
 # ===================================
 # RFID CODE
 # ===================================
 
-the_key = [201, 202, 203, 204]  # tag ids must be 1 to 255
-
-correct = [False, False, False, False]
+correct = [False, False, False]
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
 
-ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
+# ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 id_code = -1 # default no read
 
 def rfid():
@@ -92,10 +80,18 @@ def code(): # check for right id code return true on got
                 return False
     return False
 
+
 def wait_remove():
     while id_r() != -1:
         time.sleep(2) # sleep 2 seconds until reader is empty
     time.sleep(2) # and away with the tag
+
+# ====================================
+# PUMP SEQUENCE
+# ====================================
+def pump():
+    return False
+
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -205,7 +201,6 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
-    GPIO.output(chestPin, 0)  # lock chest
     if BUILD:
         start_game() # should not start game yet
 
@@ -213,7 +208,6 @@ def reset_all():
 def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    GPIO.output(chestPin, 0)  # lock chest
     wait_remove()
 
 
@@ -226,10 +220,6 @@ def reset_loop():
             reset_all()
         if result == "start":
             start_game()
-
-        # OPEN CHEST VIA SHOW CONTROLLER
-        if result == "open":
-            GPIO.output(chestPin, 1)  # open chest
 
         time.sleep(0.01)
 
@@ -278,12 +268,15 @@ def main_loop():
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
             send_packet('200')
-        if state_r() == 1:  # CODE
+        if state_r() == 1:  # STOPPERS
             if code() == True:  # run the code finder
                 state_w(2)
                 # more states?
-        if state_r() == 2:
-            # GPIO.output(chestPin, 1)  # open chest
+        if state_r() == 2:  # PUMPS
+            if pump() == True:  # run the code finder
+                state_w(3)
+                # more states?
+        if state_r() == 3:
             send_packet('201')
 
 
