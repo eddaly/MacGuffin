@@ -7,3 +7,5 @@ IS_21 = 8 # pin 12
 IS_22 = 9 # pin 18
 IS_23 = 10 # pin 16
 IS_24 = 11 # pin 32
+
+#this may get changed later
