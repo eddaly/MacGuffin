@@ -30,14 +30,15 @@ TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
 chestPin = 19  # set pin for gauge for use as some kind of indicator
+piID = 1
 
 # a set up pins. pull one up to indicate which candle is being
-IS_21 = 8 # pin 12
-IS_22 = 9 # pin 18
-IS_23 = 10 # pin 16
-IS_24 = 11 # pin 32
+#IS_21 = 8 # pin 12
+#IS_22 = 9 # pin 18
+#IS_23 = 10 # pin 16
+#IS_24 = 11 # pin 32
 
-identity = [IS_21, IS_22, IS_23, IS_24]
+#identity = [IS_21, IS_22, IS_23, IS_24]
 
 # ============================================
 # ============================================
@@ -50,10 +51,10 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(chestPin, GPIO.OUT)
 GPIO.output(chestPin, 0) # lock chest by default
 
-GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(IS_23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(IS_24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(IS_23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(IS_24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # ===================================
 # RFID CODE
@@ -79,8 +80,9 @@ def rfid():
 
 
 def code(): # check for right id code return true on got
-    for i in range(len(identity)):
-        if GPIO.input(identity[i]) == 1:
+    for i in range(4):
+        #if GPIO.input(identity[i]) == 1 :
+        if piID == i:
             if the_key[i] == id_r(): # correct rune for candle
                 if correct[i] == False:
                     correct[i] = True
