@@ -33,6 +33,8 @@ RGB_LED = [8, 9, 10] # R, G, B PWM? Software POV effect??!!
 RFID_TAG_ACK = [25, 8, 7] # Duino #1, #2, #3
 PUMP_IN = [16, 20, 21] # Duino #4, #5, #6 pulse on pull script
 
+the_key = [3, 5, 4] # parts red/green/blue
+
 # ============================================
 # ============================================
 # SET MODE FIRST (NO PIN DEFS BEFORE)
@@ -91,6 +93,39 @@ def wait_remove():
 # ====================================
 def pump():
     return False
+
+
+
+# ====================================
+# LED SET
+# ====================================
+
+rgb = [0, 0, 0] # the colour
+err = False
+
+
+def led():
+    global rgb
+    global err
+    time.sleep(0.01) # 100 Hz
+    red = float(rgb[0]) / float(the_key[0]) # 0 -> 1
+    green = float(rgb[1]) / float(the_key[1])  # 0 -> 1
+    blue = float(rgb[2]) / float(the_key[2])  # 0 -> 1
+    if (red > 1.0) or (green > 1.0) or (blue > 1.0):
+        err = True # over filled
+    if err:
+        for j in range(5):
+            for i in range(3):
+                GPIO.output(RGB_LED[i], 1) # white
+            time.sleep(0.5)
+            for i in range(3):
+                GPIO.output(RGB_LED[i], 0) # black
+            time.sleep(0.5)
+        rgb = [0, 0, 0]
+        err = False
+    else: # colour modulation
+        
+
 
 
 # ====================================
@@ -245,9 +280,9 @@ def initialise():
     t3 = threading.Thread(target=rfid)
     t3.daemon = False
     t3.start()
-    #t4 = threading.Thread(target=gauge_motion)
-    #t4.daemon = False
-    #t4.start()
+    t4 = threading.Thread(target=led)
+    t4.daemon = False
+    t4.start()
 
 
 # ===============================
