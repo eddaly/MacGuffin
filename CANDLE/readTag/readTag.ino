@@ -70,7 +70,7 @@ void loop()
   delayed_id = compare_id;
   compare_id = id;
 
-  delay(120); //delay 120 ms so as to have lower output rate than python reading
+  delay(500); //delay 120 ms so as to have lower output rate than python reading
   //identify any tags in range.
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {

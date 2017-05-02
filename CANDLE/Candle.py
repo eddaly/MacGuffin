@@ -80,6 +80,7 @@ def rfid():
 
 
 def code(): # check for right id code return true on got
+    global correct
     for i in range(4):
         #if GPIO.input(identity[i]) == 1 :
         if piID == i:
@@ -243,7 +244,7 @@ def heartbeat_loop():
     while True:
         send_packet("H")
         ##debug('isAlive: ' + datetime.datetime.now().strftime('%G-%b-%d %I:%M %p'))
-        time.sleep(10)
+        time.sleep(3)
 
 
 # ====================================
@@ -282,14 +283,15 @@ def main_loop():
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
-            send_packet('200')
+            # send_packet('200')
         if state_r() == 1:  # CODE
             if code() == True:  # run the code finder
                 state_w(2)
                 # more states?
         if state_r() == 2:
+            time.sleep(0.1)
             # GPIO.output(chestPin, 1)  # open chest
-            send_packet('201')
+            # send_packet('201')
 
 
 def main():
