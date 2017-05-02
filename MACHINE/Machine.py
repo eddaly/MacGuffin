@@ -181,6 +181,19 @@ def debug(show):
 # MORE CODE PINS ETC.
 # ===================================
 
+def motor():
+    global current_step
+    length = len(the_key)
+    complete = float(length - min(current_step, length)) / float(length)
+    complete *= complete # bias toward the end of the entry conditions
+    rand = (1.0 - complete) + random.random() * 0.25
+
+    if (rand > 0.5) and not((state_r() == 0) or (state_r() == 3)): # not idle or ended game
+        GPIO.output(motorPin, 1)  # turn on motor
+    else:
+        GPIO.output(motorPin, 0)  # turn off motor
+
+
 # ====================================
 # A GAUGE ON THE MACHINE
 # ====================================
@@ -194,6 +207,7 @@ def gauge_func(num):  # a 0 to 100% dial approximatly. Could be upto 10% out dep
 def gauge_motion():
     time.sleep(0.3)
     gauge_func(random.random() * 25.0 * min(current_step + 1, 4)) # a limit check so the last digit does not go over !!
+    motor() # update the motor too
 
 
 # =======================================
