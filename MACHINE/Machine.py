@@ -48,11 +48,10 @@ wired = 0
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-if USES_BUTTON:
-    if BUTTON_PRESS_POLARITY == 1:
-        GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    else:
-        GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+if BUTTON_PRESS_POLARITY == 1:
+    GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+else:
+    GPIO.setup(PI_BUTTON_PULL_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # wired
 GPIO.setup(wiredPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -206,7 +205,7 @@ def gauge_func(num):  # a 0 to 100% dial approximatly. Could be upto 10% out dep
 
 def gauge_motion():
     time.sleep(0.3)
-    gauge_func(random.random() * 25.0 * min(current_step + 1, 4)) # a limit check so the last digit does not go over !!
+    gauge_func(random.random() * 25.0 * min(current_step + 1, len(the_key) - 1)) # a limit check so the last digit does not go over !!
     motor() # update the motor too
 
 
