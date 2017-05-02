@@ -33,6 +33,7 @@ TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
+ALLOW_LAST_DIGIT = True # for debouncing
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 wiredPin = 21 # BCM detect wired up connectors.
@@ -149,7 +150,8 @@ def code():
         while BUTTON_ONLY_AT_EXIT and (current_step != len(the_key)) and (id_r() != -1):  # remove wait
             debug('last button press only. pulled out.')
             time.sleep(0.1)
-    elif id_r() != -1:  # reset combination unless daudling
+    elif (id_r() != -1) and not (ALLOW_LAST_DIGIT and id_r() == the_key[max(current_step - 1, 0)]):  # reset combination unless daudling
+        # a bit of a work around to allow the last digit to not reset the combination
         debug('some wrong inserted.')
         send_packet('100')
         if RESET_LOCK_ON_WRONG:
