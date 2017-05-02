@@ -32,6 +32,13 @@ void indicate() {
   Serial.println(delayed_id, DEC);// NO CARD
 }
 
+int delayr = 100;
+
+void reset() // Restarts program from beginning but does not reset the peripherals and registers
+{
+  asm volatile ("  jmp 0");  
+}  
+
 void setup() 
 { 
   //CLKPR = (1<<CLKPCE);
@@ -51,6 +58,12 @@ void setup()
 
 void loop()
 {
+  if(delayr > 0) {
+    delayr--;
+  } else {
+    delay(100);//prevent serial parse error
+    reset();// try a soft reset fix
+  }
   // delayed comparison for wiggle debounce
   delayed_id = compare2_id;
   compare2_id = compare_id;
