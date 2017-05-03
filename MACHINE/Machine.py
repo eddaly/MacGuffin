@@ -128,7 +128,7 @@ def code():
     global current_step
     # GETS TO HERE
     length = len(the_key)
-    debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
+    #debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
     if id_r() == the_key[current_step]:  # a correct digit
         debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
@@ -179,7 +179,7 @@ def code():
         # =========================================
         # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
         # =========================================
-        debug('no card detected')
+        #debug('no card detected')
     if length == current_step:  # yep got combination as line 142 would have made current step == 6
         debug('combination valid')
         return True

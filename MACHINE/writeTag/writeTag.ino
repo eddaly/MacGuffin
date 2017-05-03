@@ -10,7 +10,7 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 MFRC522::MIFARE_Key key;
 
-int tagID = 1;
+int tagID = 103;
 
 //do not change these vaiables!
 const byte sector = 0;
