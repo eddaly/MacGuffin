@@ -113,6 +113,7 @@ def db():
             if LATCH:
                 wired = 1  # latch??
             else:
+                debug(wired)
                 wired = GPIO.input(wiredPin)
 
 
