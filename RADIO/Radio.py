@@ -79,13 +79,13 @@ def rfid():
         if j == 1:
             if acitate[i] == False:
                 send_packet('1' + str(i + 1) + '1')
-                acitate[i] = True
             debug('rnd T:' + str(i + 1))
+            acitate[i] = True
         else:
             if acitate[i] == True:
                 send_packet('1' + str(i + 1) + '0')
-                acitate[i] = False
             debug('rnd F:' + str(i + 1))
+            acitate[i] = False
         flag = flag and j
     if flag:
         send_packet('201')
@@ -375,6 +375,7 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 def reset_all():
     global touch_grid
+    global acitate
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -389,6 +390,7 @@ def reset_all():
     touch_grid = [[-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False],
                   [-1, -1, -1, -1, False]]  # the four active touches
     do_touch() # clear display
+    acitate = [False, False, False, False, False]
 
 
 def start_game():
