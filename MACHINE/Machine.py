@@ -24,7 +24,7 @@ import serial
 
 # import MFRC522 # the RFID lib
 
-BUILD = True  # enable show controller
+BUILD = False  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = False
 PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
