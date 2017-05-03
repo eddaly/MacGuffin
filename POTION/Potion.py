@@ -103,10 +103,12 @@ def pump():
 rgb = [0, 0, 0] # the colour
 err = False
 
+filtered = [0.0, 0.0, 0.0] # a residual for later output
 
 def led():
     global rgb
     global err
+    global filtered
     time.sleep(0.01) # 100 Hz
     red = float(rgb[0]) / float(the_key[0]) # 0 -> 1
     green = float(rgb[1]) / float(the_key[1])  # 0 -> 1
@@ -124,8 +126,39 @@ def led():
         rgb = [0, 0, 0]
         err = False
     else: # colour modulation
+        red -= filtered[0]
+        green -= filtered[1]
+        blue -= filtered[2]
+        # offsets
+        red += 0.5
+        green += 0.5
+        blue += 0.5
+        # clamps
+        if red > 1.0:
+            red = 1.0
+        if red < 0:
+            red = 0.0
+        if green > 1.0:
+            green = 1.0
+        if green < 0:
+            green = 0.0
+        if blue > 1.0:
+            blue = 1.0
+        if blue < 0:
+            blue = 0.0
         # delta sigma lpf????
-
+        s_red = int(red + 0.5)
+        s_green = int(green + 0.5)
+        s_blue = int(blue + 0.5)
+        # output
+        GPIO.output(RGB_LED[0], s_red)
+        GPIO.output(RGB_LED[1], s_green)
+        GPIO.output(RGB_LED[2], s_blue)
+        # filtered
+        prob = 0.5
+        filtered[0] = prob * filtered[0] + (1.0 - prob) * s_red
+        filtered[1] = prob * filtered[1] + (1.0 - prob) * s_green
+        filtered[2] = prob * filtered[2] + (1.0 - prob) * s_blue
 
 
 # ====================================
