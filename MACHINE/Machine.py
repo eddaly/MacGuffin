@@ -230,8 +230,7 @@ def gauge_func(num):  # a 0 to 100% dial approximatly. Could be upto 10% out dep
 
 def gauge_motion():
     time.sleep(0.3)
-    gauge_func(random.random() * 100.0 / float(len(the_key) - 1) * min(current_step + 1, len(
-        the_key) - 1))  # a limit check so the last digit does not go over !!
+    gauge_func(random.random() * 20.0 * max(current_step + 1, 5))  # a limit check so the last digit does not go over !!
     motor()  # update the motor too
 
 

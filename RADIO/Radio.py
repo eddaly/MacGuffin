@@ -374,6 +374,7 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
+    global touch_grid
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -385,6 +386,9 @@ def reset_all():
 
     debug('all reset - releasing the lock')
     # start_game() -- should not start game yet
+    touch_grid = [[-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False],
+                  [-1, -1, -1, -1, False]]  # the four active touches
+    do_touch() # clear display
 
 
 def start_game():
