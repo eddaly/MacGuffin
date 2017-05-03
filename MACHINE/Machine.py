@@ -94,10 +94,16 @@ def rfid():
         debug(input)
         id_w(int(input))  # load in number to use next
 
+# ====================================
+# ASSUME GPIO DOES WIERD THINGS HERE
+# ====================================
+
+def db():
+    while True:
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
         # debug(str(button_dbounce))
         if GPIO.input(wiredPin) == 1:
-            wired = 1 # latch??
+             wired = 1 # latch??
 
 
 current_step = 0
@@ -364,6 +370,9 @@ def initialise():
     t4 = threading.Thread(target=gauge_motion)
     t4.daemon = False
     t4.start()
+    t5 = threading.Thread(target=db)
+    t5.daemon = False
+    t5.start()
 
 
 # ===============================
