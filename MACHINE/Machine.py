@@ -33,7 +33,6 @@ TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
-WOBBLE_BYPASS = True  # prevent -1 occasionals from resetting code
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 wiredPin = 21  # BCM detect wired up connectors.
