@@ -71,7 +71,7 @@ gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
 # RFID CODE
 # ===================================
 
-the_key = [101, 102, 103, 104, 105, 106]  # tag ids must be 1 to 255
+the_key = [-2, 101, 102, 103, 104, 105, 106]  # tag ids must be 1 to 255
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
@@ -129,7 +129,7 @@ def code():
     # GETS TO HERE
     length = len(the_key)
     #debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
-    if id_r() == the_key[current_step]:  # a correct digit
+    if id_r() == the_key[current_step + 1]:  # a correct digit
         debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
@@ -158,7 +158,7 @@ def code():
         # SO WRONG PADDLE
         # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
-        if id_r() != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
+        if id_r() != the_key[current_step]:  # last key or first key so not indexing array [-1]
             # ============================================================
             # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
             # ============================================================
