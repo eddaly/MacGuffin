@@ -255,9 +255,10 @@ def heartbeat_loop():
 def initialise():
     reset_all()
     input = ser.readline()
-    t1 = threading.Thread(target=reset_loop)
-    t1.daemon = False
-    t1.start()
+    if not BUILD:
+        t1 = threading.Thread(target=reset_loop)
+        t1.daemon = False
+        t1.start()
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
