@@ -32,6 +32,7 @@ RX_PORT = 5000  # Change when allocated, but to run independent of controller is
 RGB_LED = [8, 9, 10] # R, G, B PWM? Software POV effect??!!
 RFID_TAG_ACK = [25, 8, 7] # Duino #1, #2, #3
 PUMP_IN = [16, 20, 21] # Duino #4, #5, #6 pulse on pull script
+PROB = 0.5 # filter for persistance of vision 0 -> 1
 
 the_key = [3, 5, 4] # parts red/green/blue
 
@@ -56,51 +57,55 @@ correct = [False, False, False]
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
 
-# ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
-id_code = -1 # default no read
-
-def rfid():
-    # This loop keeps checking for chips. If one is near it will get the UID and authenticate
-    while True:
-        time.sleep(0.1)
-        input = ser.readline()  # BLOCKING
-        ##debug(input)
-        id_w(int(input))  # load in number to use next
-
-
 def code(): # check for right id code return true on got
-    for i in range(len(identity)):
-        if GPIO.input(identity[i]) == 1:
-            if the_key[i] == id_r(): # correct rune for candle
-                if correct[i] == False:
-                    correct[i] = True
-                    send_packet('1' + str(i + 1) + '1') #on
-                    return True
-            elif correct[i] == True:
+    flag = True
+    for i in range(len(RFID_TAG_ACK)):
+        if GPIO.input(RFID_TAG_ACK[i]) == 1:
+            if correct[i] == False:
+                correct[i] = True
+                send_packet('1' + str(i + 1) + '1') #on
+        else:
+            flag = False
+            if correct[i] == True:
                 correct[i] = False
                 send_packet('1' + str(i + 1) + '0')  # off
-                return False
-    return False
 
+    return flag
 
-def wait_remove():
-    while id_r() != -1:
-        time.sleep(2) # sleep 2 seconds until reader is empty
-    time.sleep(2) # and away with the tag
 
 # ====================================
 # PUMP SEQUENCE
 # ====================================
-def pump():
-    return False
+rgb = [0, 0, 0] # the colour
+latch = [False, False, False]
 
+def pump():
+    global latch
+    flag = True
+    for i in range(len(PUMP_IN)):
+        if GPIO.input(PUMP_IN[i]) == 1:
+            if latch[i] == False:
+                latch[i] = True
+                # send_packet('2' + str(i + 1) + '1')  # on
+                rgb[i] += 1
+                if rgb[i] == the_key[i]:
+                    send_packet('2' + str(i + 1) + '1')
+                else:
+                    send_packet('2' + str(i + 1) + '0')
+                    flag = False
+        else:
+            # flag = False
+            if latch[i] == True:
+                latch[i] = False
+                # send_packet('2' + str(i + 1) + '0')  # off
+
+    return flag
 
 
 # ====================================
 # LED SET
 # ====================================
 
-rgb = [0, 0, 0] # the colour
 err = False
 
 filtered = [0.0, 0.0, 0.0] # a residual for later output
@@ -109,6 +114,7 @@ def led():
     global rgb
     global err
     global filtered
+    global PROB
     time.sleep(0.01) # 100 Hz
     red = float(rgb[0]) / float(the_key[0]) # 0 -> 1
     green = float(rgb[1]) / float(the_key[1])  # 0 -> 1
@@ -124,6 +130,7 @@ def led():
                 GPIO.output(RGB_LED[i], 0) # black
             time.sleep(0.5)
         rgb = [0, 0, 0]
+        send_packet('2' + str(i) + '0') # back to
         err = False
     else: # colour modulation
         red -= filtered[0]
@@ -155,10 +162,9 @@ def led():
         GPIO.output(RGB_LED[1], s_green)
         GPIO.output(RGB_LED[2], s_blue)
         # filtered
-        prob = 0.5
-        filtered[0] = prob * filtered[0] + (1.0 - prob) * s_red
-        filtered[1] = prob * filtered[1] + (1.0 - prob) * s_green
-        filtered[2] = prob * filtered[2] + (1.0 - prob) * s_blue
+        filtered[0] = PROB * filtered[0] + (1.0 - PROB) * s_red
+        filtered[1] = PROB * filtered[1] + (1.0 - PROB) * s_green
+        filtered[2] = PROB * filtered[2] + (1.0 - PROB) * s_blue
 
 
 # ====================================
@@ -304,15 +310,16 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
-    t1 = threading.Thread(target=reset_loop)
-    t1.daemon = False
-    t1.start()
+    if not BUILD:
+        t1 = threading.Thread(target=reset_loop)
+        t1.daemon = False
+        t1.start()
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    t3 = threading.Thread(target=rfid)
-    t3.daemon = False
-    t3.start()
+    #t3 = threading.Thread(target=rfid)
+    #t3.daemon = False
+    #t3.start()
     t4 = threading.Thread(target=led)
     t4.daemon = False
     t4.start()
@@ -335,7 +342,7 @@ def main_loop():
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
-            send_packet('200')
+            #send_packet('200')
         if state_r() == 1:  # STOPPERS
             if code() == True:  # run the code finder
                 state_w(2)
@@ -345,7 +352,8 @@ def main_loop():
                 state_w(3)
                 # more states?
         if state_r() == 3:
-            send_packet('201')
+            #send_packet('201')
+            nop = True
 
 
 def main():
