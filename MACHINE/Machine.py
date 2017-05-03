@@ -85,8 +85,6 @@ else:
     button_dbounce = 1
 
 def rfid():
-    global button_dbounce
-    global wired
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
@@ -99,6 +97,8 @@ def rfid():
 # ====================================
 
 def db():
+    global button_dbounce
+    global wired
     while True:
         time.sleep(0.1)
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
