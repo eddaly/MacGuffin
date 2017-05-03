@@ -108,12 +108,11 @@ def db():
         time.sleep(0.1)
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
         # debug(str(button_dbounce))
-        if GPIO.input(wiredPin) == 1:
-            debug('SHORTED =================================================')
-            if LATCH:
+        if LATCH:
+            if GPIO.input(wiredPin) ==1:
                 wired = 1  # latch??
-            else:
-                wired = GPIO.input(wiredPin)
+        else:
+            wired = GPIO.input(wiredPin)
         debug(str(wired))
 
 
