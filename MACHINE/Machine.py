@@ -90,7 +90,7 @@ def rfid():
     while True:
         time.sleep(0.1)
         input = ser.readline()  # BLOCKING
-        debug(input)
+        debug(str(int(input)))
         id_w(int(input))  # load in number to use next
 
 
