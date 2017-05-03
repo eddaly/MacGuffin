@@ -179,7 +179,8 @@ def code():
         # =========================================
         # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
         # =========================================
-        #debug('no card detected')
+        # debug('no card detected')
+        nop = True
     if length == current_step:  # yep got combination as line 142 would have made current step == 6
         debug('combination valid')
         return True
