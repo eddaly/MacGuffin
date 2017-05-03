@@ -24,6 +24,7 @@ import serial
 
 # import MFRC522 # the RFID lib
 
+BUILD = True
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = False
 PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
@@ -326,7 +327,8 @@ def reset_all():
     wired = 0
     GPIO.output(motorPin, 0)  # turn off motor by default
     input = ser.readline()  # flush
-    # start_game() -- should not start game yet
+    if BUILD: # for tests
+        start_game() #-- should not start game yet
 
 
 def start_game():
