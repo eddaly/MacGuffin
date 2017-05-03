@@ -35,7 +35,7 @@ BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
 LATCH = False
 
-gaugePin = 21  # set pin for gauge for use as some kind of indicator
+gaugePin = 26  # set pin for gauge for use as some kind of indicator
 wiredPin = 18  # BCM detect wired up connectors.
 motorPin = 19  # motor control
 wired = 0
