@@ -364,7 +364,9 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
+    debug('flush about to happen')
     input = ser.readline()  # flush
+    debug('flushed')
     if not BUILD:
         t1 = threading.Thread(target=reset_loop)
         t1.daemon = False
