@@ -174,7 +174,7 @@ recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 # CLEAN UP ROUTINE
 def clean_up():
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
-
+    ser.close()
 
 atexit.register(clean_up)
 

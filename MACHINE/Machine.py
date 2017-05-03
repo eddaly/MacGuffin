@@ -24,7 +24,7 @@ import serial
 
 # import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = False  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = False
 PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
@@ -283,7 +283,7 @@ recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 # CLEAN UP ROUTINE
 def clean_up():
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
-
+    ser.close()
 
 atexit.register(clean_up)
 
