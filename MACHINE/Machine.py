@@ -35,9 +35,9 @@ BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
 LATCH = False
 
-gaugePin = 19  # set pin for gauge for use as some kind of indicator
-wiredPin = 21  # BCM detect wired up connectors.
-motorPin = 26  # motor control
+gaugePin = 21  # set pin for gauge for use as some kind of indicator
+wiredPin = 18  # BCM detect wired up connectors.
+motorPin = 19  # motor control
 wired = 0
 
 # ============================================
@@ -372,6 +372,8 @@ def heartbeat_loop():
 def initialise():
     reset_all()
     debug('flush about to happen')
+    input = ser.readline()  # flush
+    time.sleep(3)
     input = ser.readline()  # flush
     debug('flushed')
     if not BUILD:
