@@ -33,12 +33,12 @@ chestPin = 19  # set pin for gauge for use as some kind of indicator
 piID = 1
 
 # a set up pins. pull one up to indicate which candle is being
-#IS_21 = 8 # pin 12
-#IS_22 = 9 # pin 18
-#IS_23 = 10 # pin 16
-#IS_24 = 11 # pin 32
+# IS_21 = 8 # pin 12
+# IS_22 = 9 # pin 18
+# IS_23 = 10 # pin 16
+# IS_24 = 11 # pin 32
 
-#identity = [IS_21, IS_22, IS_23, IS_24]
+# identity = [IS_21, IS_22, IS_23, IS_24]
 
 # ============================================
 # ============================================
@@ -49,12 +49,12 @@ GPIO.setmode(GPIO.BCM)
 
 # motor
 GPIO.setup(chestPin, GPIO.OUT, initial=GPIO.LOW)
-GPIO.output(chestPin, 0) # lock chest by default
+GPIO.output(chestPin, 0)  # lock chest by default
 
-#GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(IS_23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(IS_24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(IS_23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+# GPIO.setup(IS_24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # ===================================
 # RFID CODE
@@ -68,7 +68,8 @@ correct = [False, False, False, False]
 # MIFAREReader = MFRC522.MFRC522()
 
 ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
-id_code = -1 # default no read
+id_code = -1  # default no read
+
 
 def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
@@ -79,18 +80,18 @@ def rfid():
         id_w(int(input))  # load in number to use next
 
 
-def code(): # check for right id code return true on got
+def code():  # check for right id code return true on got
     global correct
     for i in range(4):
-        #if GPIO.input(identity[i]) == 1 :
+        # if GPIO.input(identity[i]) == 1 :
         if piID == i:
-            if the_key[i] == id_r(): # correct rune for candle
+            if the_key[i] == id_r():  # correct rune for candle
                 if correct[i] == False:
                     correct[i] = True
-                    send_packet('1' + str(i + 1) + '1') #on
+                    send_packet('1' + str(i + 1) + '1')  # on
                     debug('on')
                     if BUILD:
-                        return False # just to test
+                        return False  # just to test
                     else:
                         return True
             elif correct[i] == True:
@@ -100,10 +101,14 @@ def code(): # check for right id code return true on got
                 return False
     return False
 
+
 def wait_remove():
+    global correct
     while id_r() != -1:
-        time.sleep(2) # sleep 2 seconds until reader is empty
-    time.sleep(2) # and away with the tag
+        time.sleep(2)  # sleep 2 seconds until reader is empty
+    time.sleep(2)  # and away with the tag
+    correct[piID] = False  # reset status
+
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -176,6 +181,7 @@ def clean_up():
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
     ser.close()
 
+
 atexit.register(clean_up)
 
 
@@ -215,14 +221,14 @@ def reset_all():
     debug('all reset - releasing the lock')
     GPIO.output(chestPin, 0)  # lock chest
     if BUILD:
-        start_game() # should not start game yet
+        start_game()  # should not start game yet
 
 
 def start_game():
+    wait_remove()
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     GPIO.output(chestPin, 0)  # lock chest
-    wait_remove()
 
 
 def reset_loop():
@@ -265,9 +271,9 @@ def initialise():
     t3 = threading.Thread(target=rfid)
     t3.daemon = False
     t3.start()
-    #t4 = threading.Thread(target=gauge_motion)
-    #t4.daemon = False
-    #t4.start()
+    # t4 = threading.Thread(target=gauge_motion)
+    # t4.daemon = False
+    # t4.start()
 
 
 # ===============================

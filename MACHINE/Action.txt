@@ -1,3 +1,19 @@
+"device reporst rediness to read but returned no data" a classic when 2 contenders for the serial.
+The port is referenced, but a buffer object is not returned due to it being in use.
+
+SUGGEST 1 : ps ax | grep python
+# to check only 1 python process is running
+
+SUGGEST 2 : sudo killall python
+# before starting script
+
+SUGGEST 3 : kill -9 [python-pid]
+# after obtaining pid from ps ax after a ctrl-Z
+
+==========================================================================================================
+
+
+
 Some serching on the net revealed https://www.youtube.com/watch?v=tZPWXnMdIRU as a demo of RFID on Pi, there is
 details of a bug fix to check out later.
 
