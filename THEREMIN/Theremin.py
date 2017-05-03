@@ -78,6 +78,10 @@ def receive_packet():
     print 'r_packet:',data
     return data
 
+# BCM of PIN 7
+RESET = 4
+GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
+
 def reset_all():
     print 'reset all'
     global state
@@ -86,6 +90,9 @@ def reset_all():
     global t_message
     global old_t_message
     global old_f
+    GPIO.output(RESET, GPIO.LOW)
+    time.sleep(0.5)  # wait active low reset
+    GPIO.output(RESET, GPIO.HIGH)
     l = threading.Lock()
     l.acquire
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
