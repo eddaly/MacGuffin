@@ -214,7 +214,6 @@ def reset_all():
 
     debug('all reset - releasing the lock')
     GPIO.output(chestPin, 0)  # lock chest
-    input = ser.readline()
     if BUILD:
         start_game() # should not start game yet
 
@@ -255,6 +254,7 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
+    input = ser.readline()
     t1 = threading.Thread(target=reset_loop)
     t1.daemon = False
     t1.start()

@@ -326,7 +326,6 @@ def reset_all():
     debug('all reset - releasing the lock')
     wired = 0
     GPIO.output(motorPin, 0)  # turn off motor by default
-    input = ser.readline()  # flush
     if BUILD: # for tests
         start_game() #-- should not start game yet
 
@@ -364,21 +363,22 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
+    input = ser.readline()  # flush
     # t1 = threading.Thread(target=reset_loop)
     # t1.daemon = False
     # t1.start()
-    # t2 = threading.Thread(target=heartbeat_loop)
-    # t2.daemon = False
-    # t2.start()
+    t2 = threading.Thread(target=heartbeat_loop)
+    t2.daemon = False
+    t2.start()
     t3 = threading.Thread(target=rfid)
     t3.daemon = False
     t3.start()
-    # t4 = threading.Thread(target=gauge_motion)
-    # t4.daemon = False
-    # t4.start()
-    # t5 = threading.Thread(target=db)
-    # t5.daemon = False
-    # t5.start()
+    t4 = threading.Thread(target=gauge_motion)
+    t4.daemon = False
+    t4.start()
+    t5 = threading.Thread(target=db)
+    t5.daemon = False
+    t5.start()
 
 
 # ===============================
