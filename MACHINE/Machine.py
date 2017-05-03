@@ -24,7 +24,7 @@ import serial
 
 # import MFRC522 # the RFID lib
 
-BUILD = False  # enable show controller
+BUILD = True  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = False
 PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
@@ -90,7 +90,7 @@ def rfid():
     while True:
         time.sleep(0.1)
         input = ser.readline()  # BLOCKING
-        debug(str(int(input)))
+        debug(input)
         id_w(int(input))  # load in number to use next
 
 
@@ -128,7 +128,7 @@ def code():
     length = len(the_key)
     debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
     if id_r() == the_key[current_step]:  # a correct digit
-        debug('correct digit: ' + str(id_r()) + ' or line 161')
+        debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
         send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
