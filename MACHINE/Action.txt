@@ -1,5 +1,6 @@
 "device reporst rediness to read but returned no data" a classic when 2 contenders for the serial.
 The port is referenced, but a buffer object is not returned due to it being in use.
+Yes I did get this a few times with the candle script, when I did not shut down the previous running python script.
 
 SUGGEST 1 : ps ax | grep python
 # to check only 1 python process is running
@@ -10,12 +11,16 @@ SUGGEST 2 : sudo killall python
 SUGGEST 3 : kill -9 [python-pid]
 # after obtaining pid from ps ax after a ctrl-Z
 
+
+
+No numbers without a read error, or other exception? The duino is not sending? is its lights flashing?
+
 ==========================================================================================================
 
 
 
 Some serching on the net revealed https://www.youtube.com/watch?v=tZPWXnMdIRU as a demo of RFID on Pi, there is
-details of a bug fix to check out later.
+details of a bug fix to check out later. Something to do with hardware CS.
 
 
 

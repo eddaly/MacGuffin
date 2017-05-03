@@ -89,7 +89,9 @@ def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
+        debug('waiting for serial')
         input = ser.readline()  # BLOCKING
+        debug('serial read done')
         debug(input)
         id_w(int(input))  # load in number to use next
 
