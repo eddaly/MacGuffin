@@ -412,6 +412,7 @@ def main_loop():
         if state_r() == 2:  # check wired
             if wired == 1:  # can be set any time
                 state_w(3)
+                debug('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY')
         if state_r() == 3:
             GPIO.output(motorPin, 0)  # turn off motor
             send_packet('201')
