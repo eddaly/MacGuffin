@@ -32,11 +32,11 @@ TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
-WOBBLE_BYPASS = True # prevent -1 occasionals from resetting code
+WOBBLE_BYPASS = True  # prevent -1 occasionals from resetting code
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
-wiredPin = 21 # BCM detect wired up connectors.
-motorPin = 26 # motor control
+wiredPin = 21  # BCM detect wired up connectors.
+motorPin = 26  # motor control
 wired = 0
 
 # ============================================
@@ -55,7 +55,7 @@ else:
 GPIO.setup(wiredPin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 # motor
 GPIO.setup(motorPin, GPIO.OUT)
-GPIO.output(motorPin, 0) # turn off motor by default
+GPIO.output(motorPin, 0)  # turn off motor by default
 
 # SPECIFIC SPI (Use default SPI library for Pi)
 CLK = 11
@@ -84,6 +84,7 @@ if BUTTON_PRESS_POLARITY == 1:
 else:
     button_dbounce = 1
 
+
 def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
@@ -91,6 +92,7 @@ def rfid():
         input = ser.readline()  # BLOCKING
         debug(input)
         id_w(int(input))  # load in number to use next
+
 
 # ====================================
 # ASSUME GPIO DOES WIERD THINGS HERE
@@ -104,7 +106,7 @@ def db():
         button_dbounce = GPIO.input(PI_BUTTON_PULL_UP)  # uses the 0.1 sleep as a debounce
         # debug(str(button_dbounce))
         if GPIO.input(wiredPin) == 1:
-             wired = 1 # latch??
+            wired = 1  # latch??
 
 
 current_step = 0
@@ -129,7 +131,7 @@ def code():
         debug('correct digit: ' + str(id_r()) + ' or line 161')
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
-        send_packet('10' + str(current_step)) # send correct code for digit the_key[0] => 101
+        send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         # ==============================
         # INPUT OK
         # ==============================
@@ -146,15 +148,15 @@ def code():
             # check button release
             debug('check button release.')
             time.sleep(0.1)
-        # ==================================
-        # SO HAVE REMOVED OR BUTTON RELEASE
-        # ==================================
+            # ==================================
+            # SO HAVE REMOVED OR BUTTON RELEASE
+            # ==================================
     elif id_r() != -1:  # reset combination unless daudling
         # ==================================
         # SO WRONG PADDLE
         # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
-        if id_r() != the_key[max(current_step - 1, 0)]: # last key or first key so not indexing array [-1]
+        if id_r() != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
             # ============================================================
             # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
             # ============================================================
@@ -171,7 +173,7 @@ def code():
         else:
             debug('clone of last digit/paddle')
             return False
-    else: # -1
+    else:  # -1
         # =========================================
         # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
         # =========================================
@@ -198,10 +200,10 @@ def motor():
     global current_step
     length = len(the_key)
     complete = float(length - min(current_step, length)) / float(length)
-    complete *= complete # bias toward the end of the entry conditions
+    complete *= complete  # bias toward the end of the entry conditions
     rand = (1.0 - complete) + random.random() * 0.25
 
-    if (rand > 0.5) and not((state_r() == 0) or (state_r() == 3)): # not idle or ended game
+    if (rand > 0.5) and not ((state_r() == 0) or (state_r() == 3)):  # not idle or ended game
         GPIO.output(motorPin, 1)  # turn on motor
     else:
         GPIO.output(motorPin, 0)  # turn off motor
@@ -219,8 +221,9 @@ def gauge_func(num):  # a 0 to 100% dial approximatly. Could be upto 10% out dep
 
 def gauge_motion():
     time.sleep(0.3)
-    gauge_func(random.random() * 100.0 / float(len(the_key) - 1) * min(current_step + 1, len(the_key) - 1)) # a limit check so the last digit does not go over !!
-    motor() # update the motor too
+    gauge_func(random.random() * 100.0 / float(len(the_key) - 1) * min(current_step + 1, len(
+        the_key) - 1))  # a limit check so the last digit does not go over !!
+    motor()  # update the motor too
 
 
 # =======================================
@@ -322,7 +325,7 @@ def reset_all():
     debug('all reset - releasing the lock')
     wired = 0
     GPIO.output(motorPin, 0)  # turn off motor by default
-    input = ser.readline() # flush
+    input = ser.readline()  # flush
     # start_game() -- should not start game yet
 
 
@@ -359,21 +362,21 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
-    #t1 = threading.Thread(target=reset_loop)
-    #t1.daemon = False
-    #t1.start()
-    #t2 = threading.Thread(target=heartbeat_loop)
-    #t2.daemon = False
-    #t2.start()
+    # t1 = threading.Thread(target=reset_loop)
+    # t1.daemon = False
+    # t1.start()
+    # t2 = threading.Thread(target=heartbeat_loop)
+    # t2.daemon = False
+    # t2.start()
     t3 = threading.Thread(target=rfid)
     t3.daemon = False
     t3.start()
-    #t4 = threading.Thread(target=gauge_motion)
-    #t4.daemon = False
-    #t4.start()
-    #t5 = threading.Thread(target=db)
-    #t5.daemon = False
-    #t5.start()
+    # t4 = threading.Thread(target=gauge_motion)
+    # t4.daemon = False
+    # t4.start()
+    # t5 = threading.Thread(target=db)
+    # t5.daemon = False
+    # t5.start()
 
 
 # ===============================
@@ -400,7 +403,7 @@ def main_loop():
                 # more states?
 
         if state_r() == 2:  # check wired
-            if wired == 1: # can be set any time
+            if wired == 1:  # can be set any time
                 state_w(3)
         if state_r() == 3:
             GPIO.output(motorPin, 0)  # turn off motor
