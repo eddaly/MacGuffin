@@ -33,6 +33,7 @@ TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 BUTTON_PRESS_POLARITY = 1
 RESET_LOCK_ON_WRONG = True
+LATCH = False
 
 gaugePin = 19  # set pin for gauge for use as some kind of indicator
 wiredPin = 21  # BCM detect wired up connectors.
@@ -109,7 +110,10 @@ def db():
         # debug(str(button_dbounce))
         if GPIO.input(wiredPin) == 1:
             debug('SHORTED =================================================')
-            wired = 1  # latch??
+            if LATCH:
+                wired = 1  # latch??
+            else:
+                wired = GPIO.input(wiredPin)
 
 
 current_step = 0
