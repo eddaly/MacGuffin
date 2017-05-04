@@ -26,8 +26,8 @@ import serial
 
 BUILD = False  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-USES_BUTTON = False
-PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
+USES_BUTTON = True
+PI_BUTTON_PULL_UP = 21  # A BCM of the CS // was 8 now going through NANO in slot 5
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
