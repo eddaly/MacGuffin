@@ -21,6 +21,11 @@ off = 200
 delay = 1
 min_dial_range = 56
 max_dial_range = 57
+clue_active = False
+dial_range_clue = 10
+min_dial_range_clue = min_dial_range - dial_range_clue
+max_dial_range_clue = max_dial_range + dial_range_clue
+line_hex_code = '#46ffe6'
 target_pitch = 440
 pitch_mult = 2.0
 pitch = target_pitch-(pitch_mult*min_dial_range)
@@ -43,7 +48,7 @@ ax = plt.gca()
 x = np.linspace(off, 2*np.pi, width-(off*2))
 y = (height/4) * np.sin(.5*np.pi * (x - 0.1* 5)) + (height/2)
 xx = np.linspace(off, width-off, width-(off*2))
-line, = ax.plot(xx, y, lw=2, animated=True, zorder=1,color='#46ffe6')
+line, = ax.plot(xx, y, lw=2, animated=True, zorder=1,color=line_hex_code)
 
 # render the background plate
 plt.imshow(back, zorder=0)
@@ -171,14 +176,27 @@ def init():
 
 # animation function
 def animate(k):
+    global plt
     global dial_value
     global state
     global min_dial_range
     global max_dial_range
     global target_pitch
+    global min_dial_range_clue
+    global max_dial_range_clue
+    global clue_active
+
     # update the wave
     y = (height/4) * np.sin(0.01*np.pi * (x - k*dial_value)) + (height/2)
     line.set_data(xx, y) # plot the data
+    if dial_value >= min_dial_range_clue and dial_value <= max_dial_range_clue and state == 0 and clue_active == False:
+        clue_active = True
+        plt.setp(line, linewidth=4.0,color='r')
+
+    if dial_value <= min_dial_range_clue or dial_value >= max_dial_range_clue and state == 0 and clue_active == True:
+        clue_active = False
+        plt.setp(line, linewidth=2.0,color=line_hex_code)
+
     if dial_value >= min_dial_range and dial_value <= max_dial_range and state == 0:
         if debug == 1:
             print "stop!"
