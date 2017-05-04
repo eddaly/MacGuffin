@@ -13,14 +13,14 @@ import os
 import socket
 import pyaudio
 
-debug = 0
+debug = 1
 
 height = 480
 width = 800
 off = 200
 delay = 1
-min_dial_range = 53
-max_dial_range = 58
+min_dial_range = 54
+max_dial_range = 59
 target_pitch = 440
 pitch_mult = 2.0
 pitch = target_pitch-(pitch_mult*min_dial_range)
@@ -72,7 +72,7 @@ SEND_UDP_PORT = 5001
 send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 RECV_UDP_IP = "0.0.0.0"
-RECV_UDP_PORT = 6000
+RECV_UDP_PORT = 5000
 RECV_BUFFER_SIZE = 1024
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
@@ -91,20 +91,27 @@ def receive_packet():
 def reset_all():
     global state
     global dial_value
-
+    global old_dial_value
+    l = threading.Lock()
+    l.acquire	
+    old_dial_value = 2
     dial_value = 2
     state = -1
     msg = OSC.OSCMessage()
     msg.setAddress("/play")
-    msg.insert(0,1)
+    msg.insert(0,0)
     client.send(msg)
+    print (dial_value)
+    l.release
     
 def start_game():
     global state
     global pitch
+    global dial_value
+    dial_value = 2
     msg = OSC.OSCMessage()
     msg.setAddress("/play")
-    msg.insert(0,pitch)
+    msg.insert(0,1)
     client.send(msg)
     state = 0
 
@@ -180,7 +187,7 @@ def animate(k):
         msg.insert(0,target_pitch)
         client.send(msg)
         state = 1
-        send_packet("201")
+        send_packet("202")
         os.system('/usr/bin/omxplayer --win "0 0 800 480" /home/pi/MacGuffin/OSCILLOSCOPE/OSC_SCREEN_MACGUFFIN.mp4')
     return line,
 
