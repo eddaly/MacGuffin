@@ -139,13 +139,14 @@ def code():
         debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
-        send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
+        # send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         # ==============================
         # INPUT OK
         # ==============================
         while USES_BUTTON and (check_button() == False):  # check button
             time.sleep(0.1)  # wait
             debug('waiting for press')
+        send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
             debug('Not using button. key pulled out?')
             time.sleep(0.1)
