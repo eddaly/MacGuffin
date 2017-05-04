@@ -1,6 +1,6 @@
 # Mc Guffin MACHINE
 # 
-# Author: A.T. seeper
+# Author: J seeper
 # Basic template 28/4/2017 S. Jackson
 
 # Import SPI library (for hardware SPI) and MCP3008 library.
@@ -26,7 +26,7 @@ import serial
 
 BUILD = False  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-USES_BUTTON = True
+USES_BUTTON = False
 PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
@@ -72,7 +72,7 @@ gauge = GPIO.PWM(gaugePin, 157)  # default of no signal
 # RFID CODE
 # ===================================
 
-the_key = [101, 102, 103, 104, 105, 106]  # tag ids must be 1 to 255
+the_key = [105, 102, 103, 101, 104, 106]  # tag ids must be 1 to 255
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
@@ -411,7 +411,7 @@ def main_loop():
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
-            send_packet('200')
+            #send_packet('200')
         if state_r() == 1:  # CODE
             if code() == True:  # run the code finder
                 state_w(2)

@@ -25,11 +25,19 @@ client.connect(('127.0.0.1', 4559))
 GPIO.setmode(GPIO.BCM)
 gaugePin = 19 #set pin for pressure gauge
 ledPin = 26 
+lampPin = 4
 
+
+#GPIO.setup(lampPin,GPIO.OUT)
 GPIO.setup(gaugePin,GPIO.OUT)
 GPIO.setup(26,GPIO.OUT)
 
+GPIO.setup(25,GPIO.OUT)
+GPIO.output(25,GPIO.HIGH)
 
+# 
+# GPIO.setup(4,GPIO.OUT)
+# GPIO.output(4,GPIO.LOW)
 
 gauge = GPIO.PWM(gaugePin,100) 
 
@@ -61,7 +69,7 @@ state = 6 #set initial state, should be 0 at showtime
 
 SEND_UDP_IP = "10.100.1.100"
 SEND_UDP_PORT = 5001
-RECV_UDP_IP = "10.100.1.22"
+RECV_UDP_IP = "0.0.0.0"
 RECV_UDP_PORT = 5000
 
 send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -78,10 +86,6 @@ def receive_packet():
     print 'r_packet:',data
     return data
 
-# BCM of PIN 7
-RESET = 4
-GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
-
 def reset_all():
     print 'reset all'
     global state
@@ -90,21 +94,21 @@ def reset_all():
     global t_message
     global old_t_message
     global old_f
-    GPIO.output(RESET, GPIO.LOW)
-    time.sleep(0.5)  # wait active low reset
-    GPIO.output(RESET, GPIO.HIGH)
     l = threading.Lock()
     l.acquire
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
-    state = 5
+    GPIO.output(25,GPIO.HIGH)
+    #GPIO.output(4,GPIO.LOW)
+    state = 0
     wheel_pack = 0
     t = 10
     t_message = "200"
     old_t_message = "202"
     old_f = 440
     s = 100
+
     # ////////////////////////////////////////////////////
     
     l.release
@@ -151,6 +155,8 @@ def heartbeat_loop():
 
 def initialise():
     reset_all()
+    ser.flushInput()
+    time.sleep(1)
     t1 = threading.Thread(target=reset_loop)
     t1.daemon = False
     t1.start()
@@ -211,13 +217,13 @@ def Wheel_pack():
     global state
     l = threading.Lock()
     if wheel_pack == 0:
-        lock(1000, 1023)
+        lock(456, 563)
     elif wheel_pack == 1:
-        lock(240,300)
+        lock(983,1023)
     elif wheel_pack == 2:
-        lock(705, 770)
+        lock(28,134)
     elif wheel_pack == 3:
-        lock(113, 163)
+        lock(348,453)
     else:
         l.acquire
         #GPIO.output(ledPin,GPIO.HIGH)
@@ -246,7 +252,6 @@ def theremin():
     global old_t_message
     global old_f
     l = threading.Lock()
-    ser.flushInput()
     msg = OSC.OSCMessage()
     msg.setAddress("/play_this")
     play = OSC.OSCMessage()
@@ -255,6 +260,7 @@ def theremin():
     old_f = s
     s = int(ser.readline())
     pitch = s
+    print 'pitch:', pitch
     print 't:',t
     #gauge.ChangeDutyCycle(t)
     l.acquire       
@@ -275,7 +281,7 @@ def theremin():
     
     
     
-    if pitch > 420 and pitch < 460:
+    if pitch > 410 and pitch < 470:
         t = t + 1
     elif pitch == 100:
         pass
@@ -301,6 +307,7 @@ def theremin():
         client.send(play)
         state = 6
         t_message = "202"
+        GPIO.output(25,GPIO.HIGH)
         
     if t_message != old_t_message:
         send_packet(t_message)
@@ -312,9 +319,9 @@ def theremin():
 
 
 def idle():
-    
+    GPIO.output(25,GPIO.HIGH)
     pot = mcp.read_adc(0)
-    #print 'pot:',pot
+    print 'pot:',pot
     time.sleep(0.5)    
 
 
@@ -342,9 +349,15 @@ def main():
         if state == 1:
             pot = mcp.read_adc(0)
             old_pot = pot
-            if wheel_pack == 4:
-                state = 5
+            if wheel_pack == 4: # THIS IF STATEMENT REMOOVES THE THEREMIN
+                state = 6 #this should be 5 when sensor is active
+                #GPIO.output(25,GPIO.LOW)
                 send_packet("102")
+                #voidval = ser.readline()
+                time.sleep(2)
+                send_packet("202") 
+                #voidval = ser.readline()
+                #time.sleep(1)
             else:
                 waiting()
         if state == 2:
