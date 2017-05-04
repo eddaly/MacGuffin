@@ -63,7 +63,10 @@ rfid_init()
 
 
 def sim_pin():
-    return random.random() > 0.3  # should be almost there
+    if random.random() > 0.3:
+        return True  # should be almost there
+    else:
+        return False
 
 acitate = [False, False, False, False, False]
 
