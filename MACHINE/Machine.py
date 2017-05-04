@@ -123,6 +123,7 @@ current_step = 0
 def check_button():
     if USES_BUTTON:
         if button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
+            debug('BUTTON PRESS ==================================')
             return True
         else:
             return False  # didn't press button
@@ -170,6 +171,20 @@ def code():
             # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
             # ============================================================
             debug('some wrong card inserted.')
+            while USES_BUTTON and (check_button() == False):  # check button
+                time.sleep(0.1)  # wait
+                debug('waiting for press')
+            send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
+            while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
+                debug('Not using button. key pulled out?')
+                time.sleep(0.1)
+            # ===============================
+            # SO HAVE REGISTERED PADDLE
+            # ===============================
+            while USES_BUTTON and (check_button() == True):
+                # check button release
+                debug('check button release.')
+                time.sleep(0.1)
             send_packet('100')
             if RESET_LOCK_ON_WRONG:
                 # ===================================
