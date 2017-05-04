@@ -1,0 +1,20 @@
+
+RGB_LED = [8, 9, 10] # R, G, B PWM? Software POV effect??!!
+RFID_TAG_ACK = [25, 8, 7] # Duino #1, #2, #3
+PUMP_IN = [16, 20, 21] # Duino #4, #5, #6 pulse on pull script
+
+Up to colour display control
+
+
+
+Created repo from machine copy
+
+RGB LED OUT 3 PINS
+
+OVER IS FLASH WHITE AND RESET
+
+3 * RFID STOPPERS PIN HIGH READ OK
+
+3 * PUMP SENSORS HIGH IS PULLED, LOW IS RETURNED TO OFF
+
+THE DRAW IS SHOW CONTROLLER

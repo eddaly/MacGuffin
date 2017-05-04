@@ -11,7 +11,7 @@ byte buffer[18];
 byte size = sizeof(buffer);
 
 const int signalPin = 2; //output pin on which signal is communicated.
-const int readerID = 6; //output pin will activate when reader ID matches tag ID.
+const int readerID = 1; //output pin will activate when reader ID matches tag ID.
 
 //do not change these variables!
 byte sector = 0;
@@ -20,9 +20,6 @@ byte trailerBlock = 3;
 
 void setup() 
 { 
-  CLKPR = (1<<CLKPCE);
-  CLKPR = B00000001; //4 MHZ -> /64 SPI is 50 kHz approx !! -- ABOUT 8 SCANS PER SECOND WORKS
-  //BUT STILL NEED NEW CABLES WITH GOOD DIAELECTRIC SPACING
   pinMode(signalPin, OUTPUT);
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus

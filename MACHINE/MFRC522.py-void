@@ -4,7 +4,7 @@
 # BCM mode ====
 
 import RPi.GPIO as GPIO
-import spidev
+import spi
 import signal
 import time
 import os

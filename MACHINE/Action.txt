@@ -1,4 +1,76 @@
-Found library for Pi reading of basic ID information.
+"device reporst rediness to read but returned no data" a classic when 2 contenders for the serial.
+The port is referenced, but a buffer object is not returned due to it being in use.
+Yes I did get this a few times with the candle script, when I did not shut down the previous running python script.
+
+SUGGEST 1 : ps ax | grep python
+# to check only 1 python process is running
+
+SUGGEST 2 : sudo killall python
+# before starting script
+
+SUGGEST 3 : kill -9 [python-pid]
+# after obtaining pid from ps ax after a ctrl-Z
+
+SUGGEST 4 : unplugging the USB cable also leads to a similar error. And was the easiest way of stopping a
+# running version of the candle script.
+
+
+No numbers without a read error, or other exception? The duino is not sending? is its lights flashing?
+
+==========================================================================================================
+
+
+
+Some serching on the net revealed https://www.youtube.com/watch?v=tZPWXnMdIRU as a demo of RFID on Pi, there is
+details of a bug fix to check out later. Something to do with hardware CS.
+
+
+
+The pi is connected via USB0 to the duino.
+The duino script is to be reloaded and and placed in the #1 socket. (in readTag folder)
+The reader is connected to #1 reader socket.
+The gauge is connected on the same socket as was per the radio (19 BCM).
+A pi pin (physical pin 24) BCM 8 was use for the push button (as no 3008 ADC is used).
+This pin must be connected to the push button, and the other button contact is 3V3 pull up.
+The USB port far from the network socket, and far from the board was used as /dev/ttyUSB0.
+
+Don't forget to edit:
+sudo nano /etc/rc.local
+And add the line:
+python /home/pi/machineRepo/Machine.py
+
+This is for auto starting the script
+
+The code is 1 2 3 4 so the tags have to be on the correct paddles.
+The variables at the top of the pyton script set up various features.
+The default is a button push after each paddle is placed in. This is editable to only have one button push at the end,
+or not to need button pushes as per required.
+The RX_PORT needs setting to the receive port of the machine.
+
+The MACHINE was behaving strange and insisted on being on IP 192.168.1.109 and would not load the correct config.
+This was likely a spelling mistake in config, and/or a DHCP lease issue.
+
+The RADIO also needs a pull, as the messages to the show controller for the id tags were off by 1.
+^^^^^^^^^^^^^ THE CODE IS BEING / HAS BEEN WROTE TO THIS ABOVE SPEC. ^^^^^^^^^^^^^^^^^^^^
+===========================================================================================
+===========================================================================================
+
+
+=== OLDER NOTES BELOW ===
+
+
+
+
+
+
+
+The install of the pi spi library is no longer required.
+
+Using serial RFAIL, AFAIL, NONE or <num> Duino script.
+
+======================================================================================
+Found library for Pi reading of basic ID information. --- IT DOES NOT WORK!!!!!
+======================================================================================
 
 Created initial commit from RADIO. Lots to delete. No GUI, basic boot rc.local.
 The RFID has bee programmed as number 6. (needed?) --- NOPE the Pi is the RFID master.

@@ -26,7 +26,7 @@ import random
 
 STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 SIMULATE = False
-TX_UDP_MANY = 3  # UDP reliability retransmit number of copies
+TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 CHAOS_GUAGE = False
 POT_DAMP = False
 
@@ -65,21 +65,27 @@ rfid_init()
 def sim_pin():
     return random.random() > 0.3  # should be almost there
 
+acitate = [False, False, False, False, False]
 
 def rfid():
     global rfidPins
+    global acitate
     flag = True
     for i in range(5):
         if SIMULATE:
             j = sim_pin()
         else:
             j = GPIO.input(rfidPins[i])
-        if j:
-            send_packet('1' + str(i) + '1')
-            debug('rnd T:' + str(i))
+        if j == 1:
+            if acitate[i] == False:
+                send_packet('1' + str(i + 1) + '1')
+            debug('rnd T:' + str(i + 1))
+            acitate[i] = True
         else:
-            send_packet('1' + str(i) + '0')
-            debug('rnd F:' + str(i))
+            if acitate[i] == True:
+                send_packet('1' + str(i + 1) + '0')
+            debug('rnd F:' + str(i + 1))
+            acitate[i] = False
         flag = flag and j
     if flag:
         send_packet('201')
@@ -368,6 +374,8 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
+    global touch_grid
+    global acitate
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -378,7 +386,11 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
-    start_game()
+    # start_game() -- should not start game yet
+    touch_grid = [[-1, -1, -1, -1, False], [-1, -1, -1, -1, False], [-1, -1, -1, -1, False],
+                  [-1, -1, -1, -1, False]]  # the four active touches
+    do_touch() # clear display
+    acitate = [False, False, False, False, False]
 
 
 def start_game():
@@ -394,9 +406,9 @@ def reset_loop():
         result = receive_packet()
         debug('waiting for interrupt')
 
-        if result == "101":
+        if result == "reset":
             reset_all()
-        if result == "102":
+        if result == "start":
             start_game()
 
         time.sleep(0.01)
