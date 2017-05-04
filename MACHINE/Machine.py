@@ -26,7 +26,7 @@ import serial
 
 BUILD = False  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
-USES_BUTTON = True
+USES_BUTTON = False
 PI_BUTTON_PULL_UP = 21  # A BCM of the CS // was 8 now going through NANO in slot 5
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
@@ -122,7 +122,7 @@ current_step = 0
 
 def check_button():
     if USES_BUTTON:
-        if button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
+        if GPIO.input(PI_BUTTON_PULL_UP) == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
             debug('BUTTON PRESS ==================================')
             return True
         else:
@@ -136,7 +136,8 @@ def code():
     # GETS TO HERE
     length = len(the_key)
     #debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
-    if id_r() == the_key[current_step]:  # a correct digit
+    tmp = id_r()
+    if tmp == the_key[current_step]:  # a correct digit
         debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
@@ -147,6 +148,19 @@ def code():
         while USES_BUTTON and (check_button() == False):  # check button
             time.sleep(0.1)  # wait
             debug('waiting for press')
+        tmp = id_r()
+        while USES_BUTTON and (tmp != -1):
+            time.sleep(0.1)
+            tmp = id_r()
+        if tmp != the_key[current_step - 1]:
+            send_packet('100')
+            if RESET_LOCK_ON_WRONG:
+                # ===================================
+                # START OVER
+                # ===================================
+                debug('reset combination')
+                current_step = 0
+                return False
         send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
             debug('Not using button. key pulled out?')
@@ -161,12 +175,12 @@ def code():
             # ==================================
             # SO HAVE REMOVED OR BUTTON RELEASE
             # ==================================
-    elif id_r() != -1:  # reset combination unless daudling
+    elif tmp != -1:  # reset combination unless daudling
         # ==================================
         # SO WRONG PADDLE
         # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
-        if id_r() != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
+        if tmp != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
             # ============================================================
             # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
             # ============================================================
