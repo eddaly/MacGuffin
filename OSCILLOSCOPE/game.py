@@ -19,8 +19,8 @@ height = 480
 width = 800
 off = 200
 delay = 1
-min_dial_range = 56
-max_dial_range = 57
+min_dial_range = 52
+max_dial_range = 64
 clue_active = False
 dial_range_clue = 10
 min_dial_range_clue = min_dial_range - dial_range_clue
@@ -189,13 +189,13 @@ def animate(k):
     # update the wave
     y = (height/4) * np.sin(0.01*np.pi * (x - k*dial_value)) + (height/2)
     line.set_data(xx, y) # plot the data
-    if dial_value >= min_dial_range_clue and dial_value <= max_dial_range_clue and state == 0 and clue_active == False:
-        clue_active = True
-        plt.setp(line, linewidth=4.0,color='r')
+#    if dial_value >= min_dial_range_clue and dial_value <= max_dial_range_clue and state == 0 and clue_active == False:
+#        clue_active = True
+#        plt.setp(line, linewidth=4.0,color='r')
 
-    if dial_value <= min_dial_range_clue or dial_value >= max_dial_range_clue and state == 0 and clue_active == True:
-        clue_active = False
-        plt.setp(line, linewidth=2.0,color=line_hex_code)
+#    if dial_value <= min_dial_range_clue or dial_value >= max_dial_range_clue and state == 0 and clue_active == True:
+#        clue_active = False
+#        plt.setp(line, linewidth=2.0,color=line_hex_code)
 
     if dial_value >= min_dial_range and dial_value <= max_dial_range and state == 0:
         if debug == 1:
