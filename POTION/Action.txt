@@ -1,4 +1,8 @@
+Looks like the show controller does the light algorithm.
+Not necessary to complete? Enzyme photo recovery delay a.k.a. persistance of vision.
 
+
+=======================================================================
 RGB_LED = [8, 9, 10] # R, G, B PWM? Software POV effect??!!
 RFID_TAG_ACK = [25, 8, 7] # Duino #1, #2, #3
 PUMP_IN = [16, 20, 21] # Duino #4, #5, #6 pulse on pull script

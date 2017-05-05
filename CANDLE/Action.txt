@@ -1,3 +1,16 @@
+MATERIALS
+=========
+
+4 more RFID header soldering
+4 cables
+4 USB to Mini USB
+4 USB to Micro USB
+3 Duino Nanos
+4 tags
+==> sufficient for local tests.
+
+======================================================================
+
 Setting thse 4 pis to autoboot. <== JUST NEED TAG IDs AND PROGRAMMED ACTUAL TAGS.
 When tags are programmed, alter the number in the_key,
 Each pi has a unique piID variable equal to 0, 1, 2 or 3.
