@@ -453,7 +453,8 @@ def main_loop():
         if state_r() == 3:
             GPIO.output(motorPin, 0)  # turn off motor
             send_packet('201')
-
+        if state_r() != 3:
+            send_packet('200')
 
 def main():
     initialise()

@@ -1,3 +1,17 @@
+Setting thse 4 pis to autoboot.
+When tags are programmed, alter the number in the_key,
+Each pi has a unique piID variable equal to 1, 2, 3 or 4.
+the_key is set to all [1, 1, 1, 1] for testing.
+BUILD = False must be set on each on install to use the show controller.
+
+The following 2 commands were run
+
+sudo apt-get install python-dev python-pip
+
+sudo pip install pyserial
+
+An rc.local line was created for auto boot.
+========================================================================
 Created repo from machine copy
 A simple script so that all pis can run same code.
 The following pins make the pi behave as:
