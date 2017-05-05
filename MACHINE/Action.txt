@@ -1,3 +1,23 @@
+Bournemouth Machine Fault Diagnosis
+===================================
+The show controller was issuing a "start" part way through the game, and hence resetting the combination.
+Minor modifications were made to the Machine.py script to remove an actual race condition.
+An analysis of the conditions to trigger the race condition, assuming the show controller was behaving, and it was the
+fault, indicates that a superman would have been required to replace the paddle in under a second, at the precise
+time (a microsecond in half a second, abouts there) that a new paddle was placed.
+
+I gave odds at an order of 1 in 1000, but it would be more like 1 in 500000 or less in practice. The fact that the
+actual placed key would have to have moved on the code or been the same, does indicate this was definitely not the
+problem.
+
+The reason for the output to SSH console becomes clear in the fact of an easy login, and a ctrl-Z scroll trace.
+Yes, I have written code before which actually checks for md5 collisions. Logging although useful to scroll through for
+hours to trace down bugs when no "staff" are on site or awake, have less immediacy, and are more suited to a later
+modification to direct to /file ... maybe a tee ?
+
+
+=========================================================================================================
+
 "device reporst rediness to read but returned no data" a classic when 2 contenders for the serial.
 The port is referenced, but a buffer object is not returned due to it being in use.
 Yes I did get this a few times with the candle script, when I did not shut down the previous running python script.
