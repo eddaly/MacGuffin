@@ -1,7 +1,11 @@
-Setting thse 4 pis to autoboot.
+Setting thse 4 pis to autoboot. <== JUST NEED TAG IDs AND PROGRAMMED ACTUAL TAGS.
 When tags are programmed, alter the number in the_key,
-Each pi has a unique piID variable equal to 1, 2, 3 or 4.
+Each pi has a unique piID variable equal to 0, 1, 2 or 3.
 the_key is set to all [1, 1, 1, 1] for testing.
+The elements specify all 4 tag id values, as follows.
+
+the_key = [for pi id 0, for pi id 1, for pi id 2, for pi id 3]
+
 BUILD = False must be set on each on install to use the show controller.
 
 The following 2 commands were run
@@ -11,6 +15,15 @@ sudo apt-get install python-dev python-pip
 sudo pip install pyserial
 
 An rc.local line was created for auto boot.
+
+The 2G internet SSH IP is 192.168.1.... for the 4 pis.
+
+ID          IP
+==          ==
+0           .112
+1           .109
+2           .110
+3           .111
 ========================================================================
 Created repo from machine copy
 A simple script so that all pis can run same code.
