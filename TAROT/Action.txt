@@ -18,3 +18,4 @@ There should be some valid in time windowing to prevent "ding, dong" Wrong card 
 
 There should not be too much problem in this as a full lay would be the optimum point to dwell and then "ding."
 
+Maybe better to use USB hub and add prefix to duino outputs based on position.
