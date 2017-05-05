@@ -1,0 +1,8 @@
+IR puzzle
+=========
+
+pin assign mag lock?
+pin assign IR reader. Code lock reader hacked, or specific sequence generated?
+WARNING: Remote control using IR is subject to great distance.
+This problem technically needs more thought than coding.
+
