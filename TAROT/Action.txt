@@ -1,0 +1,20 @@
+RFID
+====
+
+Multi coded readers. Specifics involve lack of 6 USB inputs on the Pi, a USB hub?
+Getting device by UUID, should work, but subject to USB ordering.
+Use of bit code over single wire, subject to some recognition delay.
+
+A pulse length code would be about the only option with current board design.
+
+00000000000000000000000000000 ........... No card
+11111111111111111111111111111 ........... Correct Card
+01010101010101010101010101010 ........... Wrong Card
+
+A filter of the GPIO input value would tend to 0, 0.5, or 1.
+
+There should be some slice ranges, such that "ding, dong" sound hunting is not a problem.
+There should be some valid in time windowing to prevent "ding, dong" Wrong card when floating to correct card.
+
+There should not be too much problem in this as a full lay would be the optimum point to dwell and then "ding."
+
