@@ -60,17 +60,18 @@ correct = [False, False, False]
 # MIFAREReader = MFRC522.MFRC522()
 
 def code(): # check for right id code return true on got
+    global correct
     flag = True
     for i in range(len(RFID_TAG_ACK)):
         if GPIO.input(RFID_TAG_ACK[i]) == 1:
             if correct[i] == False:
-                correct[i] = True
                 send_packet('1' + str(i) + '1') #on
+            correct[i] = True
         else:
             flag = False
             if correct[i] == True:
-                correct[i] = False
                 send_packet('1' + str(i) + '0')  # off
+            correct[i] = False
 
     return flag
 
@@ -270,6 +271,8 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
+    global correct
+    global latch
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -278,6 +281,8 @@ def reset_all():
     debug('reset all - got the lock... continue processing')
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
+    correct = [False, False, False]
+    latch = [False, False, False]
     debug('all reset - releasing the lock')
     if BUILD:
         start_game() # should not start game yet
@@ -341,7 +346,7 @@ def idle():
 # =========================
 def main_loop():
     while True:
-        ##debug('state main:' + str(state_r()))
+        debug('state main:' + str(state_r()))
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
