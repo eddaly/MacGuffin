@@ -25,6 +25,7 @@ import random
 # import MFRC522 # the RFID lib
 
 BUILD = True
+DYNAMIC_CODE = True
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
@@ -87,7 +88,7 @@ def pump():
     global rgb
     flag = True
     for i in range(len(PUMP_IN)):
-        if GPIO.input(PUMP_IN[i]) == 1:
+        if (GPIO.input(PUMP_IN[i]) == 1) and (GPIO.input(RFID_TAG_ACK[i]) == 1): # check tag
             if latch[i] == False:
                 # send_packet('2' + str(i + 1) + '1')  # on
                 rgb[i] += 1
@@ -101,6 +102,9 @@ def pump():
 
         if rgb[i] != the_key[i]:
             flag = False
+        if rgb[i] > the_key[i]:
+            send_packet('overfill')
+            rgb = [0, 0, 0]
 
     return flag
 
@@ -354,10 +358,14 @@ def main_loop():
             idle()  # in reset so idle and initialize display
             #send_packet('200')
         if state_r() == 1:  # STOPPERS
+            if DYNAMIC_CODE == True:
+                state_w(2) # auto go to pump sequencing
             if code() == True:  # run the code finder
                 state_w(2)
                 # more states?
         if state_r() == 2:  # PUMPS
+            if DYNAMIC_CODE == True:
+                code() # do code sequencing too
             if pump() == True:  # run the code finder
                 state_w(3)
                 # more states?
