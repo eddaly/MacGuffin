@@ -70,10 +70,18 @@ def cards():  # check for right id code return true on got
                     send_packet('1' + str(i) + '1')  # bad order
                 card_at[i] = True
         else:
-            flag = False
-            if card_at[i] == True:
-                send_packet('1' + str(i) + '0')  # incorrect
-            card_at[i] = False
+            if (GPIO.input(CORRECT_ACK[i]) == 1) and GPIO.input(TAROT_ACK[i]) == 0: # race check
+                # this makes the assertion order important
+                time.sleep(0.25)
+                if GPIO.input(TAROT_ACK[i]) == 1:
+                    return False # exit and reloop
+                flag = False
+                if card_at[i] == False:
+                    send_packet('1' + str(i) + '0')  # bad card
+                card_at[i] = True
+            else:
+                flag = False
+                card_at[i] = False
 
     return flag
 

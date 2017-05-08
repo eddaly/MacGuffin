@@ -1,3 +1,32 @@
+Informed there is a new circuit board for this one, with 2 pins to GPIO for each duino.
+The signal on the first pin is card present.
+The signal on the second pin is correct card.
+
+This makes the key code be placed in the arduino with also the correct code for the slot.
+
+A race condition could exist if the arduino signals are not transitioned in a certain way.
+
+On placing a card (incorrect order):
+==============================
+TAROT_ACK goes high, while CORRECT_ACK remains low.
+
+On placing a correct card:
+==========================
+CORRECT_ACK goes high, and then TAROT_ACK goes high.
+
+On removing a card:
+===================
+TAROT_ACK goes low, then CORRECT_ACK goes low.
+
+if CORRECT_ACK goes high, and TAROT_ACK remains low this implies the error of a wrong card.
+So ironically CORRECT_ACK signals incorrect.
+A delay test has to be performed to avoid the race condition.
+
+a delay of at most 0.25 between CORRECT_ACK and TAROT_ACK on placing a correct card is tolerated.
+Otherwise the signal will be incorrect card.
+
+=================================================================================
+
 RFID
 ====
 
