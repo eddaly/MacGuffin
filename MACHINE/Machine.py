@@ -148,19 +148,6 @@ def code():
         while USES_BUTTON and (check_button() == False):  # check button
             time.sleep(0.1)  # wait
             debug('waiting for press')
-        tmp = id_r()
-        while USES_BUTTON and (tmp != -1):
-            time.sleep(0.1)
-            tmp = id_r()
-        if tmp != the_key[current_step - 1]:
-            send_packet('100')
-            if RESET_LOCK_ON_WRONG:
-                # ===================================
-                # START OVER
-                # ===================================
-                debug('reset combination')
-                current_step = 0
-                return False
         send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
             debug('Not using button. key pulled out?')
@@ -180,15 +167,46 @@ def code():
         # SO WRONG PADDLE
         # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
-        if tmp != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
+        if current_step != 0:
+            if tmp != the_key[current_step - 1]:  # last key or first key so not indexing array [-1]
+                # ============================================================
+                # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
+                # ============================================================
+                debug('some wrong nth card inserted.')
+                while USES_BUTTON and (check_button() == False):  # check button
+                    time.sleep(0.1)  # wait
+                    debug('waiting for press')
+                send_packet('100')
+                while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
+                    debug('Not using button. key pulled out?')
+                    time.sleep(0.1)
+                # ===============================
+                # SO HAVE REGISTERED PADDLE
+                # ===============================
+                while USES_BUTTON and (check_button() == True):
+                    # check button release
+                    debug('check button release.')
+                    time.sleep(0.1)
+                if RESET_LOCK_ON_WRONG:
+                    # ===================================
+                    # START OVER
+                    # ===================================
+                    debug('reset combination')
+                    current_step = 0
+                    return False
+            # MUST BE -1 HERE
+            else:
+                debug('clone of last digit/paddle')
+                return False
+        else:
             # ============================================================
-            # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
+            # FIRST PADDLE WRONG
             # ============================================================
-            debug('some wrong card inserted.')
+            debug('some wrong 1st card inserted.')
             while USES_BUTTON and (check_button() == False):  # check button
                 time.sleep(0.1)  # wait
                 debug('waiting for press')
-            send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
+            send_packet('100')
             while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
                 debug('Not using button. key pulled out?')
                 time.sleep(0.1)
@@ -199,7 +217,6 @@ def code():
                 # check button release
                 debug('check button release.')
                 time.sleep(0.1)
-            send_packet('100')
             if RESET_LOCK_ON_WRONG:
                 # ===================================
                 # START OVER
@@ -207,10 +224,6 @@ def code():
                 debug('reset combination')
                 current_step = 0
                 return False
-        # MUST BE -1 HERE
-        else:
-            debug('clone of last digit/paddle')
-            return False
     else:  # -1
         # =========================================
         # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
