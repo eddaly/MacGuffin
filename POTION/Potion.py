@@ -20,7 +20,7 @@ import os
 import atexit
 import random
 
-import serial
+#import serial
 
 # import MFRC522 # the RFID lib
 
