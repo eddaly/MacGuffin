@@ -11,7 +11,8 @@ byte buffer[18];
 byte size = sizeof(buffer);
 
 const int signalPin = 2; //output pin on which signal is communicated.
-const int readerID = 202; //output pin will activate when reader ID matches tag ID.
+const int readerID = 1; //output pin will activate when reader ID matches tag ID.
+const int ledPin = 13;
 
 //do not change these variables!
 byte sector = 0;
@@ -20,7 +21,8 @@ byte trailerBlock = 3;
 
 void setup() 
 { 
-  pinMode(signalPin, OUTPUT);
+  pinMode(RST_PIN, OUTPUT);
+  digitalWrite(RST_PIN, LOW);
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus
   mfrc522.PCD_Init(); // Init MFRC522
@@ -32,48 +34,89 @@ void setup()
   }
 }
 
+void reset (int reset_pin)
+{
+  mfrc522.PCD_Init();
+  digitalWrite(reset_pin, HIGH);
+  delay(500);
+  digitalWrite(reset_pin, LOW);
+  asm volatile ("jmp 0"); 
+}
+
 void loop()
 {
   //identify any tags in range.
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
+    Serial.println(-1, DEC);
     digitalWrite(signalPin, LOW);
+    pulse();
+    reset(RST_PIN);
     return;
   }
 
+  //Serial.println('G1');
   //verify data has been read from tag.
   if ( ! mfrc522.PICC_ReadCardSerial() )
-  {return;}
+  {
+    Serial.println(-1, DEC);
+    digitalWrite(signalPin, LOW);
+    pulse();
+    reset(RST_PIN);
+    return;
+  }
 
+  //Serial.println('G2');
   //authentication:
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK)
   {
+    Serial.println(-1, DEC);
     digitalWrite(signalPin, LOW);
-    Serial.print(F("Authentication failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
-    return;
-  }
-
-
-  //read data from entire block.
-  status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
-  if (status != MFRC522::STATUS_OK)
-  {
-    digitalWrite(signalPin, LOW);
-    Serial.print(F("Read operation failed: "));
-    Serial.println(mfrc522.GetStatusCodeName(status));
+    pulse();
+    reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
   }
-  int tagID = buffer[0];
-  Serial.println(tagID);
 
-  if(tagID == readerID)
+
+    //Serial.println('G3');
+//read data from entire block.
+  status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
+  if (status != MFRC522::STATUS_OK)
   {
-    digitalWrite(signalPin, HIGH);
+    Serial.println(-1, DEC);
+    digitalWrite(signalPin, LOW);
+    pulse();
+    reset(RST_PIN);
+    mfrc522.PCD_Init();
+    return;
   }
-  else {digitalWrite(signalPin, LOW);}
+
+ // Serial.println('G4');
+  int tagID = buffer[0];
+//  if (tagID > 0)
+//  {
+    Serial.println(tagID, DEC);
+    if(tagID == readerID) // and also signal
+    {
+      digitalWrite(signalPin, HIGH);
+    }
+    else {digitalWrite(signalPin, LOW);}
+//  }
+//  else
+//  {
+//    Serial.println(-1, DEC);
+//  }
+  pulse();
 
   mfrc522.PCD_Init();
 }
+
+void pulse()
+{
+  digitalWrite(ledPin, HIGH);
+  delay(1000);
+  digitalWrite(ledPin, LOW);
+}
+
