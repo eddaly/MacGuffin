@@ -91,6 +91,7 @@ def pump():
     flag = True
     for i in range(len(PUMP_IN)):
         if (GPIO.input(PUMP_IN[i]) == 1) and ((GPIO.input(RFID_TAG_ACK[i]) == 1) or (not DYNAMIC_CODE)):  # check tag
+            # are the sounds to be made even when the stopper not in????????
             if latch[i] == False:
                 # send_packet('2' + str(i + 1) + '1')  # on
                 rgb[i] += 1
