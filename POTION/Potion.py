@@ -84,26 +84,25 @@ latch = [False, False, False]
 
 def pump():
     global latch
+    global rgb
     flag = True
     for i in range(len(PUMP_IN)):
         if GPIO.input(PUMP_IN[i]) == 1:
             if latch[i] == False:
                 # send_packet('2' + str(i + 1) + '1')  # on
-                #rgb[i] += 1
-                #if rgb[i] == the_key[i]:
+                rgb[i] += 1
                 send_packet('2' + str(i) + '1')
-                #else:
-                #   send_packet('2' + str(i) + '0')
-                #   flag = False
             latch[i] = True
         else:
             # flag = False
             if latch[i] == True:
-                send_packet('2' + str(i + 1) + '0')  # off
+                send_packet('2' + str(i) + '0')  # off
             latch[i] = False
 
-    return flag
+        if rgb[i] != the_key[i]:
+            flag = False
 
+    return flag
 
 # ====================================
 # LED SET
@@ -271,8 +270,6 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 
 def reset_all():
-    global correct
-    global latch
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -281,16 +278,21 @@ def reset_all():
     debug('reset all - got the lock... continue processing')
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
-    correct = [False, False, False]
-    latch = [False, False, False]
     debug('all reset - releasing the lock')
     if BUILD:
         start_game() # should not start game yet
 
 
 def start_game():
+    global correct
+    global latch
+    global rgb
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
+
+    correct = [False, False, False]
+    latch = [False, False, False]
+    rgb = [0, 0, 0]
 
 
 def reset_loop():
