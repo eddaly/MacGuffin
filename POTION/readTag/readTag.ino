@@ -11,7 +11,7 @@ byte buffer[18];
 byte size = sizeof(buffer);
 
 const int signalPin = 2; //output pin on which signal is communicated.
-const int readerID = 1; //output pin will activate when reader ID matches tag ID.
+const int readerID = 202; //output pin will activate when reader ID matches tag ID.
 
 //do not change these variables!
 byte sector = 0;

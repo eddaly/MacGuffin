@@ -53,7 +53,9 @@ for i in range(6):
 
 card_at = [False, False, False, False, False, False]
 
-
+# a nice lock free algorithm for detection
+# duino max signalling 0.3 seconds
+#
 def cards():  # check for right id code return true on got
     global card_at
     flag = True

@@ -65,12 +65,12 @@ def code(): # check for right id code return true on got
         if GPIO.input(RFID_TAG_ACK[i]) == 1:
             if correct[i] == False:
                 correct[i] = True
-                send_packet('1' + str(i + 1) + '1') #on
+                send_packet('1' + str(i) + '1') #on
         else:
             flag = False
             if correct[i] == True:
                 correct[i] = False
-                send_packet('1' + str(i + 1) + '0')  # off
+                send_packet('1' + str(i) + '0')  # off
 
     return flag
 
@@ -87,19 +87,19 @@ def pump():
     for i in range(len(PUMP_IN)):
         if GPIO.input(PUMP_IN[i]) == 1:
             if latch[i] == False:
-                latch[i] = True
                 # send_packet('2' + str(i + 1) + '1')  # on
-                rgb[i] += 1
-                if rgb[i] == the_key[i]:
-                    send_packet('2' + str(i + 1) + '1')
-                else:
-                    send_packet('2' + str(i + 1) + '0')
-                    flag = False
+                #rgb[i] += 1
+                #if rgb[i] == the_key[i]:
+                send_packet('2' + str(i) + '1')
+                #else:
+                #   send_packet('2' + str(i) + '0')
+                #   flag = False
+            latch[i] = True
         else:
             # flag = False
             if latch[i] == True:
-                latch[i] = False
-                # send_packet('2' + str(i + 1) + '0')  # off
+                send_packet('2' + str(i + 1) + '0')  # off
+            latch[i] = False
 
     return flag
 
@@ -246,6 +246,7 @@ atexit.register(clean_up)
 
 def send_packet(body):
     global l
+    debug(body) # send packet
     l.acquire()
     for i in range(TX_UDP_MANY):
         send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
@@ -285,7 +286,6 @@ def reset_all():
 def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    wait_remove()
 
 
 def reset_loop():
