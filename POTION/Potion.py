@@ -346,7 +346,7 @@ def idle():
 # =========================
 def main_loop():
     while True:
-        debug('state main:' + str(state_r()))
+        ##debug('state main:' + str(state_r()))
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
