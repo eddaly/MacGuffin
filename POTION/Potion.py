@@ -46,7 +46,7 @@ GPIO.setmode(GPIO.BCM)
 for i in range(3):
     GPIO.setup(RFID_TAG_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(PUMP_IN[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(RGB_LED[i], GPIO.OUT)
+    #GPIO.setup(RGB_LED[i], GPIO.OUT)
 
 # ===================================
 # RFID CODE
@@ -110,6 +110,7 @@ err = False
 
 filtered = [0.0, 0.0, 0.0] # a residual for later output
 
+# The following is not used as the SC is doing all the lighting
 def led():
     global rgb
     global err
@@ -320,9 +321,9 @@ def initialise():
     #t3 = threading.Thread(target=rfid)
     #t3.daemon = False
     #t3.start()
-    t4 = threading.Thread(target=led)
-    t4.daemon = False
-    t4.start()
+    #t4 = threading.Thread(target=led)
+    #t4.daemon = False
+    #t4.start()
 
 
 # ===============================
