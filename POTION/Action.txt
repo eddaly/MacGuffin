@@ -1,3 +1,19 @@
+The SC needs to decide if the pi is doing the potion counting.
+if it is, then the pi needs 2 new messages to send.
+
+overfill => when overfilled any colour.
+gotit => when exact fill is matched to key.
+
+It could also be possible that the pi could transmit the colour levels,
+but this would need a new message type, and also a colour reset.
+
+OUT => 3+r/g/b+level
+IN => set000
+
+Due to see Matt tomorrow.
+
+
+=======================================================================
 Looks like the show controller does the light algorithm.
 Not necessary to complete? Enzyme photo recovery delay a.k.a. persistance of vision.
 
