@@ -29,12 +29,10 @@ STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
-RGB_LED = [8, 9, 10] # R, G, B PWM? Software POV effect??!!
-RFID_TAG_ACK = [25, 8, 7] # Duino #1, #2, #3
-PUMP_IN = [16, 20, 21] # Duino #4, #5, #6 pulse on pull script
-PROB = 0.5 # filter for persistance of vision 0 -> 1
+TAROT_ACK = [25, 8, 7, 16, 20, 21]  # Tarot placed ACK
+CORRECT_ACK = [25, 8, 7, 16, 20, 21]  # Correct placed ACK <== NUMBER OF GPIO, TOLD 2 PER DUINO
 
-the_key = [3, 5, 4] # parts red/green/blue
+the_key = [1, 2, 3, 5, 4, 6]  # cards correct <== KEY DONE BY DUINO
 
 heart = True
 
@@ -45,129 +43,39 @@ heart = True
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-for i in range(3):
-    GPIO.setup(RFID_TAG_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(PUMP_IN[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    #GPIO.setup(RGB_LED[i], GPIO.OUT)
+for i in range(6):
+    GPIO.setup(TAROT_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(CORRECT_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 # ===================================
-# RFID CODE
+# RFID CARDS
 # ===================================
 
-correct = [False, False, False]
+card_at = [False, False, False, False, False, False]
 
-# Create an object of the class MFRC522
-# MIFAREReader = MFRC522.MFRC522()
 
-def code(): # check for right id code return true on got
+def cards():  # check for right id code return true on got
+    global card_at
     flag = True
-    for i in range(len(RFID_TAG_ACK)):
-        if GPIO.input(RFID_TAG_ACK[i]) == 1:
-            if correct[i] == False:
-                correct[i] = True
-                send_packet('1' + str(i + 1) + '1') #on
+    for i in range(len(TAROT_ACK)):
+        if GPIO.input(TAROT_ACK[i]) == 1:
+            if GPIO.input(CORRECT_ACK[i]) == 1:
+                if card_at[i] == False:
+                    send_packet('1' + str(i) + '2')  # correct
+                card_at[i] = True
+            else:
+                flag = False
+                # for j in range(len(CORRECT_ACK)): # must check others?? <== via duino script 2 lines active
+                if card_at[i] == False:
+                    send_packet('1' + str(i) + '1')  # bad order
+                card_at[i] = True
         else:
             flag = False
-            if correct[i] == True:
-                correct[i] = False
-                send_packet('1' + str(i + 1) + '0')  # off
+            if card_at[i] == True:
+                send_packet('1' + str(i) + '0')  # incorrect
+            card_at[i] = False
 
     return flag
-
-
-# ====================================
-# PUMP SEQUENCE
-# ====================================
-rgb = [0, 0, 0] # the colour
-latch = [False, False, False]
-
-def pump():
-    global latch
-    flag = True
-    for i in range(len(PUMP_IN)):
-        if GPIO.input(PUMP_IN[i]) == 1:
-            if latch[i] == False:
-                latch[i] = True
-                # send_packet('2' + str(i + 1) + '1')  # on
-                rgb[i] += 1
-                if rgb[i] == the_key[i]:
-                    send_packet('2' + str(i + 1) + '1')
-                else:
-                    send_packet('2' + str(i + 1) + '0')
-                    flag = False
-        else:
-            # flag = False
-            if latch[i] == True:
-                latch[i] = False
-                # send_packet('2' + str(i + 1) + '0')  # off
-
-    return flag
-
-
-# ====================================
-# LED SET
-# ====================================
-
-err = False
-
-filtered = [0.0, 0.0, 0.0] # a residual for later output
-
-# The following is not used as the SC is doing all the lighting
-def led():
-    global rgb
-    global err
-    global filtered
-    global PROB
-    time.sleep(0.01) # 100 Hz
-    red = float(rgb[0]) / float(the_key[0]) # 0 -> 1
-    green = float(rgb[1]) / float(the_key[1])  # 0 -> 1
-    blue = float(rgb[2]) / float(the_key[2])  # 0 -> 1
-    if (red > 1.0) or (green > 1.0) or (blue > 1.0):
-        err = True # over filled
-    if err:
-        for j in range(5):
-            for i in range(3):
-                GPIO.output(RGB_LED[i], 1) # white
-            time.sleep(0.5)
-            for i in range(3):
-                GPIO.output(RGB_LED[i], 0) # black
-            time.sleep(0.5)
-        rgb = [0, 0, 0]
-        send_packet('2' + str(i) + '0') # back to
-        err = False
-    else: # colour modulation
-        red -= filtered[0]
-        green -= filtered[1]
-        blue -= filtered[2]
-        # offsets
-        red += 0.5
-        green += 0.5
-        blue += 0.5
-        # clamps
-        if red > 1.0:
-            red = 1.0
-        if red < 0:
-            red = 0.0
-        if green > 1.0:
-            green = 1.0
-        if green < 0:
-            green = 0.0
-        if blue > 1.0:
-            blue = 1.0
-        if blue < 0:
-            blue = 0.0
-        # delta sigma lpf????
-        s_red = int(red + 0.5)
-        s_green = int(green + 0.5)
-        s_blue = int(blue + 0.5)
-        # output
-        GPIO.output(RGB_LED[0], s_red)
-        GPIO.output(RGB_LED[1], s_green)
-        GPIO.output(RGB_LED[2], s_blue)
-        # filtered
-        filtered[0] = PROB * filtered[0] + (1.0 - PROB) * s_red
-        filtered[1] = PROB * filtered[1] + (1.0 - PROB) * s_green
-        filtered[2] = PROB * filtered[2] + (1.0 - PROB) * s_blue
 
 
 # ====================================
@@ -279,13 +187,14 @@ def reset_all():
 
     debug('all reset - releasing the lock')
     if BUILD:
-        start_game() # should not start game yet
+        start_game()  # should not start game yet
 
 
 def start_game():
+    global card_at
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    wait_remove()
+    card_at = [False, False, False, False, False, False]  # reset empty
 
 
 def reset_loop():
@@ -320,12 +229,12 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    #t3 = threading.Thread(target=rfid)
-    #t3.daemon = False
-    #t3.start()
-    #t4 = threading.Thread(target=led)
-    #t4.daemon = False
-    #t4.start()
+    # t3 = threading.Thread(target=rfid)
+    # t3.daemon = False
+    # t3.start()
+    # t4 = threading.Thread(target=led)
+    # t4.daemon = False
+    # t4.start()
 
 
 # ===============================
@@ -345,17 +254,12 @@ def main_loop():
         time.sleep(0.001)
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
-            #send_packet('200')
-        if state_r() == 1:  # STOPPERS
-            if code() == True:  # run the code finder
+            # send_packet('200')
+        if state_r() == 1:  # PLACE CARDS
+            if cards() == True:
                 state_w(2)
-                # more states?
-        if state_r() == 2:  # PUMPS
-            if pump() == True:  # run the code finder
-                state_w(3)
-                # more states?
-        if state_r() == 3:
-            #send_packet('201')
+        if state_r() == 2:
+            send_packet('161')
             nop = True
 
 
