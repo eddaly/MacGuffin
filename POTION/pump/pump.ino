@@ -9,25 +9,25 @@
 #define ON LOW
 #define OFF HIGH
 
-int at = LOW;
+int at = OFF;
 
 void setup() {
   pinMode(SIG_PIN, OUTPUT);
   digitalWrite(SIG_PIN, LOW);//default
-  pinMode(SS_PIN, INPUT);
-  pinMode(RST_PIN, INPUT);
+  pinMode(SS_PIN, INPUT_PULLUP);
+  pinMode(RST_PIN, INPUT_PULLUP);
 }
 
 void loop() {
   delay(0.05);
   if(digitalRead(SS_PIN) == ON && at == OFF) {
      at = ON;
-     digitalWrite(SIG_PIN, ON);
+     digitalWrite(SIG_PIN, HIGH);
      return;
   }
   if(digitalRead(RST_PIN) == ON && at == ON) {
      at = OFF;
-     digitalWrite(SIG_PIN, OFF);
+     digitalWrite(SIG_PIN, LOW);
      return;
   }
 }
