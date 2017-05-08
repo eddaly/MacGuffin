@@ -1,4 +1,4 @@
-# Mc Guffin POTION
+# Mc Guffin TAROT
 # 
 # Author: A.T. seeper
 # Basic template 02/05/2017 S. Jackson
