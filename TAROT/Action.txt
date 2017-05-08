@@ -25,6 +25,11 @@ A delay test has to be performed to avoid the race condition.
 a delay of at most 0.25 between CORRECT_ACK and TAROT_ACK on placing a correct card is tolerated.
 Otherwise the signal will be incorrect card.
 
+The hold time for a condition output is > 0.2 before the next output state can be sent.
+This will lead to reliable detection within an estimate 1.5 seconds or less.
+
+The detection delays can be shortened, with the minimum delay for about half a second.
+
 =================================================================================
 
 RFID
