@@ -538,7 +538,7 @@ tunning_sounds = ['/play1', '/play2']
 # ===================================
 def radio():  # use near global as the closeness of the station.
     global near
-    rfid()
+    # rfid()
     non_terminal()
     number_sounds = len(tunning_sounds)
     per_sound = 100.0 / float(number_sounds)
@@ -582,11 +582,13 @@ def main_loop():
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
         if state_r() == 1:  # CODE
+            rfid()
             if do_touch() == True:  # main gaming entry state check for touch events
                 # unlocked
                 state_w(2)
                 debug('BINGO!!!!!!')
         if state_r() == 2:  # TUNE
+            # rfid()
             if tuning_lock() == True:  # touched success turn on radio
                 state_w(3)
                 # gauge.start(0) #reset guage
