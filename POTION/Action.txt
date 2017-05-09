@@ -1,3 +1,7 @@
+Tests working, needs physical build.
+
+=========================================================================
+
 The SC needs to decide if the pi is doing the potion counting.
 if it is, then the pi needs 2 new messages to send.
 
