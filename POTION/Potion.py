@@ -108,8 +108,8 @@ def pump():
         if rgb[i] > the_key[i]:
             send_packet('overfill')  # NO CODE ISSUED YET
             rgb = [0, 0, 0]
-        if flag:
-            send_packet('gotit')  # NO CODE ISSUED YET
+    if flag:
+        send_packet('gotit')  # NO CODE ISSUED YET
     return flag
 
 
