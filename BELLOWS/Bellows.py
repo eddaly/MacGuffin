@@ -50,12 +50,12 @@ GPIO.setup(LOCK, GPIO.OUT)
 # CHECK IR
 # ====================================
 
-def ir():
-    nop = True
+def ir(): # first interact
+    return True
 
 
-def ir2():
-    nop = True
+def ir2(): # second interact to complete
+    return True
 
 # ====================================
 # REMOTE DEBUG CODE
