@@ -32,7 +32,7 @@ RX_PORT = 5000  # Change when allocated, but to run independent of controller is
 TAROT_ACK = [25, 8, 7, 16, 20, 21]  # Tarot placed ACK
 CORRECT_ACK = [2, 3, 17, 27, 22, 10]  # Correct placed ACK <== NUMBER OF GPIO, TOLD 2 PER DUINO
 
-the_key = [101, 102, 103, 104, 105, 106]  # cards correct <== KEY DONE BY DUINO
+# the_key = [101, 102, 103, 104, 105, 106]  # cards correct <== KEY DONE BY DUINO
 
 heart = True
 
@@ -74,7 +74,7 @@ def cards():  # check for right id code return true on got
         else:
             if (GPIO.input(CORRECT_ACK[i]) == 1) and (GPIO.input(TAROT_ACK[i]) == 0): # race check
                 # this makes the assertion order important
-                time.sleep(0.25)
+                time.sleep(0.2) # SLEEP TO MAKE SURE IN SAME CYCLE OF DUINO
                 if (GPIO.input(TAROT_ACK[i]) == 1) or (GPIO.input(CORRECT_ACK[i]) == 0): # exit race
                     return False # exit and reloop
                 flag = False
