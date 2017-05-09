@@ -500,7 +500,7 @@ def tuning_lock():
             twiddle = False
             debug('still')
             send_packet('400')
-    if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
+    if near > 95.0:  # arbitary? and fine tuning issues 33 buckets
         if abs(potin - pot) > 1.0:
             # escape from routine to prevent fast tune capture effect
             send_packet('301')
@@ -509,7 +509,7 @@ def tuning_lock():
         # state_w(3)  # whey hey, tuned in!!
         debug('Yup!!!!!!!!!!!!!!!!!!')
         return True
-    elif near > 90.0:
+    elif near > 85.0:
         send_packet('301')
     else:
         send_packet('300')
@@ -538,6 +538,7 @@ tunning_sounds = ['/play1', '/play2']
 # ===================================
 def radio():  # use near global as the closeness of the station.
     global near
+    rfid()
     non_terminal()
     number_sounds = len(tunning_sounds)
     per_sound = 100.0 / float(number_sounds)
