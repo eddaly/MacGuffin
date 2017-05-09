@@ -1,4 +1,4 @@
-# Mc Guffin BELLOWS
+# Mc Guffin CRYSTAL BALL
 # 
 # Author: A.T. seeper
 # Basic template 02/05/2017 S. Jackson
@@ -29,8 +29,7 @@ STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
-IR = 25
-LOCK = 8
+RFID = 25
 
 heart = True
 
@@ -41,21 +40,21 @@ heart = True
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-
-GPIO.setup(IR, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(LOCK, GPIO.OUT)
+GPIO.setup(RFID, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 
 # ====================================
 # CHECK IR
 # ====================================
 
-def ir():
-    nop = True
+def rfid():
+    if GPIO.input(RFID) == 1:
+        send_packet('101')
+        return True
+    else:
+        send_packet('100')
+        return False
 
-
-def ir2():
-    nop = True
 
 # ====================================
 # REMOTE DEBUG CODE
@@ -165,7 +164,6 @@ def reset_all():
     debug('reset all - got the lock... continue processing')
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
-    GPIO.output(LOCK, 1)  # lock
     debug('all reset - releasing the lock')
     if BUILD:
         start_game()  # should not start game yet
@@ -174,8 +172,6 @@ def reset_all():
 def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    GPIO.output(LOCK, 1)  # lock
-
 
 
 def reset_loop():
@@ -237,20 +233,11 @@ def main_loop():
             idle()  # in reset so idle and initialize display
             # send_packet('200')
         if state_r() == 1:  # CHECK IR
-            if ir() == True:
+            if rfid() == True:
                 state_w(2)
-                send_packet('101')
-            else:
-                send_packet('100')
         if state_r() == 2:
-            if ir2() == True:
-                state_w(3)
-                send_packet('111')
-            else:
-                send_packet('110')
-        if state_r() == 3:
             # send_packet('201')
-            GPIO.output(LOCK, 0) # open
+            nop = True
 
 
 def main():
