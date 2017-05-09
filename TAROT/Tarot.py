@@ -30,9 +30,9 @@ TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
 TAROT_ACK = [25, 8, 7, 16, 20, 21]  # Tarot placed ACK
-CORRECT_ACK = [25, 8, 7, 16, 20, 21]  # Correct placed ACK <== NUMBER OF GPIO, TOLD 2 PER DUINO
+CORRECT_ACK = [2, 3, 17, 27, 22, 10]  # Correct placed ACK <== NUMBER OF GPIO, TOLD 2 PER DUINO
 
-the_key = [1, 2, 3, 5, 4, 6]  # cards correct <== KEY DONE BY DUINO
+the_key = [101, 102, 103, 104, 105, 106]  # cards correct <== KEY DONE BY DUINO
 
 heart = True
 

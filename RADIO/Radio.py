@@ -69,7 +69,7 @@ def sim_pin():
 
 acitate = [False, False, False, False, False]
 
-def rfid():
+def rfid(tests):
     global rfidPins
     global acitate
     flag = True
@@ -89,10 +89,10 @@ def rfid():
             debug('rnd F:' + str(i + 1))
             acitate[i] = False
         flag = flag and j
-    if flag:
+    if flag and tests:
         send_packet('201')
         debug('Yes!!!!!!!!!')
-    else:
+    elif tests:
         send_packet('200')
         debug('No :(')
     return flag
@@ -582,7 +582,7 @@ def main_loop():
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
         if state_r() == 1:  # CODE
-            rfid()
+            rfid(False)
             if do_touch() == True:  # main gaming entry state check for touch events
                 # unlocked
                 state_w(2)
@@ -600,7 +600,7 @@ def main_loop():
             # ===============================================
             radio()  # needed??
         if state_r() == 4:  # RFID
-            if rfid() == True:  # check for 5 active highs
+            if rfid(True) == True:  # check for 5 active highs
                 state_w(1)
                 debug('MATCH!!!!!!')
 
