@@ -1,3 +1,7 @@
+Wrote duino script to detect tarot and right in right or wrong location.
+Next step is PCB and mechanical build and testing.
+
+==============================================================================
 Informed there is a new circuit board for this one, with 2 pins to GPIO for each duino.
 The signal on the first pin is card present.
 The signal on the second pin is correct card.
