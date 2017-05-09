@@ -12,7 +12,10 @@ byte size = sizeof(buffer);
 
 const int signalPinTarot = 2; //output pin on which any tarot is communicated.
 const int signalPinCorrect = 3; //output pin on which correct tarot is communicated.
+
 const int readerID = 101; //output pin will activate when reader ID matches tag ID.
+const int keys[6] = { 101, 102, 103, 104, 105, 106 };
+
 const int ledPin = 13;
 
 //do not change these variables!
@@ -99,11 +102,25 @@ void loop()
   Serial.println(tagID, DEC);
   if (tagID == readerID)
   {
+    //CORRECT
     
   } else {
-    
+    //NOT CORRECT
+    int j = 0;
+    for(int i = 0; i < 6; i++) {
+      if(keys[i] == tagID) {
+        j++;
+        //WRONG POSITION
+        
+      }
+    }
+    if(j == 0) {
+      //WRONG CARD
+      
+    }
   }
   pulse();
+  reset(RST_PIN);//NEEDS TO BE HERE TO LIMIT RATE OF SEND TO AVOID RACE
 
   mfrc522.PCD_Init();
 }
@@ -111,7 +128,7 @@ void loop()
 void pulse()
 {
   digitalWrite(ledPin, HIGH);
-  delay(1000);
+  delay(100);
   digitalWrite(ledPin, LOW);
 }
 
