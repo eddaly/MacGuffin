@@ -89,6 +89,9 @@ def rfid(tests):
             debug('rnd F:' + str(i + 1))
             acitate[i] = False
         flag = flag and j
+    if not tests and not flag: # removed the side and become unsolved
+        state_w(STARTER_STATE) # REINITIALIZE GAME
+        send_packet('200') # TEST THIS DOES SHOW CONTROLLER GO BACK AFTER A 201?
     if flag and tests:
         send_packet('201')
         debug('Yes!!!!!!!!!')
