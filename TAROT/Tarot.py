@@ -74,7 +74,7 @@ def cards():  # check for right id code return true on got
         else:
             if (GPIO.input(CORRECT_ACK[i]) == 1) and (GPIO.input(TAROT_ACK[i]) == 0): # race check
                 # this makes the assertion order important
-                time.sleep(0.2) # SLEEP TO MAKE SURE IN SAME CYCLE OF DUINO
+                time.sleep(0.1) # SLEEP TO MAKE SURE IN SAME CYCLE OF DUINO
                 if (GPIO.input(TAROT_ACK[i]) == 1) or (GPIO.input(CORRECT_ACK[i]) == 0): # exit race
                     return False # exit and reloop
                 flag = False

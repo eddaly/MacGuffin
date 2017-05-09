@@ -58,6 +58,7 @@ void loop()
   {
     //Serial.println(-1, DEC);
     pulse();
+    removeCard();
     reset(RST_PIN);
     return;
   }
@@ -68,6 +69,7 @@ void loop()
   {
     //Serial.println(-1, DEC);
     pulse();
+    removeCard();
     reset(RST_PIN);
     return;
   }
@@ -79,6 +81,7 @@ void loop()
   {
     //Serial.println(-1, DEC);
     pulse();
+    removeCard();
     reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
@@ -92,6 +95,7 @@ void loop()
   {
     //Serial.println(-1, DEC);
     pulse();
+    removeCard();
     reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
@@ -103,7 +107,10 @@ void loop()
   if (tagID == readerID)
   {
     //CORRECT
-    
+    //CORRECT_ACK goes high, and then TAROT_ACK goes high.
+      digitalWrite(signalPinCorrect, HIGH);
+      delay(1);
+      digitalWrite(signalPinTarot, HIGH);
   } else {
     //NOT CORRECT
     int j = 0;
@@ -111,18 +118,30 @@ void loop()
       if(keys[i] == tagID) {
         j++;
         //WRONG POSITION
-        
+        //TAROT_ACK goes high, while CORRECT_ACK remains low.
+        digitalWrite(signalPinCorrect, LOW);
+        digitalWrite(signalPinTarot, HIGH);
       }
     }
     if(j == 0) {
       //WRONG CARD
-      
+      //if CORRECT_ACK goes high, and TAROT_ACK remains low this implies the error of a wrong card.
+      digitalWrite(signalPinTarot, LOW);
+      digitalWrite(signalPinCorrect, HIGH);
     }
   }
   pulse();
-  reset(RST_PIN);//NEEDS TO BE HERE TO LIMIT RATE OF SEND TO AVOID RACE
+  reset(RST_PIN);//NEEDS TO BE HERE TO LIMIT RATE OF SEND TO AVOID RACE (PI WAITS 100)
 
   mfrc522.PCD_Init();
+}
+
+void removeCard() {
+  //REMOVE
+  //TAROT_ACK goes low, then CORRECT_ACK goes low.
+  digitalWrite(signalPinTarot, LOW);
+  delay(1);
+  digitalWrite(signalPinCorrect, LOW);
 }
 
 void pulse()
