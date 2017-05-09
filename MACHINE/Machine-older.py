@@ -165,29 +165,11 @@ def code():
         # SO WRONG PADDLE
         # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
-        if current_step != 0:
-            if tmp != the_key[current_step - 1]:  # last key or first key so not indexing array [-1]
-                # ============================================================
-                # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
-                # ============================================================
-                debug('some wrong nth card inserted.')
-                send_packet('100')
-                if RESET_LOCK_ON_WRONG:
-                    # ===================================
-                    # START OVER
-                    # ===================================
-                    debug('reset combination')
-                    current_step = 0
-                    return False
-            # MUST BE -1 HERE
-            else:
-                debug('clone of last digit/paddle')
-                return False
-        else:
+        if tmp != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
             # ============================================================
             # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
             # ============================================================
-            debug('some wrong 1st card inserted.')
+            debug('some wrong card inserted.')
             send_packet('100')
             if RESET_LOCK_ON_WRONG:
                 # ===================================
@@ -196,6 +178,10 @@ def code():
                 debug('reset combination')
                 current_step = 0
                 return False
+        # MUST BE -1 HERE
+        else:
+            debug('clone of last digit/paddle')
+            return False
     else:  # -1
         # =========================================
         # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
