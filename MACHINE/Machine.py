@@ -130,6 +130,22 @@ def check_button():
         return True
 
 
+def wait_remove():
+    while USES_BUTTON and (check_button() == False):  # check button
+        time.sleep(0.1)  # wait
+        debug('waiting for press')
+    while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
+        debug('Not using button. key pulled out?')
+        time.sleep(0.1)
+    # ===============================
+    # SO HAVE REGISTERED PADDLE
+    # ===============================
+    while USES_BUTTON and (check_button() == True):
+        # check button release
+        debug('check button release.')
+        time.sleep(0.1)
+
+
 def code():
     global current_step
     tmp = id_r()
@@ -144,22 +160,10 @@ def code():
         # ==============================
         # INPUT OK
         # ==============================
-        while USES_BUTTON and (check_button() == False):  # check button
-            time.sleep(0.1)  # wait
-            debug('waiting for press')
-        while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
-            debug('Not using button. key pulled out?')
-            time.sleep(0.1)
-        # ===============================
-        # SO HAVE REGISTERED PADDLE
-        # ===============================
-        while USES_BUTTON and (check_button() == True):
-            # check button release
-            debug('check button release.')
-            time.sleep(0.1)
-            # ==================================
-            # SO HAVE REMOVED OR BUTTON RELEASE
-            # ==================================
+        wait_remove()
+        # ==================================
+        # SO HAVE REMOVED OR BUTTON RELEASE
+        # ==================================
     elif tmp != -1:  # reset combination unless daudling
         # ==================================
         # SO WRONG PADDLE
@@ -172,6 +176,7 @@ def code():
                 # ============================================================
                 debug('some wrong nth card inserted.')
                 send_packet('100')
+                wait_remove()
                 if RESET_LOCK_ON_WRONG:
                     # ===================================
                     # START OVER
@@ -189,6 +194,7 @@ def code():
             # ============================================================
             debug('some wrong 1st card inserted.')
             send_packet('100')
+            wait_remove()
             if RESET_LOCK_ON_WRONG:
                 # ===================================
                 # START OVER
