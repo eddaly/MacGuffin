@@ -18,7 +18,7 @@ debug = 1
 height = 480
 width = 800
 off = 200
-delay = 1.6
+delay = 0.25 # quarter second delay on note tracking
 min_dial_range = 55
 max_dial_range = 56
 target_pitch = 440
@@ -136,6 +136,7 @@ def heartbeat_loop():
             print "I am alive!"
         time.sleep(10)
 
+filtered_dial = 0
 
 def dial_thread():
     global dial_value
@@ -145,18 +146,21 @@ def dial_thread():
     global min_pot_value
     global pitch
     global pitch_mult
+    global filtered_dial
 
     old_dial_value = dial_value
+    filtered_dial = dial_value
     msg = OSC.OSCMessage()
 
     while True:
         time.sleep(delay)
         if state == 0:
             dial_value = max(100.0*(mcp.read_adc(0)/max_pot_value),min_pot_value)
-            if dial_value != old_dial_value:
+            filtered_dial = filtered_dial * 0.1 + dial_value * 0.9 # get a filtered dial value
+            if abs(dial_value - filtered_dial) > 3.0: # 3% change pitch
                 msg.clearData()
                 msg.setAddress("/play_this")
-                msg.insert(0,pitch+(pitch_mult*dial_value))
+                msg.insert(0,pitch+(pitch_mult*filtered_dial)) # track filtered dial sound
                 client.send(msg)
             old_dial_value = dial_value
 
@@ -176,10 +180,14 @@ def animate(k):
     global min_dial_range
     global max_dial_range
     global target_pitch
+    global filtered_dial
     # update the wave
     y = (height/4) * np.sin(0.01*np.pi * (x - k*dial_value)) + (height/2)
     line.set_data(xx, y) # plot the data
     if dial_value >= min_dial_range and dial_value <= max_dial_range and state == 0:
+        if abs(filtered_dial - dial_value) > 3.0:
+            # balk due to fast twisty
+            return line,
         if debug == 1:
             print "stop!"
         msg = OSC.OSCMessage()
