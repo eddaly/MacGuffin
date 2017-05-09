@@ -490,13 +490,15 @@ def tuning_lock():
     near = 0.5 * near + 0.5 * nearnew  # some fine tuning slow inducement
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
-    if abs(potin - pot) > 3.0:
+    if abs(potin - pot) > 0.5:
         if not twiddle:
             twiddle = True
+            debug('twiddle')
             send_packet('401')
     else:
         if twiddle:
             twiddle = False
+            debug('still')
             send_packet('400')
     if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
         if abs(potin - pot) > 1.0:
