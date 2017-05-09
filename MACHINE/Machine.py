@@ -27,7 +27,7 @@ import serial
 BUILD = False  # enable show controller
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 USES_BUTTON = False
-PI_BUTTON_PULL_UP = 21  # A BCM of the CS // was 8 now going through NANO in slot 5
+PI_BUTTON_PULL_UP = 20  # A BCM of the CS // was 8 now going through NANO in slot 5
 # 1 is button pressed, 0 is button released
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
@@ -113,7 +113,7 @@ def db():
                 wired = 1  # latch??
         else:
             wired = GPIO.input(wiredPin)
-        debug(str(wired))
+       # debug(str(wired))
 
 
 
@@ -122,8 +122,7 @@ current_step = 0
 
 def check_button():
     if USES_BUTTON:
-        if GPIO.input(PI_BUTTON_PULL_UP) == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
-            debug('BUTTON PRESS ==================================')
+        if button_dbounce == BUTTON_PRESS_POLARITY:  # BUTTON PRESSED
             return True
         else:
             return False  # didn't press button
@@ -133,22 +132,21 @@ def check_button():
 
 def code():
     global current_step
+    tmp = id_r()
     # GETS TO HERE
     length = len(the_key)
     #debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
-    tmp = id_r()
     if tmp == the_key[current_step]:  # a correct digit
         debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
-        # send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
+        send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         # ==============================
         # INPUT OK
         # ==============================
         while USES_BUTTON and (check_button() == False):  # check button
             time.sleep(0.1)  # wait
             debug('waiting for press')
-        send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
             debug('Not using button. key pulled out?')
             time.sleep(0.1)
@@ -167,56 +165,12 @@ def code():
         # SO WRONG PADDLE
         # ==================================
         # a bit of a work around to allow the last digit to not reset the combination
-        if current_step != 0:
-            if tmp != the_key[current_step - 1]:  # last key or first key so not indexing array [-1]
-                # ============================================================
-                # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
-                # ============================================================
-                debug('some wrong nth card inserted.')
-                while USES_BUTTON and (check_button() == False):  # check button
-                    time.sleep(0.1)  # wait
-                    debug('waiting for press')
-                send_packet('100')
-                while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
-                    debug('Not using button. key pulled out?')
-                    time.sleep(0.1)
-                # ===============================
-                # SO HAVE REGISTERED PADDLE
-                # ===============================
-                while USES_BUTTON and (check_button() == True):
-                    # check button release
-                    debug('check button release.')
-                    time.sleep(0.1)
-                if RESET_LOCK_ON_WRONG:
-                    # ===================================
-                    # START OVER
-                    # ===================================
-                    debug('reset combination')
-                    current_step = 0
-                    return False
-            # MUST BE -1 HERE
-            else:
-                debug('clone of last digit/paddle')
-                return False
-        else:
+        if tmp != the_key[max(current_step - 1, 0)]:  # last key or first key so not indexing array [-1]
             # ============================================================
-            # FIRST PADDLE WRONG
+            # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
             # ============================================================
-            debug('some wrong 1st card inserted.')
-            while USES_BUTTON and (check_button() == False):  # check button
-                time.sleep(0.1)  # wait
-                debug('waiting for press')
+            debug('some wrong card inserted.')
             send_packet('100')
-            while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
-                debug('Not using button. key pulled out?')
-                time.sleep(0.1)
-            # ===============================
-            # SO HAVE REGISTERED PADDLE
-            # ===============================
-            while USES_BUTTON and (check_button() == True):
-                # check button release
-                debug('check button release.')
-                time.sleep(0.1)
             if RESET_LOCK_ON_WRONG:
                 # ===================================
                 # START OVER
@@ -224,6 +178,10 @@ def code():
                 debug('reset combination')
                 current_step = 0
                 return False
+        # MUST BE -1 HERE
+        else:
+            debug('clone of last digit/paddle')
+            return False
     else:  # -1
         # =========================================
         # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
@@ -349,7 +307,7 @@ def send_packet(body):
 
 
 def receive_packet():
-    debug('r_packet')
+    debug('r_packet: ')
     data, addr = recv_sock.recvfrom(1024)
     return data
 
@@ -466,8 +424,7 @@ def main_loop():
         if state_r() == 3:
             GPIO.output(motorPin, 0)  # turn off motor
             send_packet('201')
-        if state_r() != 3:
-            send_packet('200')
+
 
 def main():
     initialise()
