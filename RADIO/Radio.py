@@ -63,10 +63,7 @@ rfid_init()
 
 
 def sim_pin():
-    if random.random() > 0.3:
-        return True  # should be almost there
-    else:
-        return False
+    return random.random() > 0.3  # should be almost there
 
 acitate = [False, False, False, False, False]
 
@@ -74,20 +71,22 @@ def rfid():
     global rfidPins
     global acitate
     flag = True
+    counter = 0
     for i in range(5):
         if SIMULATE:
             j = sim_pin()
         else:
             j = GPIO.input(rfidPins[i])
         if j == 1:
+            counter = counter + 1
             if acitate[i] == False:
                 send_packet('1' + str(i + 1) + '1')
-            debug('rnd T:' + str(i + 1))
+#            debug('rnd T:' + str(i + 1))
             acitate[i] = True
         else:
             if acitate[i] == True:
                 send_packet('1' + str(i + 1) + '0')
-            debug('rnd F:' + str(i + 1))
+#            debug('rnd F:' + str(i + 1))
             acitate[i] = False
         flag = flag and j
     if flag:
@@ -96,6 +95,7 @@ def rfid():
     else:
         send_packet('200')
         debug('No :(')
+    print 'counter = ', counter
     return flag
 
 
@@ -104,7 +104,7 @@ def rfid():
 # ====================================
 def debug(show):
     # print to pts on debug console
-    os.system('echo "' + show + '" > /dev/pts/0')
+    os.system('echo "' + show + '" > /dev/null')
 
 
 # ====================================
@@ -455,8 +455,14 @@ def non_terminal():  # a non terminal condition?
     global pot
     global mcp
     global near
-    time.sleep(0.5)
+    time.sleep(0.3)
+    old_pot = pot
     pot = mcp.read_adc(0)
+    if abs(pot - old_pot > 3):
+        send_packet('401')
+    if abs(pot - old_pot == 0):
+    	send_packet('400')
+    
     # debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))  # strangely near global is 0
 
 
@@ -498,8 +504,8 @@ def tuning_lock():
         near = 0.5 * near + 0.5 * nearnew  # some fine tuning slow inducement
         debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
-    if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
-        if abs(potin - pot) > 1.0:
+    if near > 93.0:  # arbitary? and fine tuning issues 33 buckets
+        if abs(potin - pot) > 3.0:
             # escape from routine to prevent fast tune capture effect
             send_packet('301')
             return False
@@ -507,7 +513,7 @@ def tuning_lock():
         # state_w(3)  # whey hey, tuned in!!
         debug('Yup!!!!!!!!!!!!!!!!!!')
         return True
-    elif near > 90.0:
+    elif near > 80.0:
         send_packet('301')
     else:
         send_packet('300')
