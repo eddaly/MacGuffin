@@ -27,8 +27,7 @@ import random
 STARTER_STATE = 4  # the initial state after reset for the ease of build does vary (AT 4 FOR FINAL CODE)
 SIMULATE = False
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
-CHAOS_GUAGE = False
-POT_DAMP = False
+POT_DAMP = True
 
 # ============================================
 # ============================================
@@ -63,7 +62,10 @@ rfid_init()
 
 
 def sim_pin():
-    return random.random() > 0.3  # should be almost there
+    if random.random() > 0.3:
+        return True  # should be almost there
+    else:
+        return False
 
 acitate = [False, False, False, False, False]
 
@@ -71,22 +73,20 @@ def rfid():
     global rfidPins
     global acitate
     flag = True
-    counter = 0
     for i in range(5):
         if SIMULATE:
             j = sim_pin()
         else:
             j = GPIO.input(rfidPins[i])
         if j == 1:
-            counter = counter + 1
             if acitate[i] == False:
                 send_packet('1' + str(i + 1) + '1')
-#            debug('rnd T:' + str(i + 1))
+            debug('rnd T:' + str(i + 1))
             acitate[i] = True
         else:
             if acitate[i] == True:
                 send_packet('1' + str(i + 1) + '0')
-#            debug('rnd F:' + str(i + 1))
+            debug('rnd F:' + str(i + 1))
             acitate[i] = False
         flag = flag and j
     if flag:
@@ -95,7 +95,6 @@ def rfid():
     else:
         send_packet('200')
         debug('No :(')
-    print 'counter = ', counter
     return flag
 
 
@@ -104,7 +103,7 @@ def rfid():
 # ====================================
 def debug(show):
     # print to pts on debug console
-    os.system('echo "' + show + '" > /dev/null')
+    os.system('echo "' + show + '" > /dev/pts/0')
 
 
 # ====================================
@@ -379,6 +378,7 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 def reset_all():
     global touch_grid
     global acitate
+    global twiddle
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -394,6 +394,7 @@ def reset_all():
                   [-1, -1, -1, -1, False]]  # the four active touches
     do_touch() # clear display
     acitate = [False, False, False, False, False]
+    twiddle = False
 
 
 def start_game():
@@ -455,15 +456,12 @@ def non_terminal():  # a non terminal condition?
     global pot
     global mcp
     global near
-    time.sleep(0.3)
-    old_pot = pot
+    time.sleep(0.5)
     pot = mcp.read_adc(0)
-    if abs(pot - old_pot > 3):
-        send_packet('401')
-    if abs(pot - old_pot == 0):
-    	send_packet('400')
-    
     # debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))  # strangely near global is 0
+
+
+twiddle = False
 
 
 def tuning_lock():
@@ -472,40 +470,36 @@ def tuning_lock():
     global pot
     global near
     global dnear
+    global twiddle
     non_terminal()
     p_tune = 1024.0 * percent_tune / 100  # yep percent!
     # debug('pt: ' + str(p_tune))
-    if CHAOS_GUAGE:
-        potin = pot
-    else:  # a bit of var reuse
-        if POT_DAMP:
-            if dnear < 0.000001:
-                dnear = pot  # initializer
-            dnear = 0.1 * dnear + 0.9 * pot
-            # ======================================
-            # The twist dial fast tunning ....
-            # ======================================
-            potin = dnear
-        else:
-            potin = pot  # does a a bit of a fast twist capture effect without some locking
+    if POT_DAMP: # <== yes the pot is damped so as to not make an easy spin find the dial
+        if dnear < 0.000001:
+            dnear = pot  # initializer
+        dnear = 0.1 * dnear + 0.9 * pot
+        # ======================================
+        # The twist dial fast tunning ....
+        # ======================================
+        potin = dnear
+    else:
+        potin = pot  # does a a bit of a fast twist capture effect without some locking
     offset = float(abs(potin - tune_centre))  # offset
     nearnew = (1.0 - min(offset / p_tune,
                          1.0)) * 100.0  # offset rel to 20% capped at 20% (0.0 -> 1.0) scaled up for gauge
-    if CHAOS_GUAGE:
-        # debug('tunning nn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-        # continuous approximation running average filter
-        dnearnew = abs(nearnew - near) / 50.0  # speed scaling
-        # debug('tunning dnn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()) )
-        dnear = 0.2 * dnear + 0.2 * dnearnew  # damping first constant
-        # debug('tunning dn: ' + str(pot) + ' near: ' + str(nearnew) + ' state: ' + str(state_r()))
-        near = max(0.6 * near + 0.4 * nearnew - 2.0 * dnear, 0.0)  # some fine tuning slow inducement
-        debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnearnew))
-    else:
-        near = 0.5 * near + 0.5 * nearnew  # some fine tuning slow inducement
-        debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
+    near = 0.5 * near + 0.5 * nearnew  # some fine tuning slow inducement
+    debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
-    if near > 93.0:  # arbitary? and fine tuning issues 33 buckets
-        if abs(potin - pot) > 3.0:
+    if abs(potin - pot) > 3.0:
+        if not twiddle:
+            twiddle = True
+            send_packet('401')
+    else:
+        if twiddle:
+            twiddle = False
+            send_packet('400')
+    if near > 97.0:  # arbitary? and fine tuning issues 33 buckets
+        if abs(potin - pot) > 1.0:
             # escape from routine to prevent fast tune capture effect
             send_packet('301')
             return False
@@ -513,7 +507,7 @@ def tuning_lock():
         # state_w(3)  # whey hey, tuned in!!
         debug('Yup!!!!!!!!!!!!!!!!!!')
         return True
-    elif near > 80.0:
+    elif near > 90.0:
         send_packet('301')
     else:
         send_packet('300')
