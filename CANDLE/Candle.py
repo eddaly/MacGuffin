@@ -83,6 +83,7 @@ id_code = -1  # default no read
 def mfrc():
     global last_tag
     tag = -1
+    MIFAREReader.MFRC522_Init() # try an init
     # Scan for cards
     (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
     # If a card is found
