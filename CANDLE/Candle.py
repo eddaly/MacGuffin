@@ -113,11 +113,13 @@ def rfid():
     while True:
         time.sleep(0.1)
         if PI_RFID == True:
-            id_w(mfrc()) # write the read key
+            input = mfrc()
+            id_w(input) # write the read key
+            debug(str(input))
         else:
             input = ser.readline()  # BLOCKING
             id_w(int(input))  # load in number to use next
-        debug(input)
+            debug(input)
 
 
 def code():  # check for right id code return true on got
