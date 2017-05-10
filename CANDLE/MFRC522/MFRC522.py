@@ -340,7 +340,7 @@ class MFRC522:
         if len(backData) == 16:
             print "Sector " + str(blockAddr) + " " + str(backData)
             return backData[0]
-        return -1
+        return -2
 
     def MFRC522_Write(self, blockAddr, writeData):
         buff = []
