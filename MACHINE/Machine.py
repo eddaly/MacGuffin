@@ -140,21 +140,26 @@ def wait_insert_new():
     return tmp
 
 
+waiter_start = True
+
+
 def wait_remove(tmp):
+    global waiter_start
     if USES_BUTTON:
-        while check_button() == False:  # check button
+        while (check_button() == False) and not waiter_start:  # check button
             time.sleep(0.1)  # wait
             debug('waiting for press')
-        while check_button() == True:
+        while (check_button() == True) and not waiter_start:
             # check button release
             debug('waiting button release')
             time.sleep(0.1)
     # =======================================
     # SO HAVE REGISTERED PADDLE WAIT FOR NEW
     # =======================================
-    while (id_r() == -1) or (id_r() == tmp):  # wait for remove and insert another
+    while ((id_r() == -1) or (id_r() == tmp)) and not waiter_start:  # wait for remove and insert another
         debug('key pulled out? New in?')
         time.sleep(0.1)
+    waiter_start = False # allows an exit in the waiter loop
 
 
 def code():
@@ -323,6 +328,7 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 def reset_all():
     global wired
+    global waiter_start
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -334,15 +340,18 @@ def reset_all():
     debug('all reset - releasing the lock')
     wired = 0
     GPIO.output(motorPin, 0)  # turn off motor by default
+    waiter_start = True
     if BUILD: # for tests
         start_game() #-- should not start game yet
 
 
 def start_game():
     global current_step
+    global waiter_start
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     current_step = 0
+    waiter_start = True
     GPIO.output(motorPin, 1)  # start motor
 
 
