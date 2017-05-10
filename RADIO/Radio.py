@@ -504,7 +504,7 @@ def tuning_lock():
             debug('still')
             send_packet('400')
     if near > 95.0:  # arbitary? and fine tuning issues 33 buckets
-        if abs(potin - pot) > 1.0:
+        if abs(potin - pot) > 3.0: # edit to make easier to tune
             # escape from routine to prevent fast tune capture effect
             send_packet('301')
             return False
