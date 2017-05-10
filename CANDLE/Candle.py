@@ -22,7 +22,7 @@ import random
 
 import serial
 
-sys.path.insert(0, "~/Macguffin/CANDLE/MFRC522") # find module?
+sys.path.insert(0, "/home/pi/MacGuffin/CANDLE/MFRC522") # find module?
 import MFRC522 # the RFID lib
 
 BUILD = True
