@@ -1,3 +1,12 @@
+Ok, so bad readers didn't work. Good readers work direct with pi.
+
+Key code stored in SECTOR 1 FIRST BYTE
+
+
+
+=====================================================================
+
+
 MATERIALS
 =========
 
