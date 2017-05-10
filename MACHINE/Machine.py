@@ -194,6 +194,7 @@ def code():
             # ============================================================
             debug('some wrong 1st card inserted.')
             send_packet('100')
+            send_packet('blooper') # wrong first card after reset by wrong card, maybe a multi issue 100 ignore
             wait_remove()
             if RESET_LOCK_ON_WRONG:
                 # ===================================
