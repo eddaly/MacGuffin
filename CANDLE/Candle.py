@@ -97,10 +97,10 @@ def mfrc():
         key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
         # Select the scanned tag
         MIFAREReader.MFRC522_SelectTag(uid)
-        status = self.MFRC522_Auth(self.PICC_AUTHENT1A, 1, key, uid)
+        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 1, key, uid)
         # Check if authenticated
-        if status == self.MI_OK:
-            return self.MFRC522_Read(1)
+        if status == MIFAREReader.MI_OK:
+            return MIFAREReader.MFRC522_Read(1)
         else:
             debug("Authentication error")
         # Stop
