@@ -22,9 +22,12 @@ import random
 
 import serial
 
-# import MFRC522 # the RFID lib
+import MFRC522 # the RFID lib
 
 BUILD = True
+
+PI_RFID = True # set true for pi doing RFID
+
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
@@ -60,24 +63,60 @@ GPIO.output(chestPin, 0)  # lock chest by default
 # RFID CODE
 # ===================================
 
-the_key = [1, 1, 1, 1]  # tag ids must be 1 to 255
+the_key = [201, 202, 203, 204]  # tag ids must be 1 to 255
 
 correct = [False, False, False, False]
 
 # Create an object of the class MFRC522
 # MIFAREReader = MFRC522.MFRC522()
 
-ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
+if PI_RFID == True:
+    # Create an object of the class MFRC522
+    MIFAREReader = MFRC522.MFRC522()
+else:
+    ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
+
+
 id_code = -1  # default no read
+
+
+def mfrc():
+    # Scan for cards
+    (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+    # If a card is found
+    if status == MIFAREReader.MI_OK:
+        debug("Card detected")
+    # Get the UID of the card
+    (status, uid) = MIFAREReader.MFRC522_Anticoll()
+    # If we have the UID, continue
+    if status == MIFAREReader.MI_OK:
+        # Print UID
+        #print "Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3])
+        # This is the default key for authentication
+        key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+        # Select the scanned tag
+        MIFAREReader.MFRC522_SelectTag(uid)
+        status = self.MFRC522_Auth(self.PICC_AUTHENT1A, 1, key, uid)
+        # Check if authenticated
+        if status == self.MI_OK:
+            return self.MFRC522_Read(1)
+        else:
+            debug("Authentication error")
+        # Stop
+        MIFAREReader.MFRC522_StopCrypto1()
+    return -1
 
 
 def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
-        input = ser.readline()  # BLOCKING
+        if PI_RFID == True:
+            id_w(mfrc()) # write the read key
+        else:
+            input = ser.readline()  # BLOCKING
+            id_w(int(input))  # load in number to use next
         debug(input)
-        id_w(int(input))  # load in number to use next
 
 
 def code():  # check for right id code return true on got
@@ -260,7 +299,8 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
-    input = ser.readline()
+    if PI_RFID == False:
+        input = ser.readline()
     if not BUILD:
         t1 = threading.Thread(target=reset_loop)
         t1.daemon = False
