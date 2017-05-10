@@ -79,9 +79,10 @@ else:
 
 
 id_code = -1  # default no read
-
+last_tag = -1
 
 def mfrc():
+    global last_tag
     tag = -1
     # Scan for cards
     (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
@@ -103,12 +104,16 @@ def mfrc():
         # Check if authenticated
         if status == MIFAREReader.MI_OK:
             tag = MIFAREReader.MFRC522_Read(1)
+            last_tag = tag # make note
             debug('tag read')
         else:
             debug("Authentication error")
         # Stop
         MIFAREReader.MFRC522_StopCrypto1()
         time.sleep(0.5)
+    if last_tag != -1:
+        tag = last_tag # botch for skipped
+        last_tag = -1
     return tag
 
 
