@@ -91,6 +91,7 @@ def mfrc():
     # Get the UID of the card
     (status, uid) = MIFAREReader.MFRC522_Anticoll()
     # If we have the UID, continue
+    debug('try tag')
     if status == MIFAREReader.MI_OK:
         # Print UID
         #print "Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3])
@@ -102,6 +103,7 @@ def mfrc():
         # Check if authenticated
         if status == MIFAREReader.MI_OK:
             tag = MIFAREReader.MFRC522_Read(1)
+            debug('tag read')
         else:
             debug("Authentication error")
         # Stop
