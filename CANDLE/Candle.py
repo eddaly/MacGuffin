@@ -106,6 +106,7 @@ def mfrc():
             debug("Authentication error")
         # Stop
         MIFAREReader.MFRC522_StopCrypto1()
+        time.sleep(0.5)
     return tag
 
 
