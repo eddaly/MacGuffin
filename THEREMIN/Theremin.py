@@ -177,6 +177,10 @@ def lock(low_t, high_t):
         state = 1
         send_packet("101")
         l.release
+    elif pot < 11:
+        state = 1
+        wheel_pack = 0
+        send_packet('103') # dial reset
     else:
         wheel_pack = 0
         state = 4
@@ -238,7 +242,7 @@ def clear():
     pot = mcp.read_adc(0)
     if pot < 11:
         state = 1
-      
+        send_packet('103') # dial reset
     l.release
 
 def theremin():
