@@ -82,6 +82,7 @@ id_code = -1  # default no read
 
 
 def mfrc():
+    tag = -1
     # Scan for cards
     (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
     # If a card is found
@@ -100,12 +101,12 @@ def mfrc():
         status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 1, key, uid)
         # Check if authenticated
         if status == MIFAREReader.MI_OK:
-            return MIFAREReader.MFRC522_Read(1)
+            tag = MIFAREReader.MFRC522_Read(1)
         else:
             debug("Authentication error")
         # Stop
         MIFAREReader.MFRC522_StopCrypto1()
-    return -1
+    return tag
 
 
 def rfid():

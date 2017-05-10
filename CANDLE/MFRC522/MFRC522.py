@@ -337,7 +337,6 @@ class MFRC522:
         (status, backData, backLen) = self.MFRC522_ToCard(self.PCD_TRANSCEIVE, recvData)
         if not (status == self.MI_OK):
             print "Error while reading!"
-        i = 0
         if len(backData) == 16:
             print "Sector " + str(blockAddr) + " " + str(backData)
             return backData[0]
