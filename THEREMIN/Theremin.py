@@ -32,8 +32,8 @@ lampPin = 4
 GPIO.setup(gaugePin,GPIO.OUT)
 GPIO.setup(26,GPIO.OUT)
 
-GPIO.setup(25,GPIO.OUT)
-GPIO.output(25,GPIO.HIGH)
+#GPIO.setup(25,GPIO.OUT)
+#GPIO.output(25,GPIO.HIGH)
 
 # 
 # GPIO.setup(4,GPIO.OUT)
@@ -99,7 +99,7 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
-    GPIO.output(25,GPIO.HIGH)
+    #GPIO.output(25,GPIO.HIGH)
     #GPIO.output(4,GPIO.LOW)
     state = 0
     wheel_pack = 0
@@ -156,6 +156,7 @@ def heartbeat_loop():
 def initialise():
     reset_all()
     ser.flushInput()
+    voidval = ser.readline()
     time.sleep(1)
     t1 = threading.Thread(target=reset_loop)
     t1.daemon = False
@@ -317,7 +318,7 @@ def theremin():
         client.send(play)
         state = 6
         t_message = "202"
-        GPIO.output(25,GPIO.HIGH)
+        #GPIO.output(25,GPIO.HIGH)
         
     if t_message != old_t_message:
         send_packet(t_message)
@@ -329,7 +330,7 @@ def theremin():
 
 
 def idle():
-    GPIO.output(25,GPIO.HIGH)
+    #GPIO.output(25,GPIO.HIGH)
     pot = mcp.read_adc(0)
     print 'pot:',pot
     time.sleep(0.5)    
@@ -354,13 +355,14 @@ def main():
         print 'state:',state
         print 'wheel_pack:', wheel_pack
         time.sleep(0.0001)
+        voidval = ser.readline()
         if state == 0:
             idle()
         if state == 1:
             pot = mcp.read_adc(0)
             old_pot = pot
             if wheel_pack == 4: # THIS IF STATEMENT REMOOVES THE THEREMIN
-                state = 6 #this should be 5 when sensor is active
+                state = 5 #this should be 5 when sensor is active
                 #GPIO.output(25,GPIO.LOW)
                 send_packet("102")
                 #voidval = ser.readline()
