@@ -1,18 +1,28 @@
 #!/bin/bash
 PROJECT=BELLOWS
+# set to YES or NO
+GUI=NO
+
+# the first project with the embeded SPI on PI
 SPI=CANDLE
 
-# make the startme.sh (NO GUI)
-sudo cat /etc/rc.local | sudo grep -v "exit 0" > /etc/rc.local
-sudo echo "/home/pi/Macguffin/$PROJECT/startme.sh &" >> /etc/rc.local 
-sudo echo "exit 0" >> /etc/rc.local
+# get pip
+sudo apt-get install python-dev python-pip
 
-# make the startme.desktop (GUI)
-sudo cp /home/pi/Macguffin/$PROJECT/startme.desktop /etc/xdg/autostart
+if [ "$GUI" = "NO" ]; then
+    # make the startme.sh (NO GUI)
+    sudo cat /etc/rc.local | sudo grep -v "exit 0" > /etc/rc.local
+    sudo echo "/home/pi/Macguffin/$PROJECT/startme.sh &" >> /etc/rc.local 
+    sudo echo "exit 0" >> /etc/rc.local
+else
+    # make the startme.desktop (GUI)
+    sudo cp /home/pi/Macguffin/$PROJECT/startme.desktop /etc/xdg/autostart
+    # TkInter PIL lib
+    sudo pip install git+https://github.com/python-pillow/Pillow.git@b53af906d797fea736966e87c47318b039005160
+fi
 
 # make the serial install (frozen fork 11th May 2017)
-sudo apt-get install python-dev python-pip
-sudo pip install git+https://github.com/jackokring/pyserial.git
+sudo pip install git+https://github.com/pyserial/pyserial.git@055f31cf42eca936591827ccca19c56a0df8354f
 
 # make the SPI on PI install
 sudo python /home/pi/Macguffin/$SPI/SPI-Py/setup.py install
@@ -30,5 +40,3 @@ sudo python /home/pi/Macguffin/$SPI/SPI-Py/setup.py install
 #echo "@xset -dpms" >> ~/.config/lxsession/LXDE-pi/autostart
 #echo "@unclutter -display :0 -noevents -grab" >> ~/.config/lxsession/LXDE-pi/autostart
 #echo "@/home/pi/MacGuffin/OSCILLOSCOPE/startgame.sh" >> ~/.config/lxsession/LXDE-pi/autostart
-
-
