@@ -493,6 +493,11 @@ def tuning_lock():
     near = 0.5 * near + 0.5 * nearnew  # some fine tuning slow inducement
     debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()) + ' dnn: ' + str(dnear))
     gauge.start(int(near / 1.75 * 97 / 60))  # tuning indication, maybe sensitivity needs changing 1.3
+    if abs(nearnew - near) > 3.0: # for some movement
+        if nearnew > near:
+            send_packet('500') # emmit a packet for closer
+        else:
+            send_packet('501') # emit a packet for further
     if abs(potin - pot) > 0.5:
         if not twiddle:
             twiddle = True
@@ -503,8 +508,8 @@ def tuning_lock():
             twiddle = False
             debug('still')
             send_packet('400')
-    if near > 95.0:  # arbitary? and fine tuning issues 33 buckets
-        if abs(potin - pot) > 3.0: # edit to make easier to tune
+    if near > 80.0:  # actual range pot has to be left in 20% of dial * (100 - 80%) = (within 4%)
+        if abs(potin - pot) > 10.0: # edit to make easier to tune (speed dial has to be slow turned, higher = easier)
             # escape from routine to prevent fast tune capture effect
             send_packet('301')
             return False
