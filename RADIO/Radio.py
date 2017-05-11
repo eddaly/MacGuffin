@@ -459,8 +459,8 @@ def non_terminal():  # a non terminal condition?
     global pot
     global mcp
     global near
-    time.sleep(0.5)
-    pot = mcp.read_adc(0)
+    time.sleep(0.1) # quicker read time and filter effect
+    pot = mcp.read_adc(0) # READ ADC
     # debug('tunning: ' + str(pot) + ' near: ' + str(near) + ' state: ' + str(state_r()))  # strangely near global is 0
 
 
@@ -498,7 +498,7 @@ def tuning_lock():
             send_packet('500') # emmit a packet for closer
         else:
             send_packet('501') # emit a packet for further
-    if abs(potin - pot) > 0.5:
+    if abs(potin - pot) > 2.0:
         if not twiddle:
             twiddle = True
             debug('twiddle')
@@ -517,7 +517,7 @@ def tuning_lock():
         # state_w(3)  # whey hey, tuned in!!
         debug('Yup!!!!!!!!!!!!!!!!!!')
         return True
-    elif near > 85.0:
+    elif near > 30.0:
         send_packet('301')
     else:
         send_packet('300')
@@ -528,7 +528,7 @@ def tunning_change():
     global tune_centre
     global pot
     random.seed(a=pot)
-    tmp = random.randrange(370)
+    tmp = random.randrange(300)
     non_terminal()
     gauge.start(0)
     debug('tmp: ' + str(tmp) + ' pot: ' + str(pot))
