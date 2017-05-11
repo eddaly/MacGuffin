@@ -13,8 +13,8 @@ byte size = sizeof(buffer);
 const int signalPinTarot = 2; //output pin on which any tarot is communicated.
 const int signalPinCorrect = 3; //output pin on which correct tarot is communicated.
 
-const int readerID = 101; //output pin will activate when reader ID matches tag ID.
-const int keys[6] = { 101, 102, 103, 104, 105, 106 };
+const int readerID = 206; //output pin will activate when reader ID matches tag ID.
+const int keys[6] = { 201, 202, 203, 204, 205, 206 };
 
 const int ledPin = 13;
 
