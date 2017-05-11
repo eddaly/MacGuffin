@@ -1,3 +1,6 @@
+Need to solder some RFID readers.
+RFIDs programmed. Missing 40 pin header. PARTS?
+==============================================================================
 Wrote duino script to detect tarot and right in right or wrong location.
 Next step is PCB and mechanical build and testing.
 
