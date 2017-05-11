@@ -3,6 +3,10 @@ PROJECT=LEVER
 # set to YES or NO
 GUI=NO
 SPI=NO
+# dont forget all the dots
+IP=10.100.1.
+GATE=254
+THIS=24
 
 # the first project with the embeded SPI on PI
 SPIPROJ=CANDLE
@@ -36,6 +40,23 @@ fi
 
 
 sudo echo "ssh" > /boot/ssh
+
+sudo cat > /etc/network/interfaces << EOF
+auto lo
+
+iface lo inet loopback
+
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+    wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+
+#Your static network configuration  
+iface eth0 inet static
+    address $IP$THIS
+    netmask 255.255.255.0
+    gateway $IP$GATE
+EOF
+#don't use any space before of after 'EOF' in the previous line
 
 # SOME OLDER STUFF FOR REFERENCE
 #echo "@lxpanel --profile LXDE-pi" > ~/.config/lxsession/LXDE-pi/autostart
