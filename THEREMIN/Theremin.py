@@ -165,26 +165,30 @@ def initialise():
     t2.start()
     
 
-def lock(low_t, high_t):
+def lock(low_t, high_t): # the half second lock check routine
     global wheel_pack
     global state
-    l = threading.Lock()
-    time.sleep(0.5)
+    l = threading.Lock() # good job l.acquire without () does nothing, (holding locks over sleep is not good)
+    time.sleep(0.5) # half second delay for to acquire number through ADC
     pot = mcp.read_adc(0)
-    l.acquire
-    if pot >= low_t and pot <= high_t:
+    l.acquire # needs () to active, but 32 bit aligned memory access atomicity works. locks only required
+    # when accessing 2 object items in the same object, and both have to be "changed at the same time"
+    if pot >= low_t and pot <= high_t: # correct number
         wheel_pack += 1
         state = 1
-        send_packet("101")
+        send_packet("101") # correct number send message ok
         l.release
-    elif pot < 11:
+    elif pot < 11: # moved to X position
         state = 1
         wheel_pack = 0
         send_packet('103') # dial reset
-    else:
+        # l.release # this is a function reference pointer. () is needed to use it
+        # how would "t1 = threading.Thread(target=reset_loop)" set the thread to use? if reset_loop() was evaluated?
+    else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
         state = 4
-        send_packet("100")
+        send_packet("100") # error noise (1st time ok, second time etc no does????)
+        # maybe it was idling "bing! bing! bing!"
         l.release
         
         
@@ -198,7 +202,7 @@ def turn():
     turn_speed = abs(pot - old_pot)
 
 
-def waiting():
+def waiting(): # checks to see if wheel moved before combination entry
     global state
     l = threading.Lock()
     turn()
@@ -207,7 +211,7 @@ def waiting():
         state = 2
         l.release
 
-def stop_wait():
+def stop_wait(): # checks to see if wheel stopped before combination entry (1st digit?)
     global state
     l = threading.Lock()
     turn()
@@ -217,7 +221,7 @@ def stop_wait():
         state = 3
         l.release
 
-def Wheel_pack():
+def Wheel_pack(): # check combination to see if digits entered (half second gaps in lock)
     global state
     l = threading.Lock()
     if wheel_pack == 0:
@@ -228,7 +232,7 @@ def Wheel_pack():
         lock(28,134)
     elif wheel_pack == 3:
         lock(348,453)
-    else:
+    else: # wheel pack at 4 starts theremin
         l.acquire
         #GPIO.output(ledPin,GPIO.HIGH)
         state = 5
@@ -242,7 +246,7 @@ def clear():
     pot = mcp.read_adc(0)
     if pot < 11:
         state = 1
-        send_packet('103') # dial reset
+        send_packet('103') # dial reset for start of combination entry
     l.release
 
 def theremin():
