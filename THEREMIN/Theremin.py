@@ -247,6 +247,8 @@ def clear():
     if pot < 11:
         state = 1
         send_packet('103') # dial reset for start of combination entry
+    else:
+        send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
     l.release
 
 def theremin():
