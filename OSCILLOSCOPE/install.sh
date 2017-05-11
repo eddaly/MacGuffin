@@ -1,5 +1,8 @@
 #!/bin/bash
 
+sudo apt-get update
+sudo apt-get install pd-extended
+
 echo "@lxpanel --profile LXDE-pi" > ~/.config/lxsession/LXDE-pi/autostart
 echo "@pcmanfm --desktop --profile LXDE-pi" >> ~/.config/lxsession/LXDE-pi/autostart
 echo "@point-rpi" >> ~/.config/lxsession/LXDE-pi/autostart

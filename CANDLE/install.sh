@@ -8,7 +8,8 @@ SPI=YES
 SPIPROJ=CANDLE
 
 # get pip
-sudo apt-get install python-dev python-pip
+sudo apt-get update
+sudo apt-get install python-dev python-pip pd-extended
 
 if [ "$GUI" = "NO" ]; then
     # make the startme.sh (NO GUI)
