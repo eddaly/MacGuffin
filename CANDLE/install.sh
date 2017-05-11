@@ -1,8 +1,8 @@
 #!/bin/bash
-PROJECT=BELLOWS
+PROJECT=CANDLE
 # set to YES or NO
 GUI=NO
-SPI=NO
+SPI=YES
 
 # the first project with the embeded SPI on PI
 SPIPROJ=CANDLE

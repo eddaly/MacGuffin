@@ -1,7 +1,7 @@
 #!/bin/bash
-PROJECT=BELLOWS
+PROJECT=RADIO
 # set to YES or NO
-GUI=NO
+GUI=YES
 SPI=NO
 
 # the first project with the embeded SPI on PI

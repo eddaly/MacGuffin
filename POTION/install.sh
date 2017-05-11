@@ -1,5 +1,5 @@
 #!/bin/bash
-PROJECT=BELLOWS
+PROJECT=POTION
 # set to YES or NO
 GUI=NO
 SPI=NO

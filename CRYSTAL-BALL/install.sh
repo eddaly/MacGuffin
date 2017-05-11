@@ -1,5 +1,5 @@
 #!/bin/bash
-PROJECT=BELLOWS
+PROJECT=CRYSTAL-BALL
 # set to YES or NO
 GUI=NO
 SPI=NO
