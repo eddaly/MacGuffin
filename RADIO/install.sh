@@ -35,7 +35,7 @@ if [ "$SPI" = "YES"]; then
 fi
 
 
-
+sudo echo "ssh" > /boot/ssh
 
 # SOME OLDER STUFF FOR REFERENCE
 #echo "@lxpanel --profile LXDE-pi" > ~/.config/lxsession/LXDE-pi/autostart

@@ -34,7 +34,7 @@ if [ "$SPI" = "YES"]; then
     echo "dtparam=spi=on" >> /boot/config.txt
 fi
 
-
+sudo echo "ssh" > /boot/ssh
 
 
 # SOME OLDER STUFF FOR REFERENCE
