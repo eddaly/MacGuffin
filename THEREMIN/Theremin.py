@@ -259,6 +259,7 @@ def clear():
         send_packet('103') # dial reset for start of combination entry
     else:
         # send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
+        nop = True
     l.release
 
 def theremin():
