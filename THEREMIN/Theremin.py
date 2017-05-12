@@ -62,6 +62,7 @@ f=0
 old_f = 30
 t_message = "200"
 old_t_message = "202"
+cleared = False
 
 t=10 #starting pressure level
 delay = 0.5 #set turn speed delay here
@@ -94,6 +95,8 @@ def reset_all():
     global t_message
     global old_t_message
     global old_f
+    global cleared
+    cleared = False
     l = threading.Lock()
     l.acquire
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
@@ -175,6 +178,7 @@ def send_once(body):
 def lock(low_t, high_t): # the half second lock check routine
     global wheel_pack
     global state
+    global cleared
     l = threading.Lock() # good job l.acquire without () does nothing, (holding locks over sleep is not good)
     time.sleep(0.5) # half second delay for to acquire number through ADC
     pot = mcp.read_adc(0)
@@ -183,18 +187,20 @@ def lock(low_t, high_t): # the half second lock check routine
     if pot >= low_t and pot <= high_t: # correct number
         wheel_pack += 1
         state = 1
-        send_once("101") # correct number send message ok
+        cleared = False
+        send_packet("101") # correct number send message ok
         l.release
-    elif pot < 11: # moved to X position
+    elif pot < 11 and state != 1: # moved to X position
         state = 1
+        cleared = False
         wheel_pack = 0
-        send_once('103') # dial reset
-        # l.release # this is a function reference pointer. () is needed to use it
+        send_packet('103') # dial reset
+        l.release 
         # how would "t1 = threading.Thread(target=reset_loop)" set the thread to use? if reset_loop() was evaluated?
     else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
         state = 4
-        send_once("100") # error noise (1st time ok, second time etc no does????)
+        send_packet("100") # error noise (1st time ok, second time etc no does????)
         # maybe it was idling "bing! bing! bing!"
         l.release
         
@@ -211,11 +217,13 @@ def turn():
 
 def waiting(): # checks to see if wheel moved before combination entry
     global state
+    global cleared
     l = threading.Lock()
     turn()
     if turn_speed > 5:
         l.acquire
         state = 2
+        cleared = False
         l.release
 
 def stop_wait(): # checks to see if wheel stopped before combination entry (1st digit?)
@@ -247,15 +255,21 @@ def Wheel_pack(): # check combination to see if digits entered (half second gaps
 
 def clear():
     global state
+    global cleared
     l = threading.Lock()
     time.sleep(0.5)
     l.acquire
     pot = mcp.read_adc(0)
     if pot < 11:
         state = 1
+        cleared = False
         send_packet('103') # dial reset for start of combination entry
     else:
-        send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
+        if cleared == False:
+            send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
+            cleared = True
+            state = 1
+
     l.release
 
 def theremin():
