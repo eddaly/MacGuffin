@@ -197,7 +197,7 @@ def lock(low_t, high_t): # the half second lock check routine
     else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
         state = 4
-        emit_once("100") # error noise (1st time ok, second time etc no does????)
+        send_packet("100") # error noise (1st time ok, second time etc no does????)
         # maybe it was idling "bing! bing! bing!"
         l.release
         
