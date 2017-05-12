@@ -1,0 +1,14 @@
+Installed Pi bakery (to test building an image), as git is not a default to pull, for install.sh
+It looks a bit like scratch for building some defaults, and automation of networking setup
+and package downloads. 
+
+Must pull to a pi th chmod the scripts, and then push? Windows is a bit lax in this way.
+
+The network is recommended to be a 2 step process. An automated pull to a local repository
+on a pi designed for distibution. The an email sent to the admin that there is a pullable.
+Then an automated pull then onto the machines. This has the advantage of an easy hold
+and also no problems with a live update during a game.
+
+CONS: It is more difficult to implement. I'm not sure what the current firewall status is
+and it maybe better to only update while on site, or make the proxy on site, do an automated
+ssh into the games to do the pull that way from a script on the "local" repo.
