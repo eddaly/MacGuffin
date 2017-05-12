@@ -163,7 +163,14 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    
+
+sent = '99' # some random thing
+
+def send_once(body):
+    global sent
+    if body != sent:
+        send_packet(body)
+        sent = body
 
 def lock(low_t, high_t): # the half second lock check routine
     global wheel_pack
@@ -176,18 +183,18 @@ def lock(low_t, high_t): # the half second lock check routine
     if pot >= low_t and pot <= high_t: # correct number
         wheel_pack += 1
         state = 1
-        send_packet("101") # correct number send message ok
+        send_once("101") # correct number send message ok
         l.release
     elif pot < 11: # moved to X position
         state = 1
         wheel_pack = 0
-        send_packet('103') # dial reset
+        send_once('103') # dial reset
         # l.release # this is a function reference pointer. () is needed to use it
         # how would "t1 = threading.Thread(target=reset_loop)" set the thread to use? if reset_loop() was evaluated?
     else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
         state = 4
-        send_packet("100") # error noise (1st time ok, second time etc no does????)
+        send_once("100") # error noise (1st time ok, second time etc no does????)
         # maybe it was idling "bing! bing! bing!"
         l.release
         
