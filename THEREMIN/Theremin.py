@@ -76,6 +76,15 @@ send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
+emitted = ''
+
+
+def emit_once(body):
+    global emitted
+    if body != emitted:
+        emitted = body
+        send_packet(body) # just once
+
 def send_packet(body):
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
     
@@ -188,7 +197,7 @@ def lock(low_t, high_t): # the half second lock check routine
     else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
         state = 4
-        send_packet("100") # error noise (1st time ok, second time etc no does????)
+        emit_once("100") # error noise (1st time ok, second time etc no does????)
         # maybe it was idling "bing! bing! bing!"
         l.release
         
@@ -249,7 +258,7 @@ def clear():
         state = 1
         send_packet('103') # dial reset for start of combination entry
     else:
-        send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
+        emit_once('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
     l.release
 
 def theremin():
