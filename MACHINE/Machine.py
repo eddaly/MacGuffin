@@ -131,6 +131,10 @@ def check_button():
 
 
 def wait_insert_new():
+    global check
+    global bloop
+    check = 0
+    bloop = False
     tmp = id_r()
     while tmp == -1:  # wait for new
         debug('no key')
@@ -141,7 +145,22 @@ def wait_insert_new():
 
 
 waiter_start = True
+check = 0
+bloop = False
 
+def check_long(tmp): # EMIT REPEAT BLOOPS
+    global check
+    global bloop
+    #check for a long enough series of -1 and bloop again
+    tmp2 = id_r()
+    if tmp2 == -1:
+        check += 1
+    if check > 40:
+        check = 0
+        bloop = True
+    if (tmp2 == tmp) and bloop:
+        send_packet('100') # emit bloop if 40 ticks, = 4 seconds
+        bloop = False
 
 def wait_remove(tmp):
     global waiter_start
@@ -159,6 +178,7 @@ def wait_remove(tmp):
     while ((id_r() == -1) or (id_r() == tmp)) and not waiter_start:  # wait for remove and insert another
         debug('key pulled out? New in?')
         time.sleep(0.1)
+        check_long(tmp)
     waiter_start = False # allows an exit in the waiter loop
 
 
