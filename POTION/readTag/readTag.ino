@@ -50,7 +50,7 @@ void loop()
   {
     Serial.println(-1, DEC);
     digitalWrite(signalPin, LOW);
-    pulse();
+//    pulse();
     reset(RST_PIN);
     return;
   }
@@ -61,7 +61,7 @@ void loop()
   {
     Serial.println(-1, DEC);
     digitalWrite(signalPin, LOW);
-    pulse();
+//    pulse();
     reset(RST_PIN);
     return;
   }
@@ -73,7 +73,7 @@ void loop()
   {
     Serial.println(-1, DEC);
     digitalWrite(signalPin, LOW);
-    pulse();
+//    pulse();
     reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
@@ -87,7 +87,7 @@ void loop()
   {
     Serial.println(-1, DEC);
     digitalWrite(signalPin, LOW);
-    pulse();
+//    pulse();
     reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
@@ -116,7 +116,7 @@ void loop()
 void pulse()
 {
   digitalWrite(ledPin, HIGH);
-  delay(1000);
+  delay(500);
   digitalWrite(ledPin, LOW);
 }
 

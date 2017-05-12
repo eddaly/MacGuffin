@@ -61,7 +61,7 @@ def rfid():
 # ====================================
 def debug(show):
     # print to pts on debug console
-    os.system('echo "' + show + '" > /dev/pts/0')
+    os.system('echo "' + show + '" > /dev/pts/1')
 
 
 # ===================================
