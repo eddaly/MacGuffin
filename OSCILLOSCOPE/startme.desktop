@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Osc.py
-Comment=The Osc (in /etc/xdg/autostart)
-NoDisplay=false
-Exec=bash /home/pi/MacGuffin/OSCILLOSCOPE/startme.sh

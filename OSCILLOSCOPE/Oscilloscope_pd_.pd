@@ -9,7 +9,7 @@
 #X obj 324 -116 routeOSC /play_this /play;
 #X obj 397 -85 change;
 #X obj 397 -60 sel 0 1;
-#X msg 433 -34 0.1 1000;
+#X msg 433 -34 0.1 100;
 #X text 191 19 change frequency;
 #X msg 386 -34 0 1000;
 #X obj 301 18 osc~ 0;
