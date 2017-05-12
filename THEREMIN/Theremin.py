@@ -79,11 +79,11 @@ recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 emitted = ''
 
 
-def emit_once(body):
-    global emitted
-    if body != emitted:
-        emitted = body
-        send_packet(body) # just once
+#def emit_once(body):
+#    global emitted
+#    if body != emitted:
+#        emitted = body
+#        send_packet(body) # just once
 
 def send_packet(body):
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
@@ -258,7 +258,7 @@ def clear():
         state = 1
         send_packet('103') # dial reset for start of combination entry
     else:
-        emit_once('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
+        # send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
     l.release
 
 def theremin():
