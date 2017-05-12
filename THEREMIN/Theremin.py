@@ -32,8 +32,8 @@ lampPin = 4
 GPIO.setup(gaugePin,GPIO.OUT)
 GPIO.setup(26,GPIO.OUT)
 
-#GPIO.setup(25,GPIO.OUT)
-#GPIO.output(25,GPIO.HIGH)
+GPIO.setup(25,GPIO.OUT)
+GPIO.output(25,GPIO.HIGH)
 
 # 
 # GPIO.setup(4,GPIO.OUT)
@@ -76,15 +76,6 @@ send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 
-emitted = ''
-
-
-#def emit_once(body):
-#    global emitted
-#    if body != emitted:
-#        emitted = body
-#        send_packet(body) # just once
-
 def send_packet(body):
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
     
@@ -108,7 +99,7 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
-    #GPIO.output(25,GPIO.HIGH)
+    GPIO.output(25,GPIO.HIGH)
     #GPIO.output(4,GPIO.LOW)
     state = 0
     wheel_pack = 0
@@ -165,7 +156,6 @@ def heartbeat_loop():
 def initialise():
     reset_all()
     ser.flushInput()
-    voidval = ser.readline()
     time.sleep(1)
     t1 = threading.Thread(target=reset_loop)
     t1.daemon = False
@@ -258,8 +248,7 @@ def clear():
         state = 1
         send_packet('103') # dial reset for start of combination entry
     else:
-        # send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
-        nop = True
+        send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
     l.release
 
 def theremin():
@@ -328,7 +317,7 @@ def theremin():
         client.send(play)
         state = 6
         t_message = "202"
-        #GPIO.output(25,GPIO.HIGH)
+        GPIO.output(25,GPIO.HIGH)
         
     if t_message != old_t_message:
         send_packet(t_message)
@@ -340,7 +329,7 @@ def theremin():
 
 
 def idle():
-    #GPIO.output(25,GPIO.HIGH)
+    GPIO.output(25,GPIO.HIGH)
     pot = mcp.read_adc(0)
     print 'pot:',pot
     time.sleep(0.5)    
@@ -365,14 +354,13 @@ def main():
         print 'state:',state
         print 'wheel_pack:', wheel_pack
         time.sleep(0.0001)
-        voidval = ser.readline()
         if state == 0:
             idle()
         if state == 1:
             pot = mcp.read_adc(0)
             old_pot = pot
             if wheel_pack == 4: # THIS IF STATEMENT REMOOVES THE THEREMIN
-                state = 5 #this should be 5 when sensor is active
+                state = 6 #this should be 5 when sensor is active
                 #GPIO.output(25,GPIO.LOW)
                 send_packet("102")
                 #voidval = ser.readline()
