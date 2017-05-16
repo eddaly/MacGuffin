@@ -9,7 +9,7 @@ MESSAGE = sys.argv[3]
 
 print "UDP target IP:", UDP_IP
 print "UDP target port:", UDP_PORT
-print "message:", MESSAGE
+print "Payload:", MESSAGE
 
 sock = socket.socket(socket.AF_INET, # Internet
              socket.SOCK_DGRAM) # UDP
