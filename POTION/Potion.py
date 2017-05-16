@@ -24,7 +24,7 @@ import random
 
 # import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = False # set for shoe controller
 DYNAMIC_CODE = False  # selects the code solve being active at the same time as pumps
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
