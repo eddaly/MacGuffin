@@ -68,12 +68,12 @@ def code():  # check for right id code return true on got
         if GPIO.input(RFID_TAG_ACK[i]) == 1:
             if correct[i] == False:
                 send_packet('1' + str(i) + '1')  # on
-            correct[i] = True
+                correct[i] = True
         else:
             flag = False
             if correct[i] == True:
                 send_packet('1' + str(i) + '0')  # off
-            correct[i] = False
+                correct[i] = False
 
     return flag
 
