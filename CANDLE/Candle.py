@@ -25,7 +25,7 @@ import serial
 sys.path.insert(0, "/home/pi/MacGuffin/CANDLE/MFRC522") # find module?
 import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = False
 
 PI_RFID = True # set true for pi doing RFID
 
@@ -152,6 +152,7 @@ def code():  # check for right id code return true on got
                     correct[i] = True
                     send_packet('1' + str(i + 1) + '1')  # on
                     debug('on')
+                    GPIO.output(LEDPin, 1)
                     if BUILD:
                         return False  # just to test
                     else:
@@ -160,6 +161,7 @@ def code():  # check for right id code return true on got
                 correct[i] = False
                 send_packet('1' + str(i + 1) + '0')  # off
                 debug('off')
+                GPIO.output(LEDPin, 1)
                 return False
     return False
 
