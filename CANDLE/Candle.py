@@ -33,16 +33,22 @@ STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
-chestPin = 19  # set pin for gauge for use as some kind of indicator
+# chestPin = 19  # set pin for gauge for use as some kind of indicator
+LEDPin = 21 # pyhsical pin 40
 piID = 1
 
-# a set up pins. pull one up to indicate which candle is being
-# IS_21 = 8 # pin 12
-# IS_22 = 9 # pin 18
-# IS_23 = 10 # pin 16
-# IS_24 = 11 # pin 32
+HOST = os.environ['HOSTNAME']
+HOST_VAL = [
+    'CHEST', # Candle Chest
+    'TABLE1', # Table 1
+    'TABLE2', # Table 2
+    'MANTEL' # Mantelpiece
+    ]
 
-# identity = [IS_21, IS_22, IS_23, IS_24]
+for i in range(len(HOST_VAL)):
+    if HOST_VAL[i] == HOST:
+        piID = i # auto set host id based on
+
 
 # ============================================
 # ============================================
@@ -51,9 +57,11 @@ piID = 1
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-# motor
-GPIO.setup(chestPin, GPIO.OUT, initial=GPIO.LOW)
-GPIO.output(chestPin, 0)  # lock chest by default
+#GPIO.setup(chestPin, GPIO.OUT, initial=GPIO.LOW)
+#GPIO.output(chestPin, 0)  # lock chest by default
+
+GPIO.setup(LEDPin, GPIO.OUT, initial=GPIO.LOW)
+GPIO.output(LEDPin, 0)  # lock chest by default
 
 # GPIO.setup(IS_21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 # GPIO.setup(IS_22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
@@ -64,7 +72,7 @@ GPIO.output(chestPin, 0)  # lock chest by default
 # RFID CODE
 # ===================================
 
-the_key = [201, 202, 203, 204]  # tag ids must be 1 to 255
+the_key = [111, 112, 113, 114]  # tag ids must be 1 to 255
 
 correct = [False, False, False, False]
 
@@ -269,7 +277,8 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
     debug('all reset - releasing the lock')
-    GPIO.output(chestPin, 0)  # lock chest
+    # GPIO.output(chestPin, 0)  # lock chest
+    GPIO.output(LEDPin, 0)
     if BUILD:
         start_game()  # should not start game yet
 
@@ -278,7 +287,8 @@ def start_game():
     wait_remove()
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    GPIO.output(chestPin, 0)  # lock chest
+    # GPIO.output(chestPin, 0)  # lock chest
+    GPIO.output(LEDPin, 0)
 
 
 def reset_loop():
@@ -292,9 +302,13 @@ def reset_loop():
             start_game()
 
         # OPEN CHEST VIA SHOW CONTROLLER
-        if result == "open":
-            GPIO.output(chestPin, 1)  # open chest
+        #if result == "open":
+        #    GPIO.output(chestPin, 1)  # open chest
 
+        if result == "light":
+            GPIO.output(LEDPin, 1)
+        if result == "dark":
+            GPIO.output(LEDPin, 0)
         time.sleep(0.01)
 
 
