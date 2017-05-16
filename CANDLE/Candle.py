@@ -35,7 +35,7 @@ RX_PORT = 5000  # Change when allocated, but to run independent of controller is
 
 # chestPin = 19  # set pin for gauge for use as some kind of indicator
 LEDPin = 21 # pyhsical pin 40
-piID = 1
+piID = -1
 
 HOST = os.environ['HOSTNAME']
 HOST_VAL = [
@@ -45,10 +45,14 @@ HOST_VAL = [
     'MANTEL' # Mantelpiece
     ]
 
+
 for i in range(len(HOST_VAL)):
     if HOST_VAL[i] == HOST:
         piID = i # auto set host id based on
 
+if ('HOSTNAME' not in os.environ) or (piID == -1):
+    print 'please set the HOSTNAME to CHEST, TABLE1, TABLE2 or MANTEL'
+    sys.exit(0)
 
 # ============================================
 # ============================================
