@@ -37,7 +37,7 @@ RX_PORT = 5000  # Change when allocated, but to run independent of controller is
 LEDPin = 21 # pyhsical pin 40
 piID = -1
 
-HOST = os.environ['HOSTNAME']
+HOST = socket.gethostname()
 HOST_VAL = [
     'CHEST', # Candle Chest
     'TABLE1', # Table 1
@@ -50,7 +50,7 @@ for i in range(len(HOST_VAL)):
     if HOST_VAL[i] == HOST:
         piID = i # auto set host id based on
 
-if ('HOSTNAME' not in os.environ) or (piID == -1):
+if piID == -1:
     print 'please set the HOSTNAME to CHEST, TABLE1, TABLE2 or MANTEL'
     sys.exit(0)
 
