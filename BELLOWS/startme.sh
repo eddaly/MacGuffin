@@ -6,4 +6,4 @@
 #xset -dpms
 #unclutter -root -noevents -grab -display :0 -idle 0 &
 #sleep 5
-/home/pi/MacGuffin/BELLOWS/Bellows.py
+python /home/pi/MacGuffin/BELLOWS/Bellows.py
