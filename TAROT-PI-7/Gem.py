@@ -108,7 +108,7 @@ def rfid():
                 id_w(the_key) # simulate
             else:
                 id_w(-1) # or none
-            debug(id_r())
+            debug(str(id_r()))
         else:
             if PI_RFID == True:
                 input = mfrc()
