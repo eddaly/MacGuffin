@@ -42,8 +42,10 @@ heart = True
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-
-GPIO.setup(DETECT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+if POLARITY == 1:
+    GPIO.setup(DETECT, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+else:
+    GPIO.setup(DETECT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #GPIO.setup(LOCK, GPIO.OUT)
 
 
