@@ -27,7 +27,7 @@ import MFRC522 # the RFID lib
 
 BUILD = True
 
-PI_RFID = True # set true for pi doing RFID
+PI_RFID = False # set true for pi doing RFID
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
