@@ -1,0 +1,62 @@
+Need to solder some RFID readers.
+RFIDs programmed. Missing 40 pin header. PARTS?
+==============================================================================
+Wrote duino script to detect tarot and right in right or wrong location.
+Next step is PCB and mechanical build and testing.
+
+==============================================================================
+Informed there is a new circuit board for this one, with 2 pins to GPIO for each duino.
+The signal on the first pin is card present.
+The signal on the second pin is correct card.
+
+This makes the key code be placed in the arduino with also the correct code for the slot.
+
+A race condition could exist if the arduino signals are not transitioned in a certain way.
+
+On placing a card (incorrect order):
+==============================
+TAROT_ACK goes high, while CORRECT_ACK remains low.
+
+On placing a correct card:
+==========================
+CORRECT_ACK goes high, and then TAROT_ACK goes high.
+
+On removing a card:
+===================
+TAROT_ACK goes low, then CORRECT_ACK goes low.
+
+if CORRECT_ACK goes high, and TAROT_ACK remains low this implies the error of a wrong card.
+So ironically CORRECT_ACK signals incorrect.
+A delay test has to be performed to avoid the race condition.
+
+a delay of at most 0.25 between CORRECT_ACK and TAROT_ACK on placing a correct card is tolerated.
+Otherwise the signal will be incorrect card.
+
+The hold time for a condition output is > 0.2 before the next output state can be sent.
+This will lead to reliable detection within an estimate 1.5 seconds or less.
+
+The detection delays can be shortened, with the minimum delay for about half a second.
+
+=================================================================================
+
+RFID
+====
+
+Multi coded readers. Specifics involve lack of 6 USB inputs on the Pi, a USB hub?
+Getting device by UUID, should work, but subject to USB ordering.
+Use of bit code over single wire, subject to some recognition delay.
+
+A pulse length code would be about the only option with current board design.
+
+00000000000000000000000000000 ........... No card
+11111111111111111111111111111 ........... Correct Card
+01010101010101010101010101010 ........... Wrong Card
+
+A filter of the GPIO input value would tend to 0, 0.5, or 1.
+
+There should be some slice ranges, such that "ding, dong" sound hunting is not a problem.
+There should be some valid in time windowing to prevent "ding, dong" Wrong card when floating to correct card.
+
+There should not be too much problem in this as a full lay would be the optimum point to dwell and then "ding."
+
+Maybe better to use USB hub and add prefix to duino outputs based on position.
