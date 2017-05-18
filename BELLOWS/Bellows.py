@@ -59,10 +59,12 @@ def man(): # latching detect
         if input == 1: # and become on
             latch = True
             send_packet('101')
+            time.sleep(0.5) # debounce
     else: # on
         if input == 0: # and become off
             latch = False
             send_packet('100')
+            time.sleep(0.5) # debounce
 #    return True
 
 
