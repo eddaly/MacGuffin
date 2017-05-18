@@ -1,4 +1,4 @@
-# Mc Guffin TAROT
+# Mc Guffin GEM
 # 
 # Author: A.T. seeper
 # Basic template 02/05/2017 S. Jackson
@@ -20,21 +20,18 @@ import os
 import atexit
 import random
 
-#import serial
+import serial
 
-# import MFRC522 # the RFID lib
+sys.path.insert(0, "/home/pi/MacGuffin/TAROT-PI-7/MFRC522") # find module?
+import MFRC522 # the RFID lib
 
 BUILD = True
+
+PI_RFID = True # set true for pi doing RFID
+
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
-
-TAROT_ACK = [25, 8, 7, 16, 20, 21]  # Tarot placed ACK
-CORRECT_ACK = [2, 3, 17, 27, 22, 10]  # Correct placed ACK <== NUMBER OF GPIO, TOLD 2 PER DUINO
-
-# the_key = [101, 102, 103, 104, 105, 106]  # cards correct <== KEY DONE BY DUINO
-
-heart = True
 
 # ============================================
 # ============================================
@@ -43,49 +40,101 @@ heart = True
 # ============================================
 GPIO.setmode(GPIO.BCM)
 
-for i in range(6):
-    GPIO.setup(TAROT_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-    GPIO.setup(CORRECT_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
 # ===================================
-# RFID CARDS
+# RFID CODE
 # ===================================
 
-card_at = [False, False, False, False, False, False]
+the_key = 201  # tag ids must be 1 to 255
 
-# a nice lock free algorithm for detection
-# duino max signalling 0.3 seconds
-#
-def cards():  # check for right id code return true on got
-    global card_at
-    flag = True
-    for i in range(len(TAROT_ACK)):
-        if GPIO.input(TAROT_ACK[i]) == 1:
-            if GPIO.input(CORRECT_ACK[i]) == 1:
-                if card_at[i] == False:
-                    send_packet('1' + str(i) + '2')  # correct
-                card_at[i] = True
-            else:
-                flag = False
-                # for j in range(len(CORRECT_ACK)): # must check others?? <== via duino script 2 lines active
-                if card_at[i] == False:
-                    send_packet('1' + str(i) + '1')  # bad order
-                card_at[i] = True
+correct = False
+
+# Create an object of the class MFRC522
+# MIFAREReader = MFRC522.MFRC522()
+
+if PI_RFID == True:
+    # Create an object of the class MFRC522
+    MIFAREReader = MFRC522.MFRC522()
+else:
+    ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
+
+
+id_code = -1  # default no read
+
+def mfrc():
+    global last_tag
+    tag = -1
+    MIFAREReader.MFRC522_Init() # try an init
+    # Scan for cards
+    (status, TagType) = MIFAREReader.MFRC522_Request(MIFAREReader.PICC_REQIDL)
+    # If a card is found
+    if status == MIFAREReader.MI_OK:
+        debug("Card detected")
+    else:
+        debug('no card')
+        return -1
+    # Get the UID of the card
+    (status, uid) = MIFAREReader.MFRC522_Anticoll()
+    # If we have the UID, continue
+    debug('try tag')
+    if status == MIFAREReader.MI_OK:
+        # Print UID
+        #print "Card read UID: " + str(uid[0]) + "," + str(uid[1]) + "," + str(uid[2]) + "," + str(uid[3])
+        # This is the default key for authentication
+        key = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
+        # Select the scanned tag
+        MIFAREReader.MFRC522_SelectTag(uid)
+        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 1, key, uid)
+        # Check if authenticated
+        if status == MIFAREReader.MI_OK:
+            tag = MIFAREReader.MFRC522_Read(1)
+            debug('tag read')
         else:
-            if (GPIO.input(CORRECT_ACK[i]) == 1) and (GPIO.input(TAROT_ACK[i]) == 0): # race check
-                # this makes the assertion order important
-                time.sleep(0.1) # SLEEP TO MAKE SURE IN SAME CYCLE OF DUINO
-                if (GPIO.input(TAROT_ACK[i]) == 1) or (GPIO.input(CORRECT_ACK[i]) == 0): # exit race
-                    return False # exit and reloop
-                flag = False
-                if card_at[i] == False:
-                    send_packet('1' + str(i) + '0')  # bad card
-                card_at[i] = True
-            else:
-                flag = False
-                card_at[i] = False
+            debug("Authentication error")
+        # Stop
+        MIFAREReader.MFRC522_StopCrypto1()
+        time.sleep(0.5)
+    return tag
 
-    return flag
+
+def rfid():
+    # This loop keeps checking for chips. If one is near it will get the UID and authenticate
+    while True:
+        time.sleep(0.1)
+        if PI_RFID == True:
+            input = mfrc()
+            id_w(input) # write the read key
+            debug(str(input))
+        else:
+            input = ser.readline()  # BLOCKING
+            id_w(int(input))  # load in number to use next
+            debug(input)
+
+
+def code():  # check for right id code return true on got
+    global correct
+    if the_key == id_r():  # correct rune for candle
+        if correct == False:
+            correct = True
+            send_packet('101')  # on
+            debug('on')
+            if BUILD:
+                return False  # just to test
+            else:
+                return True
+    elif correct == True:
+        correct = False
+        send_packet('100')  # off
+        debug('off')
+        return False
+    return False
+
+
+def wait_remove():
+    global correct
+    while id_r() != -1:
+        time.sleep(2)  # sleep 2 seconds until reader is empty
+    time.sleep(2)  # and away with the tag
+    correct[piID] = False  # reset status
 
 
 # ====================================
@@ -157,6 +206,7 @@ recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 # CLEAN UP ROUTINE
 def clean_up():
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
+    ser.close()
 
 
 atexit.register(clean_up)
@@ -201,10 +251,9 @@ def reset_all():
 
 
 def start_game():
-    global card_at
+    wait_remove()
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    card_at = [False, False, False, False, False, False]  # reset empty
 
 
 def reset_loop():
@@ -216,8 +265,6 @@ def reset_loop():
             reset_all()
         if result == "start":
             start_game()
-
-        time.sleep(0.01)
 
 
 def heartbeat_loop():
@@ -232,6 +279,8 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
+    if PI_RFID == False:
+        input = ser.readline()
     if not BUILD:
         t1 = threading.Thread(target=reset_loop)
         t1.daemon = False
@@ -239,10 +288,10 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    # t3 = threading.Thread(target=rfid)
-    # t3.daemon = False
-    # t3.start()
-    # t4 = threading.Thread(target=led)
+    t3 = threading.Thread(target=rfid)
+    t3.daemon = False
+    t3.start()
+    # t4 = threading.Thread(target=gauge_motion)
     # t4.daemon = False
     # t4.start()
 
@@ -265,12 +314,14 @@ def main_loop():
         if state_r() == 0:  # RESET
             idle()  # in reset so idle and initialize display
             # send_packet('200')
-        if state_r() == 1:  # PLACE CARDS
-            if cards() == True:
+        if state_r() == 1:  # CODE
+            if code() == True:  # run the code finder
                 state_w(2)
+                # more states?
         if state_r() == 2:
-            send_packet('161')
-            nop = True
+            time.sleep(0.1)
+            # GPIO.output(chestPin, 1)  # open chest
+            # send_packet('201')
 
 
 def main():

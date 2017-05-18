@@ -1,12 +1,12 @@
 #!/bin/bash
-PROJECT=TAROT
+PROJECT=TAROT-PI-7
 # set to YES or NO
 GUI=NO
-SPI=NO
+SPI=YES
 # dont forget all the dots
 IP=10.100.1.
 GATE=254
-THIS=30
+THIS=31
 
 # the first project with the embeded SPI on PI
 SPIPROJ=CANDLE
