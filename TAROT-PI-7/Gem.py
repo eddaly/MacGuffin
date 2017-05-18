@@ -215,7 +215,8 @@ recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
 # CLEAN UP ROUTINE
 def clean_up():
     recv_sock.close()  # just in case there is a hanging socket reaalocation problem (but it's not C)
-    ser.close()
+    if not DUINO and not PI_RFID:
+        ser.close()
 
 
 atexit.register(clean_up)
@@ -288,7 +289,7 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
-    if PI_RFID == False:
+    if (PI_RFID == False) and not DUINO:
         input = ser.readline()
     if not BUILD:
         t1 = threading.Thread(target=reset_loop)
