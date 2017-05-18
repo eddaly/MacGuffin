@@ -105,9 +105,10 @@ def rfid():
         time.sleep(0.1)
         if DUINO:
             if GPIO.input(21) == 1:
-                id_w(201) # simulate
+                id_w(the_key) # simulate
             else:
                 id_w(-1) # or none
+            debug(id_r())
         else:
             if PI_RFID == True:
                 input = mfrc()
@@ -289,7 +290,7 @@ def heartbeat_loop():
 # ====================================
 def initialise():
     reset_all()
-    if (PI_RFID == False) and not DUINO:
+    if (PI_RFID == False) and (not DUINO):
         input = ser.readline()
     if not BUILD:
         t1 = threading.Thread(target=reset_loop)
