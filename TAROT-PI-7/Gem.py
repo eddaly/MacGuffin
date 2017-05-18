@@ -55,7 +55,7 @@ correct = False
 if PI_RFID == True:
     # Create an object of the class MFRC522
     MIFAREReader = MFRC522.MFRC522()
-else:
+elif not DUINO:
     ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 
 if DUINO:
