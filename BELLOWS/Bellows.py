@@ -24,13 +24,13 @@ import random
 
 # import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = True # this one can remain in loop as just a proxy for SC
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
-IR = 25
-LOCK = 8
+DETECT = 25 # physical 22
+#LOCK = 8
 
 heart = True
 
@@ -42,27 +42,36 @@ heart = True
 GPIO.setmode(GPIO.BCM)
 
 
-GPIO.setup(IR, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(LOCK, GPIO.OUT)
+GPIO.setup(DETECT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+#GPIO.setup(LOCK, GPIO.OUT)
 
 
 # ====================================
-# CHECK IR
+# CHECK MANOMETER
 # ====================================
 
-def ir(): # first interact
-    return True
+latch = False
 
+def man(): # latching detect
+    global latch
+    input = GPIO.input(DETECT)
+    if latch == False: # off
+        if input == 1: # and become on
+            latch = True
+            send_packet('101')
+    else: # on
+        if input == 0: # and become off
+            latch = False
+            send_packet('100')
+#    return True
 
-def ir2(): # second interact to complete
-    return True
 
 # ====================================
 # REMOTE DEBUG CODE
 # ====================================
 def debug(show):
     # print to pts on debug console
-    os.system('echo "' + show + '" > /dev/pts/1')
+    os.system('echo "' + show + '" > /dev/pts/0')
 
 
 # ===================================
@@ -165,7 +174,7 @@ def reset_all():
     debug('reset all - got the lock... continue processing')
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
 
-    GPIO.output(LOCK, 1)  # lock
+    #GPIO.output(LOCK, 1)  # lock
     debug('all reset - releasing the lock')
     if BUILD:
         start_game()  # should not start game yet
@@ -174,7 +183,7 @@ def reset_all():
 def start_game():
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
-    GPIO.output(LOCK, 1)  # lock
+    #GPIO.output(LOCK, 1)  # lock
 
 
 
@@ -237,20 +246,20 @@ def main_loop():
             idle()  # in reset so idle and initialize display
             # send_packet('200')
         if state_r() == 1:  # CHECK IR
-            if ir() == True:
-                state_w(2)
-                send_packet('101')
-            else:
-                send_packet('100')
-        if state_r() == 2:
-            if ir2() == True:
-                state_w(3)
-                send_packet('111')
-            else:
-                send_packet('110')
-        if state_r() == 3:
-            # send_packet('201')
-            GPIO.output(LOCK, 0) # open
+            man()
+                #state_w(2)
+                #send_packet('101')
+            #else:
+                #send_packet('100')
+#        if state_r() == 2:
+#            if ir2() == True:
+#                state_w(3)
+#                send_packet('111')
+#            else:
+#                send_packet('110')
+#        if state_r() == 3:
+#            # send_packet('201')
+#            GPIO.output(LOCK, 0) # open
 
 
 def main():
