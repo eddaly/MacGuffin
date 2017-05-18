@@ -6,4 +6,4 @@
 #xset -dpms
 #unclutter -root -noevents -grab -display :0 -idle 0 &
 #sleep 5
-python /home/pi/MacGuffin/TAROT-PI-7/Gem.py
+/usr/bin/python /home/pi/MacGuffin/TAROT-PI-7/Gem.py
