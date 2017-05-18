@@ -24,6 +24,7 @@ import random
 
 # import MFRC522 # the RFID lib
 
+POLARITY = 0 # the active polarity
 BUILD = True # this one can remain in loop as just a proxy for SC
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
@@ -54,14 +55,18 @@ latch = False
 
 def man(): # latching detect
     global latch
+    if POLARITY == 1:
+        off = 0
+    else:
+        off = 1
     input = GPIO.input(DETECT)
     if latch == False: # off
-        if input == 1: # and become on
+        if input == POLARITY: # and become on
             latch = True
             send_packet('101')
             time.sleep(0.5) # debounce
     else: # on
-        if input == 0: # and become off
+        if input == off: # and become off
             latch = False
             send_packet('100')
             time.sleep(0.5) # debounce
