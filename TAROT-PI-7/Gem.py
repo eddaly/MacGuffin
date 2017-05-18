@@ -298,9 +298,9 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    #t3 = threading.Thread(target=rfid)
-    #t3.daemon = False
-    #t3.start()
+    t3 = threading.Thread(target=rfid)
+    t3.daemon = False
+    t3.start()
     # t4 = threading.Thread(target=gauge_motion)
     # t4.daemon = False
     # t4.start()
