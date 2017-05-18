@@ -134,7 +134,7 @@ def wait_remove():
     while id_r() != -1:
         time.sleep(2)  # sleep 2 seconds until reader is empty
     time.sleep(2)  # and away with the tag
-    correct[piID] = False  # reset status
+    correct = False  # reset status
 
 
 # ====================================
