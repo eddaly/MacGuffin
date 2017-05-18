@@ -28,6 +28,7 @@ import MFRC522 # the RFID lib
 BUILD = True
 
 PI_RFID = False # set true for pi doing RFID
+DUINO = True
 
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
@@ -57,6 +58,8 @@ if PI_RFID == True:
 else:
     ser = serial.Serial('/dev/ttyUSB0', 9600)  # maybe change after device scan
 
+if DUINO:
+    GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 id_code = -1  # default no read
 
@@ -100,14 +103,20 @@ def rfid():
     # This loop keeps checking for chips. If one is near it will get the UID and authenticate
     while True:
         time.sleep(0.1)
-        if PI_RFID == True:
-            input = mfrc()
-            id_w(input) # write the read key
-            debug(str(input))
+        if DUINO:
+            if GPIO.input(21) == 1:
+                id_w(201) # simulate
+            else:
+                id_w(-1) # or none
         else:
-            input = ser.readline()  # BLOCKING
-            id_w(int(input))  # load in number to use next
-            debug(input)
+            if PI_RFID == True:
+                input = mfrc()
+                id_w(input) # write the read key
+                debug(str(input))
+            else:
+                input = ser.readline()  # BLOCKING
+                id_w(int(input))  # load in number to use next
+                debug(input)
 
 
 def code():  # check for right id code return true on got
@@ -288,9 +297,9 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    t3 = threading.Thread(target=rfid)
-    t3.daemon = False
-    t3.start()
+    #t3 = threading.Thread(target=rfid)
+    #t3.daemon = False
+    #t3.start()
     # t4 = threading.Thread(target=gauge_motion)
     # t4.daemon = False
     # t4.start()
