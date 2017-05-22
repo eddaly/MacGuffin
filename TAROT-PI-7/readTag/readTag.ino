@@ -10,12 +10,8 @@ MFRC522::StatusCode status;
 byte buffer[18];
 byte size = sizeof(buffer);
 
-const int signalPinTarot = 2; //output pin on which any tarot is communicated.
-const int signalPinCorrect = 3; //output pin on which correct tarot is communicated.
-
-const int readerID = 30; //output pin will activate when reader ID matches tag ID.
-const int keys[6] = { 25, 26, 27, 28, 29, 30 };
-
+const int signalPin = 2; //output pin on which signal is communicated.
+const int readerID = 36; //output pin will activate when reader ID matches tag ID.
 const int ledPin = 13;
 
 //do not change these variables!
@@ -26,10 +22,6 @@ byte trailerBlock = 3;
 void setup() 
 { 
   pinMode(RST_PIN, OUTPUT);
-  pinMode(signalPinTarot, OUTPUT);
-  digitalWrite(signalPinTarot, LOW);
-  pinMode(signalPinCorrect, OUTPUT);
-  digitalWrite(signalPinCorrect, LOW);
   digitalWrite(RST_PIN, LOW);
   Serial.begin(9600);
   SPI.begin(); // Init SPI bus
@@ -57,8 +49,8 @@ void loop()
   if ( ! mfrc522.PICC_IsNewCardPresent() )
   {
     Serial.println(-1, DEC);
-    //pulse();
-    removeCard();
+    digitalWrite(signalPin, LOW);
+//    pulse();
     reset(RST_PIN);
     return;
   }
@@ -68,8 +60,8 @@ void loop()
   if ( ! mfrc522.PICC_ReadCardSerial() )
   {
     Serial.println(-1, DEC);
-    //pulse();
-    removeCard();
+    digitalWrite(signalPin, LOW);
+//    pulse();
     reset(RST_PIN);
     return;
   }
@@ -80,8 +72,8 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     Serial.println(-1, DEC);
-    //pulse();
-    removeCard();
+    digitalWrite(signalPin, LOW);
+//    pulse();
     reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
@@ -94,8 +86,8 @@ void loop()
   if (status != MFRC522::STATUS_OK)
   {
     Serial.println(-1, DEC);
-    //pulse();
-    removeCard();
+    digitalWrite(signalPin, LOW);
+//    pulse();
     reset(RST_PIN);
     mfrc522.PCD_Init();
     return;
@@ -103,53 +95,28 @@ void loop()
 
  // Serial.println('G4');
   int tagID = buffer[0];
-  Serial.println(tagID, DEC);
-  if (tagID == readerID)
-  {
-    //CORRECT
-    //CORRECT_ACK goes high, and then TAROT_ACK goes high.
-      digitalWrite(signalPinCorrect, HIGH);
-      delay(1);
-      digitalWrite(signalPinTarot, HIGH);
-      pulse();
-  } else {
-    //NOT CORRECT
-    int j = 0;
-    for(int i = 0; i < 6; i++) {
-      if(keys[i] == tagID) {
-        j++;
-        //WRONG POSITION
-        //TAROT_ACK goes high, while CORRECT_ACK remains low.
-        digitalWrite(signalPinCorrect, LOW);
-        digitalWrite(signalPinTarot, HIGH);
-        pulse();
-      }
+//  if (tagID > 0)
+//  {
+    Serial.println(tagID, DEC);
+    if(tagID == readerID) // and also signal
+    {
+      digitalWrite(signalPin, HIGH);
     }
-    if(j == 0) {
-      //WRONG CARD
-      //if CORRECT_ACK goes high, and TAROT_ACK remains low this implies the error of a wrong card.
-      digitalWrite(signalPinTarot, LOW);
-      digitalWrite(signalPinCorrect, HIGH);
-    }
-  }
-  //pulse();
-  reset(RST_PIN);//NEEDS TO BE HERE TO LIMIT RATE OF SEND TO AVOID RACE (PI WAITS 100)
+    else {digitalWrite(signalPin, LOW);}
+//  }
+//  else
+//  {
+//    Serial.println(-1, DEC);
+//  }
+  pulse();
 
   mfrc522.PCD_Init();
-}
-
-void removeCard() {
-  //REMOVE
-  //TAROT_ACK goes low, then CORRECT_ACK goes low.
-  digitalWrite(signalPinTarot, LOW);
-  delay(1);
-  digitalWrite(signalPinCorrect, LOW);
 }
 
 void pulse()
 {
   digitalWrite(ledPin, HIGH);
-  delay(100);
+  delay(500);
   digitalWrite(ledPin, LOW);
 }
 
