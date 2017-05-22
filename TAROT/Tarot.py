@@ -52,7 +52,7 @@ for i in range(6):
 # ===================================
 
 card_at = [False, False, False, False, False, False]
-#card_wait = [0, 0, 0, 0, 0, 0]
+card_wait = [0, 0, 0, 0, 0, 0]
 
 # a nice lock free algorithm for detection
 # duino max signalling 0.3 seconds
@@ -67,12 +67,14 @@ def cards():  # check for right id code return true on got
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '2')  # correct
                     card_at[i] = True
+                    card_wait[i] += 1
             else:
                 flag = False
                 # for j in range(len(CORRECT_ACK)): # must check others?? <== via duino script 2 lines active
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '1')  # bad order
                     card_at[i] = True
+                    card_wait[i] += 1
         else:
             if (GPIO.input(CORRECT_ACK[i]) == 1) and (GPIO.input(TAROT_ACK[i]) == 0): # race check
                 # this makes the assertion order important
@@ -83,11 +85,13 @@ def cards():  # check for right id code return true on got
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '0')  # bad card
                     card_at[i] = True
+                    card_wait[i] += 1
             elif (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): # none
                 flag = False
-                if card_at[i] == True:
+                if (card_at[i] == True) and (card_wait > 4):
                     send_packet('1' + str(i) + '9') # removed
                     card_at[i] = False
+                    card_wait[i] = 0
 
     return flag
 
