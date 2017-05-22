@@ -87,12 +87,15 @@ def cards():  # check for right id code return true on got
                     card_at[i] = True
                 card_wait[i] = 0
             elif (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): # none
-                flag = False
-                card_wait[i] += 1
-                time.sleep(0.5)
-                if (card_at[i] == True) and (card_wait > 4):
-                    send_packet('1' + str(i) + '9') # removed
-                    card_at[i] = False
+                time.sleep(0.8) # wait check reset
+                if (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): #actual reset
+                    flag = False
+                    card_wait[i] += 1
+                    if (card_at[i] == True) and (card_wait > 4):
+                        send_packet('1' + str(i) + '9') # removed
+                        card_at[i] = False
+                else:
+                    return False # try again
 
     return flag
 
