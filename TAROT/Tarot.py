@@ -24,7 +24,7 @@ import random
 
 # import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = False
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
@@ -270,7 +270,7 @@ def main_loop():
                 state_w(2)
         if state_r() == 2:
             send_packet('161')
-            nop = True
+            state_w(3) # like a final do nothing state
 
 
 def main():
