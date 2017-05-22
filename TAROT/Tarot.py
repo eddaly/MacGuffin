@@ -81,8 +81,10 @@ def cards():  # check for right id code return true on got
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '0')  # bad card
                 card_at[i] = True
-            else:
+            elif (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): # none
                 flag = False
+                if card_at[i] == True:
+                    send_packet('1' + str(i) + '9') # removed
                 card_at[i] = False
 
     return flag
