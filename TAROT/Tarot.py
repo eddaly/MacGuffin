@@ -64,6 +64,7 @@ def cards():  # check for right id code return true on got
     for i in range(len(TAROT_ACK)):
         if GPIO.input(TAROT_ACK[i]) == 1:
             if GPIO.input(CORRECT_ACK[i]) == 1:
+                time.sleep(0.5)
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '2')  # correct
                     card_at[i] = True
@@ -71,6 +72,7 @@ def cards():  # check for right id code return true on got
             else:
                 flag = False
                 # for j in range(len(CORRECT_ACK)): # must check others?? <== via duino script 2 lines active
+                time.sleep(0.5)
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '1')  # bad order
                     card_at[i] = True
@@ -82,12 +84,14 @@ def cards():  # check for right id code return true on got
                 if (GPIO.input(TAROT_ACK[i]) == 1) or (GPIO.input(CORRECT_ACK[i]) == 0): # exit race
                     return False # exit and reloop
                 flag = False
+                time.sleep(0.5)
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '0')  # bad card
                     card_at[i] = True
                     card_wait[i] += 1
             elif (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): # none
                 flag = False
+                time.sleep(0.5)
                 if (card_at[i] == True) and (card_wait > 4):
                     send_packet('1' + str(i) + '9') # removed
                     card_at[i] = False
