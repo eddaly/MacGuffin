@@ -52,6 +52,8 @@ for i in range(6):
 # ===================================
 
 card_at = [False, False, False, False, False, False]
+card_at_w = [False, False, False, False, False, False]
+card_at_b = [False, False, False, False, False, False]
 card_wait = [0, 0, 0, 0, 0, 0]
 
 # a nice lock free algorithm for detection
@@ -59,6 +61,8 @@ card_wait = [0, 0, 0, 0, 0, 0]
 #
 def cards():  # check for right id code return true on got
     global card_at
+    global card_at_w
+    global card_at_b
     global card_wait
     flag = True
     for i in range(len(TAROT_ACK)):
@@ -67,13 +71,17 @@ def cards():  # check for right id code return true on got
                 if card_at[i] == False:
                     send_packet('1' + str(i) + '2')  # correct
                     card_at[i] = True
+                    card_at_b[i] = False
+                    card_at_w[i] = False
                 card_wait[i] = 0
             else:
                 flag = False
                 # for j in range(len(CORRECT_ACK)): # must check others?? <== via duino script 2 lines active
-                if card_at[i] == False:
+                if card_at_w[i] == False:
                     send_packet('1' + str(i) + '1')  # bad order
-                    card_at[i] = True
+                    card_at[i] = False
+                    card_at_b[i] = False
+                    card_at_w[i] = True
                 card_wait[i] = 0
         else:
             if (GPIO.input(CORRECT_ACK[i]) == 1) and (GPIO.input(TAROT_ACK[i]) == 0): # race check
@@ -82,20 +90,25 @@ def cards():  # check for right id code return true on got
                 if (GPIO.input(TAROT_ACK[i]) == 1) or (GPIO.input(CORRECT_ACK[i]) == 0): # exit race
                     return False # exit and reloop
                 flag = False
-                if card_at[i] == False:
+                if card_at_b[i] == False:
                     send_packet('1' + str(i) + '0')  # bad card
-                    card_at[i] = True
+                    card_at[i] = False
+                    card_at_b[i] = True
+                    card_at_w[i] = False
                 card_wait[i] = 0
             elif (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): # none
                 time.sleep(0.5) # wait check reset
                 if (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): #actual reset
                     flag = False
                     card_wait[i] += 1
-                    if (card_at[i] == True) and (card_wait > 10): # the number of bounce times
+                    check = card_at[i] or card_at_b[i] or card_at_w[i]
+                    if (check == True) and (card_wait > 10): # the number of bounce times
                         # there is an unavoidable delay of sleep .8 * 6 for the miss reading
                         # change of emmiting a '1x9' packet
                         send_packet('1' + str(i) + '9') # removed
                         card_at[i] = False
+                        card_at_b[i] = False
+                        card_at_w[i] = False
                 else:
                     return False # try again
 
