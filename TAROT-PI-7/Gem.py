@@ -25,7 +25,7 @@ import serial
 sys.path.insert(0, "/home/pi/MacGuffin/TAROT-PI-7/MFRC522") # find module?
 import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = False
 
 PI_RFID = False # set true for pi doing RFID
 DUINO = True
@@ -326,8 +326,8 @@ def main_loop():
             idle()  # in reset so idle and initialize display
             # send_packet('200')
         if state_r() == 1:  # CODE
-            if code() == True:  # run the code finder
-                state_w(2)
+            code()  # run the code finder
+            #   state_w(2)
                 # more states?
         if state_r() == 2:
             time.sleep(0.1)
