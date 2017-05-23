@@ -32,8 +32,8 @@ lampPin = 4
 GPIO.setup(gaugePin,GPIO.OUT)
 GPIO.setup(26,GPIO.OUT)
 
-GPIO.setup(25,GPIO.OUT)
-GPIO.output(25,GPIO.HIGH)
+# GPIO.setup(25,GPIO.OUT)
+# GPIO.output(25,GPIO.HIGH)
 
 # 
 # GPIO.setup(4,GPIO.OUT)
@@ -102,7 +102,7 @@ def reset_all():
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
-    GPIO.output(25,GPIO.HIGH)
+
     #GPIO.output(4,GPIO.LOW)
     state = 0
     wheel_pack = 0
@@ -122,7 +122,7 @@ def start_game():
     print 'start game'
     l = threading.Lock()
     l.acquire
-    state = 4
+    state = 1
 
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     ## actually this should probably go in reset_all(), start game shoudl never be called from the show controller without reset_all having already been called.  
@@ -185,21 +185,16 @@ def lock(low_t, high_t): # the half second lock check routine
     l.acquire # needs () to active, but 32 bit aligned memory access atomicity works. locks only required
     # when accessing 2 object items in the same object, and both have to be "changed at the same time"
     if pot >= low_t and pot <= high_t: # correct number
+        if wheel_pack == 0:
+        	send_packet("103") # reset sound
+        else:
+        	send_packet("101") # correct number send message ok
         wheel_pack += 1
         state = 1
-        cleared = False
-        send_packet("101") # correct number send message ok
         l.release
-    elif pot < 11 and state != 1: # moved to X position
-        state = 1
-        cleared = False
-        wheel_pack = 0
-        send_packet('103') # dial reset
-        l.release 
-        # how would "t1 = threading.Thread(target=reset_loop)" set the thread to use? if reset_loop() was evaluated?
     else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
-        state = 4
+        state = 1
         send_packet("100") # error noise (1st time ok, second time etc no does????)
         # maybe it was idling "bing! bing! bing!"
         l.release
@@ -240,17 +235,19 @@ def Wheel_pack(): # check combination to see if digits entered (half second gaps
     global state
     l = threading.Lock()
     if wheel_pack == 0:
-        lock(456, 563)
+    	lock(0,11)
     elif wheel_pack == 1:
-        lock(983,1023)
+        lock(456, 563)
     elif wheel_pack == 2:
-        lock(28,134)
+        lock(983,1023)
     elif wheel_pack == 3:
+        lock(28,134)
+    elif wheel_pack == 4:
         lock(348,453)
-    else: # wheel pack at 4 starts theremin
+    else: # wheel pack at 5 starts theremin
         l.acquire
         #GPIO.output(ledPin,GPIO.HIGH)
-        state = 5
+        #state = 5
         l.release    
 
 def clear():
@@ -338,7 +335,7 @@ def theremin():
         client.send(play)
         state = 6
         t_message = "202"
-        GPIO.output(25,GPIO.HIGH)
+        # GPIO.output(25,GPIO.HIGH)
         
     if t_message != old_t_message:
         send_packet(t_message)
@@ -350,7 +347,7 @@ def theremin():
 
 
 def idle():
-    GPIO.output(25,GPIO.HIGH)
+    # GPIO.output(25,GPIO.HIGH)
     pot = mcp.read_adc(0)
     print 'pot:',pot
     time.sleep(0.5)    
@@ -375,20 +372,18 @@ def main():
         print 'state:',state
         print 'wheel_pack:', wheel_pack
         time.sleep(0.0001)
+        voidval = ser.readline()
         if state == 0:
             idle()
         if state == 1:
             pot = mcp.read_adc(0)
             old_pot = pot
-            if wheel_pack == 4: # THIS IF STATEMENT REMOOVES THE THEREMIN
-                state = 6 #this should be 5 when sensor is active
+            if wheel_pack == 5: # THIS IF STATEMENT REMOOVES THE THEREMIN
+                state = 5 #this should be 5 when sensor is active
                 #GPIO.output(25,GPIO.LOW)
                 send_packet("102")
-                #voidval = ser.readline()
-                time.sleep(2)
-                send_packet("202") 
-                #voidval = ser.readline()
-                #time.sleep(1)
+                voidval = ser.readline()
+                time.sleep(1)
             else:
                 waiting()
         if state == 2:
