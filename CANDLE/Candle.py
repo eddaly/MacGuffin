@@ -25,7 +25,7 @@ import serial
 sys.path.insert(0, "/home/pi/MacGuffin/CANDLE/MFRC522") # find module?
 import MFRC522 # the RFID lib
 
-BUILD = True
+BUILD = False
 
 PI_RFID = True # set true for pi doing RFID
 
