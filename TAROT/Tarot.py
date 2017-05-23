@@ -87,11 +87,11 @@ def cards():  # check for right id code return true on got
                     card_at[i] = True
                 card_wait[i] = 0
             elif (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): # none
-                time.sleep(0.8) # wait check reset
+                time.sleep(0.5) # wait check reset
                 if (GPIO.input(CORRECT_ACK[i]) == 0) and (GPIO.input(TAROT_ACK[i]) == 0): #actual reset
                     flag = False
                     card_wait[i] += 1
-                    if (card_at[i] == True) and (card_wait > 6): # the number of bounce times
+                    if (card_at[i] == True) and (card_wait > 10): # the number of bounce times
                         # there is an unavoidable delay of sleep .8 * 6 for the miss reading
                         # change of emmiting a '1x9' packet
                         send_packet('1' + str(i) + '9') # removed
