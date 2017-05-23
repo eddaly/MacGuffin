@@ -19,13 +19,16 @@ height = 480
 width = 800
 off = 200
 delay = 0.25 # quarter second delay on note tracking
-min_dial_range = 55
-max_dial_range = 56
+min_dial_range = 56
+max_dial_range = 57
 target_pitch = 440
 pitch_mult = 2.0
 pitch = target_pitch-(pitch_mult*min_dial_range)
 max_pot_value = 1023.0
 min_pot_value = 5.0 # the default pot value so that the wave is always moving
+dialTime = 0
+winTime = 6 #win condition time out
+theremin = 0
 
 # connect to pd
 client = OSC.OSCClient()
@@ -92,11 +95,15 @@ def reset_all():
     global state
     global dial_value
     global old_dial_value
+    global dialTime
+    global theremin
     l = threading.Lock()
     l.acquire
+    dialTime = 0
     old_dial_value = 2
     dial_value = 2
     state = -1
+    theremin = 0
     msg = OSC.OSCMessage()
     msg.setAddress("/play")
     msg.insert(0,0)
@@ -118,6 +125,7 @@ def start_game():
 def reset_loop():
     global debug
     global delay
+    global theremin
 
     while True:
         packet = receive_packet()
@@ -127,6 +135,8 @@ def reset_loop():
             reset_all()
         if packet == "start":
             start_game()
+        if packet == "123":
+        	theremin = 1    
         time.sleep(delay)
 
 def heartbeat_loop():
@@ -157,7 +167,7 @@ def dial_thread():
         if state == 0:
             dial_value = max(100.0*(mcp.read_adc(0)/max_pot_value),min_pot_value)
             filtered_dial = filtered_dial * 0.1 + dial_value * 0.9 # get a filtered dial value
-            if abs(dial_value - filtered_dial) > 3.0: # 3% change pitch
+            if abs(dial_value - filtered_dial) >= 0.0: # 3% change pitch
                 msg.clearData()
                 msg.setAddress("/play_this")
                 msg.insert(0,pitch+(pitch_mult*filtered_dial)) # track filtered dial sound
@@ -181,22 +191,28 @@ def animate(k):
     global max_dial_range
     global target_pitch
     global filtered_dial
+    global dialTime 
+    global winTime
     # update the wave
     y = (height/4) * np.sin(0.01*np.pi * (x - k*dial_value)) + (height/2)
     line.set_data(xx, y) # plot the data
     if dial_value >= min_dial_range and dial_value <= max_dial_range and state == 0:
-        if abs(filtered_dial - dial_value) > 3.0:
+        if abs(filtered_dial - dial_value) > 1.0:
             # balk due to fast twisty
             return line,
+        dialTime = dialTime + 1
         if debug == 1:
             print "stop!"
-        msg = OSC.OSCMessage()
-        msg.setAddress("/play_this")
-        msg.insert(0,target_pitch)
-        client.send(msg)
-        state = 1
-        send_packet("202")
-        os.system('/usr/bin/omxplayer --win "0 0 800 480" /home/pi/MacGuffin/OSCILLOSCOPE/OSC_SCREEN_MACGUFFIN.mp4')
+        if dialTime > winTime and theremin == 1:
+        	msg = OSC.OSCMessage()
+        	msg.setAddress("/play_this")
+        	msg.insert(0,target_pitch)
+        	client.send(msg)
+        	state = 1
+        	send_packet("202")
+        	os.system('/usr/bin/omxplayer --win "0 0 800 480" /home/pi/MacGuffin/OSCILLOSCOPE/OSC_SCREEN_MACGUFFIN.mp4')
+    else: 
+    	dialTime = 0
     return line,
 
 
