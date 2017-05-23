@@ -161,7 +161,7 @@ def code():  # check for right id code return true on got
                 correct[i] = False
                 send_packet('1' + str(i + 1) + '0')  # off
                 debug('off')
-                GPIO.output(LEDPin, 1)
+                GPIO.output(LEDPin, 0)
                 return False
     return False
 
