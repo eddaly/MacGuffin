@@ -366,10 +366,10 @@ def main_loop():
             idle()  # in reset so idle and initialize display
             # send_packet('200')
         if state_r() == 1:  # CODE
-            if code() == True:  # run the code finder
-                state_w(2)
+            code()  # run the code finder
+            #    state_w(2)
                 # more states?
-        if state_r() == 2:
+        if state_r() == 2: # AVOID THIS STATE
             time.sleep(0.1)
             # GPIO.output(chestPin, 1)  # open chest
             # send_packet('201')
