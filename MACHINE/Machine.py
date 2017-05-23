@@ -130,89 +130,84 @@ def check_button():
         return True
 
 
-def wait_insert_new():
-    global check
-    global bloop
-    check = 0
-    bloop = False
-    tmp = id_r()
-    while tmp == -1:  # wait for new
-        debug('no key')
+def wait_remove():
+    while USES_BUTTON and (check_button() == False):  # check button
+        time.sleep(0.1)  # wait
+        debug('waiting for press')
+    while (not USES_BUTTON) and (id_r() != -1):  # not using button wait for remove
+        debug('Not using button. key pulled out?')
         time.sleep(0.1)
-        tmp = id_r()
-    # got new in tmp
-    return tmp
-
-
-waiter_start = True
-check = 0
-bloop = False
-
-def check_long(tmp): # EMIT REPEAT BLOOPS
-    global check
-    global bloop
-    #check for a long enough series of -1 and bloop again
-    tmp2 = id_r()
-    if tmp2 == -1:
-        check += 1
-    if check > 40:
-        check = 0
-        bloop = True
-    if (tmp2 == tmp) and bloop:
-        send_packet('100') # emit bloop if 40 ticks, = 4 seconds
-        bloop = False
-
-def wait_remove(tmp):
-    global waiter_start
-    if USES_BUTTON:
-        while (check_button() == False) and not waiter_start:  # check button
-            time.sleep(0.1)  # wait
-            debug('waiting for press')
-        while (check_button() == True) and not waiter_start:
-            # check button release
-            debug('waiting button release')
-            time.sleep(0.1)
-    # =======================================
-    # SO HAVE REGISTERED PADDLE WAIT FOR NEW
-    # =======================================
-    while ((id_r() == -1) or (id_r() == tmp)) and not waiter_start:  # wait for remove and insert another
-        debug('key pulled out? New in?')
+    # ===============================
+    # SO HAVE REGISTERED PADDLE
+    # ===============================
+    while USES_BUTTON and (check_button() == True):
+        # check button release
+        debug('check button release.')
         time.sleep(0.1)
-        check_long(tmp)
-    waiter_start = False # allows an exit in the waiter loop
 
 
 def code():
     global current_step
-    tmp = wait_insert_new()
+    tmp = id_r()
     # GETS TO HERE
     length = len(the_key)
     #debug('the key length is: ' + str(length) + ' current step: ' + str(current_step))
     if tmp == the_key[current_step]:  # a correct digit
-        debug('correct digit: ' + str(tmp))
+        debug('correct digit: ' + str(id_r()))
         current_step += 1  # move onto next digit?
         debug('correct digit (increased and packet out): ' + str(current_step))
         send_packet('10' + str(current_step))  # send correct code for digit the_key[0] => 101
         # ==============================
         # INPUT OK
         # ==============================
-        wait_remove(tmp)
+        wait_remove()
         # ==================================
         # SO HAVE REMOVED OR BUTTON RELEASE
         # ==================================
-    else:
-        # ============================================================
-        # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
-        # ============================================================
-        debug('some wrong nth card inserted.')
-        send_packet('100')
-        wait_remove(tmp)
-        if RESET_LOCK_ON_WRONG:
-            # ===================================
-            # START OVER
-            # ===================================
-            debug('reset combination')
-            current_step = 0
+    elif tmp != -1:  # reset combination unless daudling
+        # ==================================
+        # SO WRONG PADDLE
+        # ==================================
+        # a bit of a work around to allow the last digit to not reset the combination
+        if current_step != 0:
+            if tmp != the_key[current_step - 1]:  # last key or first key so not indexing array [-1]
+                # ============================================================
+                # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
+                # ============================================================
+                debug('some wrong nth card inserted.')
+                send_packet('100')
+                wait_remove()
+                if RESET_LOCK_ON_WRONG:
+                    # ===================================
+                    # START OVER
+                    # ===================================
+                    debug('reset combination')
+                    current_step = 0
+                    return False
+            # MUST BE -1 HERE
+            else:
+                debug('clone of last digit/paddle')
+                return False
+        else:
+            # ============================================================
+            # SO NOT LAST PADDLE (AS IT WOULD BE ON WOBBLES AND BOUNCING)
+            # ============================================================
+            debug('some wrong 1st card inserted.')
+            send_packet('100')
+            wait_remove()
+            if RESET_LOCK_ON_WRONG:
+                # ===================================
+                # START OVER
+                # ===================================
+                debug('reset combination')
+                current_step = 0
+                return False
+    else:  # -1
+        # =========================================
+        # NOT GOOD, NOT BAD, NOT LAST, BUT NO RFID
+        # =========================================
+        # debug('no card detected')
+        nop = True
     if length == current_step:  # yep got combination as line 142 would have made current step == 6
         debug('combination valid')
         return True
@@ -224,7 +219,7 @@ def code():
 # ====================================
 def debug(show):
     # print to pts on debug console
-    os.system('echo "' + show + '" > /dev/pts/1') # changed so second log needed
+    os.system('echo "' + show + '" > /dev/pts/0')
 
 
 # ===================================
@@ -348,7 +343,6 @@ GPIO.setup(RESET, GPIO.OUT, initial=GPIO.LOW)
 
 def reset_all():
     global wired
-    global waiter_start
     state_w(0)  # indicate reset
     GPIO.output(RESET, GPIO.LOW)
     time.sleep(0.5)  # wait active low reset
@@ -360,18 +354,15 @@ def reset_all():
     debug('all reset - releasing the lock')
     wired = 0
     GPIO.output(motorPin, 0)  # turn off motor by default
-    waiter_start = True
     if BUILD: # for tests
         start_game() #-- should not start game yet
 
 
 def start_game():
     global current_step
-    global waiter_start
     state_w(STARTER_STATE)  # indicate enable and play on TODO: MUST CHANGE TO FIVE???!!!
     # TODO: If there is anything else you want to reset when you receive the start game packet, put it here :)
     current_step = 0
-    waiter_start = True
     GPIO.output(motorPin, 1)  # start motor
 
 

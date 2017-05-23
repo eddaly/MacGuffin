@@ -24,8 +24,8 @@ import random
 
 # import MFRC522 # the RFID lib
 
-BUILD = True
-DYNAMIC_CODE = False  # selects the code solve being active at the same time as pumps
+BUILD = False # set for shoe controller
+DYNAMIC_CODE = True  # selects the code solve being active at the same time as pumps
 STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
@@ -35,7 +35,7 @@ RFID_TAG_ACK = [25, 8, 7]  # Duino #1, #2, #3
 PUMP_IN = [16, 20, 21]  # Duino #4, #5, #6 pulse on pull script
 PROB = 0.5  # filter for persistance of vision 0 -> 1
 
-the_key = [3, 5, 4]  # parts red/green/blue
+# the_key = [3, 5, 4]  # parts red/green/blue
 
 heart = True
 
@@ -47,7 +47,7 @@ heart = True
 GPIO.setmode(GPIO.BCM)
 
 for i in range(3):
-    GPIO.setup(RFID_TAG_ACK[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(RFID_TAG_ACK[i], GPIO.IN)
     GPIO.setup(PUMP_IN[i], GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     # GPIO.setup(RGB_LED[i], GPIO.OUT)
 
@@ -68,12 +68,12 @@ def code():  # check for right id code return true on got
         if GPIO.input(RFID_TAG_ACK[i]) == 1:
             if correct[i] == False:
                 send_packet('1' + str(i) + '1')  # on
-            correct[i] = True
+                correct[i] = True
         else:
             flag = False
             if correct[i] == True:
                 send_packet('1' + str(i) + '0')  # off
-            correct[i] = False
+                correct[i] = False
 
     return flag
 
@@ -88,7 +88,7 @@ latch = [False, False, False]
 def pump():
     global latch
     global rgb
-    flag = True
+#    flag = True
     for i in range(len(PUMP_IN)):
         if (GPIO.input(PUMP_IN[i]) == 1) and ((GPIO.input(RFID_TAG_ACK[i]) == 1) or (not DYNAMIC_CODE)):  # check tag
             # are the sounds to be made even when the stopper not in????????
@@ -97,20 +97,20 @@ def pump():
                 rgb[i] += 1
                 send_packet('2' + str(i) + '1')
             latch[i] = True
-        else:
+        elif (GPIO.input(RFID_TAG_ACK[i]) == 1) or (not DYNAMIC_CODE):
             # flag = False
             if latch[i] == True:
                 send_packet('2' + str(i) + '0')  # off
             latch[i] = False
 
-        if rgb[i] != the_key[i]:
-            flag = False
-        if rgb[i] > the_key[i]:
-            send_packet('overfill')  # NO CODE ISSUED YET
-            rgb = [0, 0, 0]
-    if flag:
-        send_packet('gotit')  # NO CODE ISSUED YET
-    return flag
+#        if rgb[i] != the_key[i]:
+#            flag = False
+#        if rgb[i] > the_key[i]:
+#            send_packet('overfill')  # NO CODE ISSUED YET
+#            rgb = [0, 0, 0]
+#    if flag:
+#        send_packet('gotit')  # NO CODE ISSUED YET
+#    return False
 
 
 # ====================================
@@ -372,12 +372,7 @@ def main_loop():
         if state_r() == 2:  # PUMPS
             if DYNAMIC_CODE == True:
                 code()  # do code sequencing too
-            if pump() == True:  # run the pump
-                state_w(3)
-                # more states?
-        if state_r() == 3:
-            # send_packet('201')
-            nop = True
+            pump()
 
 
 def main():

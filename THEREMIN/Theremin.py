@@ -32,8 +32,8 @@ lampPin = 4
 GPIO.setup(gaugePin,GPIO.OUT)
 GPIO.setup(26,GPIO.OUT)
 
-#GPIO.setup(25,GPIO.OUT)
-#GPIO.output(25,GPIO.HIGH)
+GPIO.setup(25,GPIO.OUT)
+GPIO.output(25,GPIO.HIGH)
 
 # 
 # GPIO.setup(4,GPIO.OUT)
@@ -62,6 +62,7 @@ f=0
 old_f = 30
 t_message = "200"
 old_t_message = "202"
+cleared = False
 
 t=10 #starting pressure level
 delay = 0.5 #set turn speed delay here
@@ -75,15 +76,6 @@ RECV_UDP_PORT = 5000
 send_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 recv_sock.bind((RECV_UDP_IP, RECV_UDP_PORT))
-
-emitted = ''
-
-
-#def emit_once(body):
-#    global emitted
-#    if body != emitted:
-#        emitted = body
-#        send_packet(body) # just once
 
 def send_packet(body):
     send_sock.sendto(body, (SEND_UDP_IP, SEND_UDP_PORT))
@@ -103,12 +95,14 @@ def reset_all():
     global t_message
     global old_t_message
     global old_f
+    global cleared
+    cleared = False
     l = threading.Lock()
     l.acquire
     # TODO: If there is anything else you want to reset when you receive the reset packet, put it here :)
     gauge.start(0)
     GPIO.output(ledPin,GPIO.LOW)
-    #GPIO.output(25,GPIO.HIGH)
+    GPIO.output(25,GPIO.HIGH)
     #GPIO.output(4,GPIO.LOW)
     state = 0
     wheel_pack = 0
@@ -165,7 +159,6 @@ def heartbeat_loop():
 def initialise():
     reset_all()
     ser.flushInput()
-    voidval = ser.readline()
     time.sleep(1)
     t1 = threading.Thread(target=reset_loop)
     t1.daemon = False
@@ -173,11 +166,19 @@ def initialise():
     t2 = threading.Thread(target=heartbeat_loop)
     t2.daemon = False
     t2.start()
-    
+
+sent = '99' # some random thing
+
+def send_once(body):
+    global sent
+    if body != sent:
+        send_packet(body)
+        sent = body
 
 def lock(low_t, high_t): # the half second lock check routine
     global wheel_pack
     global state
+    global cleared
     l = threading.Lock() # good job l.acquire without () does nothing, (holding locks over sleep is not good)
     time.sleep(0.5) # half second delay for to acquire number through ADC
     pot = mcp.read_adc(0)
@@ -186,13 +187,15 @@ def lock(low_t, high_t): # the half second lock check routine
     if pot >= low_t and pot <= high_t: # correct number
         wheel_pack += 1
         state = 1
+        cleared = False
         send_packet("101") # correct number send message ok
         l.release
-    elif pot < 11: # moved to X position
+    elif pot < 11 and state != 1: # moved to X position
         state = 1
+        cleared = False
         wheel_pack = 0
         send_packet('103') # dial reset
-        # l.release # this is a function reference pointer. () is needed to use it
+        l.release 
         # how would "t1 = threading.Thread(target=reset_loop)" set the thread to use? if reset_loop() was evaluated?
     else: # is this a flood of input when the machine first starts?
         wheel_pack = 0
@@ -214,11 +217,13 @@ def turn():
 
 def waiting(): # checks to see if wheel moved before combination entry
     global state
+    global cleared
     l = threading.Lock()
     turn()
     if turn_speed > 5:
         l.acquire
         state = 2
+        cleared = False
         l.release
 
 def stop_wait(): # checks to see if wheel stopped before combination entry (1st digit?)
@@ -250,16 +255,21 @@ def Wheel_pack(): # check combination to see if digits entered (half second gaps
 
 def clear():
     global state
+    global cleared
     l = threading.Lock()
     time.sleep(0.5)
     l.acquire
     pot = mcp.read_adc(0)
     if pot < 11:
         state = 1
+        cleared = False
         send_packet('103') # dial reset for start of combination entry
     else:
-        # send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
-        nop = True
+        if cleared == False:
+            send_packet('100') # this is a wrong thing digit THERE MAYBE COMPLAINTS!!!
+            cleared = True
+            state = 1
+
     l.release
 
 def theremin():
@@ -328,7 +338,7 @@ def theremin():
         client.send(play)
         state = 6
         t_message = "202"
-        #GPIO.output(25,GPIO.HIGH)
+        GPIO.output(25,GPIO.HIGH)
         
     if t_message != old_t_message:
         send_packet(t_message)
@@ -340,7 +350,7 @@ def theremin():
 
 
 def idle():
-    #GPIO.output(25,GPIO.HIGH)
+    GPIO.output(25,GPIO.HIGH)
     pot = mcp.read_adc(0)
     print 'pot:',pot
     time.sleep(0.5)    
@@ -365,14 +375,13 @@ def main():
         print 'state:',state
         print 'wheel_pack:', wheel_pack
         time.sleep(0.0001)
-        voidval = ser.readline()
         if state == 0:
             idle()
         if state == 1:
             pot = mcp.read_adc(0)
             old_pot = pot
             if wheel_pack == 4: # THIS IF STATEMENT REMOOVES THE THEREMIN
-                state = 5 #this should be 5 when sensor is active
+                state = 6 #this should be 5 when sensor is active
                 #GPIO.output(25,GPIO.LOW)
                 send_packet("102")
                 #voidval = ser.readline()

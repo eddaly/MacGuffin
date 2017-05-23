@@ -31,13 +31,13 @@ void loop() {
   if(digitalRead(SS_PIN) == ON && at == OFF) {
      at = ON;
      digitalWrite(SIG_PIN, HIGH);
-     pulse();
+     digitalWrite(LED_BUILTIN, HIGH);
      return;
   }
   if(digitalRead(RST_PIN) == ON && at == ON) {
      at = OFF;
      digitalWrite(SIG_PIN, LOW);
-     pulse();
+     digitalWrite(LED_BUILTIN, LOW);
      return;
   }
 }
