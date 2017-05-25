@@ -30,7 +30,7 @@ STARTER_STATE = 1  # the initial state after reset for the ease of build
 TX_UDP_MANY = 1  # UDP reliability retransmit number of copies
 RX_PORT = 5000  # Change when allocated, but to run independent of controller is 8080
 
-DETECT = 25 # physical 22
+DETECT = 26 # physical 37
 #LOCK = 8
 
 heart = True
