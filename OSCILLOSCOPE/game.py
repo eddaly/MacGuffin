@@ -19,7 +19,7 @@ height = 480
 width = 800
 off = 200
 delay = 0.25 # quarter second delay on note tracking
-min_dial_range = 56
+min_dial_range = 55
 max_dial_range = 57
 target_pitch = 440
 pitch_mult = 2.0
@@ -27,7 +27,7 @@ pitch = target_pitch-(pitch_mult*min_dial_range)
 max_pot_value = 1023.0
 min_pot_value = 5.0 # the default pot value so that the wave is always moving
 dialTime = 0
-winTime = 6 #win condition time out
+winTime = 4 #win condition time out
 theremin = 0
 
 # connect to pd
@@ -96,14 +96,14 @@ def reset_all():
     global dial_value
     global old_dial_value
     global dialTime
-    global theremin
+    
     l = threading.Lock()
     l.acquire
     dialTime = 0
     old_dial_value = 2
     dial_value = 2
     state = -1
-    theremin = 0
+    
     msg = OSC.OSCMessage()
     msg.setAddress("/play")
     msg.insert(0,0)
@@ -203,7 +203,7 @@ def animate(k):
         dialTime = dialTime + 1
         if debug == 1:
             print "stop!"
-        if dialTime > winTime and theremin == 1:
+        if dialTime > winTime:
         	msg = OSC.OSCMessage()
         	msg.setAddress("/play_this")
         	msg.insert(0,target_pitch)
